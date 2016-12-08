@@ -1,15 +1,13 @@
 <?php
 /**
- * Created by IntelliJ IDEA.
- * User: sein
- * Date: 10.11.16
- * Time: 13:15
+ * NOTE: This client is thought as a very simple test which is mainly used for testing purposes and not to be used
+ * as a productive client with real cracking.
  */
 
 //TODO: implement auto update feature
 
 $VERSION = "0.1.0";
-$URL = "http://localhost/hashtopussy/src/api/server.php";
+$URL = "https://alpha.hashes.org/src/api/server.php";
 $OS = 0;
 
 $TOKEN = null;
@@ -25,7 +23,9 @@ $TASK = null;
 $BENCH = false;
 $KEYSPACE = false;
 $CHUNK = null;
+$lastPercent = 0;
 while ($RUNNING) {
+  $BINARY = "hashcat";
   if ($TOKEN == null) {
     register();
     continue;
@@ -59,20 +59,69 @@ while ($RUNNING) {
     }
   }
   else if($TASK != null && $CHUNK != null){
-    //do task
+    runTask();
+    die();
   }
 }
 
 echo "Bye :)\n";
 
 
-
+function runTask(){
+  global $TASK, $TOKEN, $BINARY, $CHUNK;
+  if(file_exists("hashlists/zaps")){
+    system("rm -r hashlists/zaps");
+  }
+  mkdir("hashlists/zaps");
+  $founds = array();
+  
+  $command = "hashcat/$BINARY --skip=".$CHUNK['skip']." --limit=".($CHUNK['skip'] + $CHUNK['length'])." --outfile-check-dir hashlists/zaps --potfile-disable --machine-readable --status --status-timer=".$TASK['statustimer']." ".$TASK['cmdpars']." ".str_replace("#HL#", "hashlists/hl".$TASK['hashlist'], $TASK['attackcmd']);
+  echo $command."\n";
+  $running = popen($command, "r");
+  echo "Command started...\n";
+  $skipping = 0;
+  while(!feof($running)){
+    $line = trim(fgets($running));
+    if(strpos($line, "STATUS") !== false){
+      $split = explode("\t", $line);
+      if($skipping > 0){
+        echo "skipping $skipping...\n";
+        $skipping--;
+        continue;
+      }
+      echo "STATUS\n";
+      $query = array("action" => "solve", "token" => $TOKEN, "chunk" => $CHUNK['chunk'], "keyspaceProgress" => $split[8], "progress" => $split[10], "total" => $split[11], "speed" => $split[3], "state" => $split[1], "cracks" => $founds);
+      $start = time();
+      $ans = doRequest($query);
+      $required = time() - $start;
+      if($required > $TASK['statustimer']){
+        $skipping = floor($required/($TASK['statustimer']*2));
+      }
+      if($ans == null){
+        echo "Solve command failed!\n";
+      }
+      else{
+        echo "Cracks sent!\n";
+        $founds = array();
+      }
+    }
+    else if(strpos($line, "\r") !== false){
+      $line = explode("\r", $line);
+      $founds[] = $line[sizeof($line) - 1];
+    }
+  }
+  /*$query = array("action" => "solve", "token" => $TOKEN, "chunk" => $CHUNK['chunk'], "keyspaceProgress" => $split[8], "progress" => $split[10], "total" => $split[11], "speed" => $split[3], "state" => $split[1], "cracks" => $founds);
+  doRequest($query);*/
+  pclose($running);
+  echo "Command finished!\n";
+}
 
 function doKeyspace(){
   global $TASK, $TOKEN, $KEYSPACE, $BINARY;
   
-  $command = "hashcat/$BINARY --keyspace ".$TASK['cmdpars']." ".str_replace("#HL#", "hashlists/hl".$TASK['hashlist'], $TASK['attackcmd']);
+  $command = "hashcat/$BINARY --keyspace ".$TASK['cmdpars']." ".str_replace("#HL#", "", $TASK['attackcmd']);
   $output = array();
+  echo $command."\n";
   exec($command, $output);
   if(sizeof($output) != 1){
     die("Something went wrong when calculating the keyspace!\n");
@@ -82,6 +131,8 @@ function doKeyspace(){
   $ans = doRequest($query);
   if($ans == null){
     echo "Failed to send keyspace!\n";
+    sleep(5);
+    return;
   }
   else{
     echo "Keyspace sent!\n";
@@ -92,7 +143,53 @@ function doKeyspace(){
 function doBenchmark(){
   global $TASK, $TOKEN, $BENCH, $BINARY;
   
-  //TODO: do benchmark
+  $command = "hashcat/$BINARY --machine-readable ".$TASK['cmdpars']." ".str_replace("#HL#", "hashlists/hl".$TASK['hashlist'], $TASK['attackcmd']);
+  $descriptorspec = array(
+    0 => array("pipe", "r"),  // STDIN ist eine Pipe, von der das Child liest
+    1 => array("pipe", "w"),  // STDOUT ist eine Pipe, in die das Child schreibt
+    2 => array("file", "/tmp/error-output.txt", "a") // STDERR ist eine Datei, in die geschrieben wird
+  );
+  $pipes = array();
+  $process = proc_open($command, $descriptorspec, $pipes);
+  
+  if (is_resource($process)) {
+    sleep(30);
+    fwrite($pipes[0], "s");
+    fwrite($pipes[0], "q");
+    fclose($pipes[0]);
+    
+    $output = stream_get_contents($pipes[1]);
+    $output = explode("\n", $output);
+    $lastStatus = null;
+    foreach($output as $line){
+      if(strpos($line, "STATUS") === 0){
+        $lastStatus = $line;
+      }
+    }
+    if($lastStatus == null){
+      die("Error on determining last status on benchmarking!");
+    }
+    $lastStatus = explode("\t", $lastStatus);
+    $bench = $lastStatus[10]/$lastStatus[11];
+    
+    fclose($pipes[1]);
+    proc_close($process);
+    
+    echo "Hashcat benchmarking done!\n";
+  }
+  else{
+    die("Hashcat benchmarking failed!\n");
+  }
+  
+  $query = array("action" => "bench", "token" => $TOKEN, "taskId" => $TASK['task'], "speed" => $bench);
+  $ans = doRequest($query);
+  if($ans == null){
+    echo "Failed to send benchmark result!\n";
+    sleep(5);
+    return;
+  }
+  echo "Benchmark sent!\n";
+  $BENCH = false;
 }
 
 function getChunk(){
@@ -117,6 +214,7 @@ function getChunk(){
     $BENCH = true;
   }
   else{
+    echo "Successfully got chunk!\n";
     $CHUNK = $ans;
   }
 }
@@ -171,10 +269,12 @@ function handleDependencies(){
   
   $hashlist = $TASK['hashlist'];
   $files = $TASK['files'];
-  downloadHashlist($hashlist);
-  foreach($files[0] as $file){
-    if(file_exists("files/$file")){
-      continue;
+  if(!file_exists("hashlists/$hashlist")) {
+    downloadHashlist($hashlist);
+  }
+  foreach($files as $file){
+    if(!file_exists("files")){
+      mkdir("files");
     }
     $query = array("action" => "file", "token" => $TOKEN, "file" => $file, "task" => $TASK['task']);
     $ans = doRequest($query);
@@ -182,8 +282,31 @@ function handleDependencies(){
       echo "Failed to get required file $file!\n";
       die();
     }
+  
+    if(file_exists("files/".$ans['filename'])){
+      continue;
+    }
     $url = $ans['url'];
-    doDownload($url, "files/$file");
+    $file = $ans['filename'];
+    echo "Downloading file $file...\n";
+    doDownload($url, "files/".$ans['filename']);
+    echo "Download finished!\n";
+    $extension = $ans['extension'];
+    if($extension == '7z'){
+      echo "Extract $file...\n";
+      extractFile($file);
+    }
+  }
+}
+
+function extractFile($file){
+  global $OS;
+  
+  if($OS == 1){
+    //TODO:
+  }
+  else {
+    system("cd files && 7z x $file");
   }
 }
 
@@ -326,17 +449,35 @@ function doDownloadRequest($query, $file){
 }
 
 function doDownload($url, $save) {
+  global $lastPercent;
+  
   set_time_limit(0); // unlimited max execution time
+  $lastPercent = 0;
   $options = array(
     CURLOPT_FILE => fopen($save, "wb"),
     CURLOPT_TIMEOUT => 28800, // set this to 8 hours so we dont timeout on big files
     CURLOPT_URL => $url,
+    CURLOPT_PROGRESSFUNCTION => 'progress'
   );
   
   $ch = curl_init();
   curl_setopt_array($ch, $options);
   curl_exec($ch);
   curl_close($ch);
+}
+
+function progress($resource,$download_size, $downloaded, $upload_size, $uploaded) {
+  global $lastPercent;
+  
+  if($download_size > 0) {
+    $percent = round($downloaded / $download_size * 100);
+    if($percent > $lastPercent){
+      echo "$percent%     \r";
+      $lastPercent = $percent;
+    }
+  }
+  ob_flush();
+  flush();
 }
 
 function doRequest($query, $binaryExptected = false) {
@@ -371,6 +512,7 @@ function doRequest($query, $binaryExptected = false) {
   }
   
   $answer = json_decode($server_output, true);
+  print_r($answer);
   if ($answer['response'] == 'ERROR') {
     echo "FAILED: " . $answer['message'] . "\n";
   }
