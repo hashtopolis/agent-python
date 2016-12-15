@@ -1,5 +1,7 @@
-package org.hashes.hashtopussy.agent.request;
+package org.hashes.hashtopussy.agent.api;
 
+import org.hashes.hashtopussy.agent.common.Setting;
+import org.hashes.hashtopussy.agent.common.Settings;
 import org.hashes.hashtopussy.agent.exceptions.InvalidQueryException;
 import org.hashes.hashtopussy.agent.exceptions.InvalidUrlException;
 import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
@@ -19,8 +21,8 @@ public class Request {
     private String url;
     private JSONObject query;
 
-    public Request(String url) {
-        this.url = url;
+    public Request() {
+        this.url = (String) Settings.get(Setting.URL);
     }
 
     public void setQuery(JSONObject query) {
@@ -52,7 +54,7 @@ public class Request {
         wr.close();
 
         int responseCode = con.getResponseCode();
-        if(responseCode != 200){
+        if (responseCode != 200) {
             throw new WrongResponseCodeException("Got response code: " + responseCode);
         }
 

@@ -1,12 +1,16 @@
 package org.hashes.hashtopussy.agent.actions;
 
+import org.hashes.hashtopussy.agent.api.response.ErrorResponse;
+import org.hashes.hashtopussy.agent.api.query.LoginQuery;
+import org.hashes.hashtopussy.agent.api.response.LoginResponse;
 import org.hashes.hashtopussy.agent.common.LogLevel;
 import org.hashes.hashtopussy.agent.common.LoggerFactory;
+import org.hashes.hashtopussy.agent.common.Setting;
 import org.hashes.hashtopussy.agent.common.Settings;
 import org.hashes.hashtopussy.agent.exceptions.InvalidQueryException;
 import org.hashes.hashtopussy.agent.exceptions.InvalidUrlException;
 import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
-import org.hashes.hashtopussy.agent.request.Request;
+import org.hashes.hashtopussy.agent.api.Request;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -21,37 +25,26 @@ public class LoginAction extends AbstractAction {
         this.actionType = ActionType.LOGIN;
     }
 
-    public JSONObject act(Map<MappingType, Object> mapping) {
-        String token = Settings.getToken();
+    public JSONObject act(Map<MappingType, Object> mapping) throws WrongResponseCodeException, InvalidQueryException, InvalidUrlException, IOException {
+        String token = (String) Settings.get(Setting.TOKEN);
         if (token == null) {
             throw new IllegalArgumentException("Token must not be null on login!");
         }
 
-        JSONObject answer = new JSONObject();
-        try {
-            JSONObject query = new JSONObject();
-            query.put("action", this.actionType.getString());
-            query.put("token", token);
-            Request request = new Request(Settings.getUrl());
-            request.setQuery(query);
-            answer = request.execute();
-            if (answer.get("response") == null) {
-                LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
-                LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
-            } else if (!answer.get("response").equals("SUCCESS")) {
-                LoggerFactory.getLogger().log(LogLevel.ERROR, "Login failed: " + answer.get("message"));
-                return new JSONObject();
-            }
-            LoggerFactory.getLogger().log(LogLevel.NORMAL, "Logged in successful");
-        } catch (InvalidQueryException e) {
-            e.printStackTrace();
-        } catch (InvalidUrlException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (WrongResponseCodeException e) {
-            e.printStackTrace();
+        JSONObject query = new JSONObject();
+        query.put(LoginQuery.ACTION.identifier(), this.actionType.getString());
+        query.put(LoginQuery.TOKEN.identifier(), token);
+        Request request = new Request();
+        request.setQuery(query);
+        JSONObject answer = request.execute();
+        if (answer.get(LoginResponse.RESPONSE.identifier()) == null) {
+            LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
+            LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
+        } else if (!answer.get(LoginResponse.RESPONSE.identifier()).equals("SUCCESS")) {
+            LoggerFactory.getLogger().log(LogLevel.ERROR, "Login failed: " + answer.get(ErrorResponse.MESSAGE.identifier()));
+            return new JSONObject();
         }
+        LoggerFactory.getLogger().log(LogLevel.NORMAL, "Logged in successful");
         return answer;
     }
 }
