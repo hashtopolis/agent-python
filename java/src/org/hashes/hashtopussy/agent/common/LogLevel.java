@@ -7,6 +7,7 @@ public enum LogLevel {
     DEBUG,
     INFO,
     NORMAL,
+    WARN,
     ERROR,
     FATAL
 }

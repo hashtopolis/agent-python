@@ -25,6 +25,7 @@ public class LoginAction extends AbstractAction {
         this.actionType = ActionType.LOGIN;
     }
 
+    @Override
     public JSONObject act(Map<MappingType, Object> mapping) throws WrongResponseCodeException, InvalidQueryException, InvalidUrlException, IOException {
         String token = (String) Settings.get(Setting.TOKEN);
         if (token == null) {
@@ -45,6 +46,7 @@ public class LoginAction extends AbstractAction {
             return new JSONObject();
         }
         LoggerFactory.getLogger().log(LogLevel.NORMAL, "Logged in successful");
+        LoggerFactory.getLogger().log(LogLevel.INFO, "Logged in with timeout: " + answer.get(LoginResponse.TIMEOUT.identifier()));
         return answer;
     }
 }

@@ -1,5 +1,7 @@
 package org.hashes.hashtopussy.agent.common;
 
+import org.json.JSONObject;
+
 /**
  * Created by sein on 15.12.16.
  */
@@ -8,39 +10,74 @@ public enum Setting {
         public String getDefault() {
             return "https://alpha.hashes.org/src/api/server.php";
         }
+
+        @Override
+        public Object parse(Object in) {
+            return in.toString();
+        }
     },
     TOKEN {
         public String getDefault() {
-            return "SPx1G7WWPp";
+            return null;
+            //return "SPx1G7WWPp";
+        }
+
+        @Override
+        public Object parse(Object in) {
+            return in.toString();
         }
     },
     LOGGER {
-        @Override
         public LoggerType getDefault() {
             return LoggerType.STDOUT;
         }
+
+        @Override
+        public Object parse(Object in) {
+            return LoggerType.valueOf(in.toString());
+        }
     },
     LOG_LEVEL {
-        @Override
         public LogLevel getDefault() {
-            return LogLevel.NORMAL;
+            return LogLevel.DEBUG;
+        }
+
+        @Override
+        public Object parse(Object in) {
+            return LogLevel.valueOf(in.toString());
         }
     },
     DISABLE_HASHCAT_CHECK {
         public Boolean getDefault() {
             return false;
         }
+
+        @Override
+        public Object parse(Object in) {
+            return Boolean.valueOf(in.toString());
+        }
     },
     DISABLE_AUTO_UPDATE {
         public Boolean getDefault() {
             return false;
+        }
+
+        @Override
+        public Object parse(Object in) {
+            return Boolean.valueOf(in.toString());
         }
     },
     EXPERIMENTAL_BENCHMARK {
         public Boolean getDefault() {
             return false;
         }
+
+        @Override
+        public Object parse(Object in) {
+            return Boolean.valueOf(in.toString());
+        }
     };
 
     public abstract Object getDefault();
+    public abstract Object parse(Object in);
 }

@@ -12,7 +12,14 @@ public class LoggerFactory {
         if (logger != null) {
             return logger;
         }
-        logger = new Logger(((LoggerType) Settings.get(Setting.LOGGER)).getPrinter(), (LogLevel) Settings.get(Setting.LOG_LEVEL));
+        LogLevel level = (LogLevel) Settings.get(Setting.LOG_LEVEL);
+        LoggerType loggerType = ((LoggerType) Settings.get(Setting.LOGGER));
+        if(level == null || loggerType == null){
+            logger = new Logger(LoggerType.STDOUT.getPrinter(), LogLevel.DEBUG);
+        }
+        else {
+            logger = new Logger(loggerType.getPrinter(), level);
+        }
         return logger;
     }
 }

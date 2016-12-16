@@ -14,6 +14,13 @@ public class Logger {
         this.level = level;
     }
 
+    public void setLevel(LogLevel level){
+        if(level == null){
+            return;
+        }
+        this.level = level;
+    }
+
     public void log(LogLevel level, String message) {
         if (this.level.ordinal() > level.ordinal()) {
             return;
