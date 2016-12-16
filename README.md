@@ -1,6 +1,12 @@
-# hashtopussy-agent
+# Hashtopussy Agents
 
-Agent for using the distributed hashcracker Hashtopussy
+Official agents for using the distributed hashcracker Hashtopussy.
+
+Currently available agents:
+- PHP (Experimental)
+- Java (Partial)
+- Python (In Development)
+- C# (In Development)
 
 
 ## Protocol Documentation
