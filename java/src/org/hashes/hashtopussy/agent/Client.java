@@ -41,7 +41,7 @@ public class Client {
                         System.out.print("Client needs to be registered, please enter a voucher: ");
                         Map<MappingType, Object> mapping = new HashMap<>();
                         while(!input.hasNext()){
-                            //wait
+                            Thread.sleep(100);
                         }
                         mapping.put(MappingType.VOUCHER, input.nextLine());
                         action = new RegisterAction();

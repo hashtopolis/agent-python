@@ -1,6 +1,5 @@
 package org.hashes.hashtopussy.agent.common;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.json.JSONObject;
 
 import java.io.*;
