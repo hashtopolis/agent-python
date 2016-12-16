@@ -15,7 +15,7 @@ dependencies {
 
 sourceSets {
     main {
-        java  {
+        java {
             srcDir 'src'
         }
     }
@@ -27,7 +27,7 @@ jar {
     }
 
     from {
-        configurations.compile.collect { it.isDirectory() ? it: zipTree(it) }
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
     archiveName = 'hashtopussy.jar'
