@@ -1,9 +1,6 @@
 package org.hashes.hashtopussy.agent;
 
-import org.hashes.hashtopussy.agent.actions.Action;
-import org.hashes.hashtopussy.agent.actions.LoginAction;
-import org.hashes.hashtopussy.agent.actions.MappingType;
-import org.hashes.hashtopussy.agent.actions.RegisterAction;
+import org.hashes.hashtopussy.agent.actions.*;
 import org.hashes.hashtopussy.agent.cli.CommandLineParser;
 import org.hashes.hashtopussy.agent.common.*;
 import org.json.JSONObject;
@@ -29,16 +26,18 @@ public class Client {
       isRunning = true;
       Action action;
       JSONObject answer;
+      Map<MappingType, Object> mapping;
       Scanner input = new Scanner(System.in);
       while (isRunning) {
         switch (clientStatus.getCurrentState()) {
           case INIT:
+            //register agent if required
             if (Settings.get(Setting.TOKEN) != null) {
               clientStatus.setCurrentState(ClientState.LOGIN_READY);
               break;
             }
             System.out.print("Client needs to be registered, please enter a voucher: ");
-            Map<MappingType, Object> mapping = new HashMap<>();
+            mapping = new HashMap<>();
             while (!input.hasNext()) {
               Thread.sleep(100);
             }
@@ -54,13 +53,40 @@ public class Client {
             action = new LoginAction();
             action.act(null);
             clientStatus.setIsLoggedin(true);
+            //TODO: we need to check here if new binaries are available
             clientStatus.setCurrentState(ClientState.LOGIN_DONE);
             break;
           case LOGIN_DONE:
-            //TODO: get a task
+            // get a task
+            action = new TaskAction();
+            mapping = new HashMap<>();
+            mapping.put(MappingType.CLIENTSTATUS, clientStatus);
+            action.act(mapping);
+            if(clientStatus.getTask() != null){
+              //TODO: when task is received, we need to download files and hashlist
+              Utils.printTaskInfo(clientStatus.getTask());
+              clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
+            }
+            else{
+              Thread.sleep(5000);
+            }
             break;
           case TASK_RECEIVED:
-            //TODO: get a chunk
+            // get a chunk
+            action = new ChunkAction();
+            mapping = new HashMap<>();
+            mapping.put(MappingType.CLIENTSTATUS, clientStatus);
+            action.act(mapping);
+            if(clientStatus.getChunk() != null){
+              Utils.printChunkInfo(clientStatus.getChunk());
+              clientStatus.setCurrentState(ClientState.CHUNK_RECEIVED);
+            }
+            else if(clientStatus.getCurrentState() == ClientState.BENCHMARK_REQUIRED || clientStatus.getCurrentState() == ClientState.KEYSPACE_REQUIRED){
+              //everything is well
+            }
+            else{
+              Thread.sleep(5000);
+            }
             break;
           case BENCHMARK_REQUIRED:
             //TODO: do benchmark
@@ -77,6 +103,7 @@ public class Client {
             LoggerFactory.getLogger().log(LogLevel.FATAL, "Client is in ERROR state, aborting!");
             System.exit(-1);
         }
+        Thread.sleep(100);
       }
       LoggerFactory.getLogger().log(LogLevel.NORMAL, "HTP Client loop finished");
       input.close();
