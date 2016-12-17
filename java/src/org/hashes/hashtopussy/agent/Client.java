@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-/**
- * Created by sein on 03.12.16.
- */
 public class Client {
   public boolean isRunning;
   private ClientStatus clientStatus;
@@ -62,12 +59,11 @@ public class Client {
             mapping = new HashMap<>();
             mapping.put(MappingType.CLIENTSTATUS, clientStatus);
             action.act(mapping);
-            if(clientStatus.getTask() != null){
+            if (clientStatus.getTask() != null) {
               //TODO: when task is received, we need to download files and hashlist
               Utils.printTaskInfo(clientStatus.getTask());
               clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
-            }
-            else{
+            } else {
               Thread.sleep(5000);
             }
             break;
@@ -77,14 +73,12 @@ public class Client {
             mapping = new HashMap<>();
             mapping.put(MappingType.CLIENTSTATUS, clientStatus);
             action.act(mapping);
-            if(clientStatus.getChunk() != null){
+            if (clientStatus.getChunk() != null) {
               Utils.printChunkInfo(clientStatus.getChunk());
               clientStatus.setCurrentState(ClientState.CHUNK_RECEIVED);
-            }
-            else if(clientStatus.getCurrentState() == ClientState.BENCHMARK_REQUIRED || clientStatus.getCurrentState() == ClientState.KEYSPACE_REQUIRED){
+            } else if (clientStatus.getCurrentState() == ClientState.BENCHMARK_REQUIRED || clientStatus.getCurrentState() == ClientState.KEYSPACE_REQUIRED) {
               //everything is well
-            }
-            else{
+            } else {
               Thread.sleep(5000);
             }
             break;

@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-/**
- * Created by sein on 15.12.16.
- */
 public class Settings {
   private static Map<Setting, Object> map = new HashMap<>();
   private static final String filename = "settings.json";

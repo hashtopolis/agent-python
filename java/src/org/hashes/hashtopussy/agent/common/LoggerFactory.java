@@ -1,10 +1,5 @@
 package org.hashes.hashtopussy.agent.common;
 
-import java.io.PrintWriter;
-
-/**
- * Created by sein on 15.12.16.
- */
 public class LoggerFactory {
   private static Logger logger;
   

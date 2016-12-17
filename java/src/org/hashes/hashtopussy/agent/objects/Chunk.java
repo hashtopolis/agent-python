@@ -1,8 +1,5 @@
 package org.hashes.hashtopussy.agent.objects;
 
-/**
- * Created by sein on 16.12.16.
- */
 public class Chunk {
   private int chunkId;
   private long skip;

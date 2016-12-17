@@ -1,8 +1,5 @@
 package org.hashes.hashtopussy.agent.api.query;
 
-/**
- * Created by sein on 17.12.16.
- */
 public enum ChunkQuery {
   ACTION {
     @Override

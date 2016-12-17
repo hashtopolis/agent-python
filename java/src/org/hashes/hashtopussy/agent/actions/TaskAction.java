@@ -15,9 +15,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * Created by sein on 15.12.16.
- */
 public class TaskAction extends AbstractAction {
   
   public TaskAction() {

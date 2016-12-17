@@ -1,8 +1,5 @@
 package org.hashes.hashtopussy.agent.api.query;
 
-/**
- * Created by sein on 15.12.16.
- */
 public enum LoginQuery {
   ACTION {
     @Override

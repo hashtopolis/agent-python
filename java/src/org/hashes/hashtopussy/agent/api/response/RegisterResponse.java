@@ -1,8 +1,5 @@
 package org.hashes.hashtopussy.agent.api.response;
 
-/**
- * Created by sein on 16.12.16.
- */
 public enum RegisterResponse {
   ACTION {
     @Override

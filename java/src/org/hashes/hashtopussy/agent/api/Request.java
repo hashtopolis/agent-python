@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-/**
- * Created by sein on 03.12.16.
- */
 public class Request {
   private String url;
   private JSONObject query;

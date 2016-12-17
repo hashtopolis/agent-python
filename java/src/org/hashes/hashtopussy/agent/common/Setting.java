@@ -1,10 +1,5 @@
 package org.hashes.hashtopussy.agent.common;
 
-import org.json.JSONObject;
-
-/**
- * Created by sein on 15.12.16.
- */
 public enum Setting {
   URL {
     public String getDefault() {

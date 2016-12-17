@@ -1,8 +1,5 @@
 package org.hashes.hashtopussy.agent.api.query;
 
-/**
- * Created by sein on 16.12.16.
- */
 public enum TaskQuery {
   ACTION {
     @Override

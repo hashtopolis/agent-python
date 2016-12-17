@@ -1,8 +1,5 @@
 package org.hashes.hashtopussy.agent.objects;
 
-/**
- * Created by sein on 16.12.16.
- */
 public class Task {
   private int taskId;
   private int wait;

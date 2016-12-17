@@ -4,9 +4,6 @@ import org.hashes.hashtopussy.agent.objects.Benchmark;
 import org.hashes.hashtopussy.agent.objects.Chunk;
 import org.hashes.hashtopussy.agent.objects.Task;
 
-/**
- * Created by sein on 15.12.16.
- */
 public class ClientStatus {
   private boolean isLoggedin = false;
   private Benchmark benchmark = null;

@@ -2,9 +2,6 @@ package org.hashes.hashtopussy.agent.cli;
 
 import org.hashes.hashtopussy.agent.common.*;
 
-/**
- * Created by sein on 15.12.16.
- */
 public class CommandLineParser {
   public void parse(String[] argv) {
     try {

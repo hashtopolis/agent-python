@@ -16,9 +16,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * Created by sein on 16.12.16.
- */
 public class RegisterAction extends AbstractAction {
   
   public RegisterAction() {
