@@ -61,7 +61,7 @@ public class KeyspaceAction extends AbstractAction {
     String line;
     String output = "";
     while ((line = br.readLine()) != null) {
-      output += line;
+      output = line;
     }
     
     // send keyspace to server
