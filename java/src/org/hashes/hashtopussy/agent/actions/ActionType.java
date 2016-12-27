@@ -54,8 +54,12 @@ enum ActionType {
     public String getString() {
       return "file";
     }
+  }, CRACKING {
+    @Override
+    public String getString() {
+      return "solve";
+    }
   };
-  //TODO: add more actionTypes
   
   public abstract String getString();
   

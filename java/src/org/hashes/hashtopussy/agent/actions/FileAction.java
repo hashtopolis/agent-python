@@ -14,8 +14,10 @@ import org.hashes.hashtopussy.agent.exceptions.InvalidUrlException;
 import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class FileAction extends AbstractAction {
@@ -51,8 +53,28 @@ public class FileAction extends AbstractAction {
     }
     
     String downloadUrl = (String)answer.get(FileResponse.URL.identifier());
-    request = new Request(downloadUrl);
-    answer = request.execute(true, "files/" + mapping.get(MappingType.FILENAME));
+    Utils.downloadFile(downloadUrl, "files/" + mapping.get(MappingType.FILENAME));
+    
+    File check = new File("files/" + mapping.get(MappingType.FILENAME));
+    String[] splitted = ((String)mapping.get(MappingType.FILENAME)).split("\\.");
+    String extension = splitted[splitted.length - 1];
+    if(check.exists() && extension.equals("7z")){
+      List<String> cmd = new ArrayList<>();
+      cmd.add("7z");
+      cmd.add("x");
+      cmd.add("files/" + mapping.get(MappingType.FILENAME));
+      ProcessBuilder processBuilder = new ProcessBuilder();
+      processBuilder.command(cmd);
+      Process process = processBuilder.start();
+      InputStream is = process.getInputStream();
+      InputStreamReader isr = new InputStreamReader(is);
+      BufferedReader br = new BufferedReader(isr);
+      String line;
+      LoggerFactory.getLogger().log(LogLevel.NORMAL, "Extracting " + check.getName() + "...");
+      while((line = br.readLine()) != null) {
+        LoggerFactory.getLogger().log(LogLevel.DEBUG, line);
+      }
+    }
     
     return answer;
   }

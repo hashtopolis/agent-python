@@ -76,13 +76,13 @@ public class Request {
     int lastProgress = 0;
     while ((inputLine = in.readLine()) != null) {
       if(outputWriter != null) {
-        outputWriter.write(inputLine + "\n");
+        outputWriter.append(inputLine + "\n");
       }
       else {
         response.append(inputLine);
       }
       count += inputLine.length();
-      if(logProgress && count - lastProgress > 5000000){
+      if(logProgress && count - lastProgress > 500000){
         LoggerFactory.getLogger().log(LogLevel.INFO, "Progress: " + count);
         lastProgress = count;
       }

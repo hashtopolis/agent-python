@@ -10,6 +10,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +31,7 @@ public class Utils {
   public static void printTaskInfo(Task task) {
     //TODO: make some fancy output here
     LoggerFactory.getLogger().log(LogLevel.DEBUG, "Task info: " + task.getAttackCmd() + " " + task.getCmdPars() + " " + task.getHashlistId());
+    LoggerFactory.getLogger().log(LogLevel.DEBUG, "Task files: " + String.join(", ", task.getFiles()));
   }
   
   public static void printChunkInfo(Chunk chunk) {
@@ -84,5 +91,43 @@ public class Utils {
       }
     }
     return false;
+  }
+  
+  public static void downloadFile(String url, String filename) throws IOException {
+    InputStream is = null;
+    FileOutputStream fos = null;
+  
+    try {
+      URL u = new URL(url);
+      URLConnection urlConn = u.openConnection();//connect
+    
+      is = urlConn.getInputStream();               //get connection inputstream
+      fos = new FileOutputStream(filename);   //open outputstream to local file
+    
+      byte[] buffer = new byte[4096];              //declare 4KB buffer
+      int len;
+    
+      //while we have availble data, continue downloading and storing to local file
+      while ((len = is.read(buffer)) > 0) {
+        fos.write(buffer, 0, len);
+        //TODO: add progress output
+      }
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        if (is != null) {
+          is.close();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      } finally {
+        if (fos != null) {
+          fos.close();
+        }
+      }
+    }
   }
 }

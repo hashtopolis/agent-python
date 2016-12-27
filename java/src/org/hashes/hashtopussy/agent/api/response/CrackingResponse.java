@@ -1,28 +1,34 @@
-package org.hashes.hashtopussy.agent.api.query;
+package org.hashes.hashtopussy.agent.api.response;
 
-public enum FileQuery {
+public enum CrackingResponse {
   ACTION {
     @Override
     public String identifier() {
       return "action";
     }
   },
-  TOKEN {
+  RESPONSE {
     @Override
     public String identifier() {
-      return "token";
+      return "response";
     }
   },
-  TASK {
+  CRACKED {
     @Override
     public String identifier() {
-      return "task";
+      return "cracked";
     }
   },
-  FILENAME {
+  SKIPPED {
     @Override
     public String identifier() {
-      return "file";
+      return "skipped";
+    }
+  },
+  ZAP {
+    @Override
+    public String identifier() {
+      return "zap";
     }
   };
   

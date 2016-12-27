@@ -35,7 +35,9 @@ public class ChunkAction extends AbstractAction {
       answer = request.execute();
     } catch (JSONException e){
       LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
-      LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
+      if(answer != null) {
+        LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
+      }
       return new JSONObject();
     }
     if (answer.get(ChunkResponse.RESPONSE.identifier()) == null) {

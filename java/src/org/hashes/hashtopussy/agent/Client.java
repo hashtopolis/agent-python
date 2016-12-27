@@ -61,11 +61,11 @@ public class Client {
             action.act(mapping);
             if (clientStatus.getTask() != null) {
               // when task is received, we need to download files and hashlist
+              Utils.printTaskInfo(clientStatus.getTask());
               if(Utils.downloadsRequired(clientStatus)){
                 clientStatus.setCurrentState(ClientState.DOWNLOADS_REQUIRED);
                 break;
               }
-              Utils.printTaskInfo(clientStatus.getTask());
               clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
             } else {
               Thread.sleep(5000);
@@ -103,7 +103,10 @@ public class Client {
             break;
           case CHUNK_RECEIVED:
             // do cracking process
-            //TODO: do cracking
+            action = new CrackingAction();
+            mapping = new HashMap<>();
+            mapping.put(MappingType.CLIENTSTATUS, clientStatus);
+            action.act(mapping);
             break;
           case DOWNLOADS_REQUIRED:
             // download file dependencies
