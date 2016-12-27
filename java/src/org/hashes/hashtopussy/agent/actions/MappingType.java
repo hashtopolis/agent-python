@@ -4,5 +4,6 @@ public enum MappingType {
   TOKEN,
   GPUS,
   VOUCHER,
-  CLIENTSTATUS
+  CLIENTSTATUS,
+  FILENAME
 }

@@ -1,5 +1,7 @@
 package org.hashes.hashtopussy.agent.api;
 
+import org.hashes.hashtopussy.agent.common.LogLevel;
+import org.hashes.hashtopussy.agent.common.LoggerFactory;
 import org.hashes.hashtopussy.agent.common.Setting;
 import org.hashes.hashtopussy.agent.common.Settings;
 import org.hashes.hashtopussy.agent.exceptions.InvalidQueryException;
@@ -8,10 +10,7 @@ import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
 import org.json.*;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 
 public class Request {
@@ -22,11 +21,19 @@ public class Request {
     this.url = (String) Settings.get(Setting.URL);
   }
   
+  public Request(String url){
+    this.url = url;
+  }
+  
   public void setQuery(JSONObject query) {
     this.query = query;
   }
   
-  public JSONObject execute() throws InvalidQueryException, InvalidUrlException, IOException, WrongResponseCodeException {
+  public JSONObject execute() throws WrongResponseCodeException, InvalidQueryException, InvalidUrlException, IOException {
+    return execute(false, null);
+  }
+  
+  public JSONObject execute(boolean logProgress, String downloadPath) throws InvalidQueryException, InvalidUrlException, IOException, WrongResponseCodeException {
     if (this.query == null) {
       throw new InvalidQueryException("Query arguments cannot be null!");
     } else if (this.url == null) {
@@ -55,14 +62,36 @@ public class Request {
       throw new WrongResponseCodeException("Got response code: " + responseCode);
     }
     
+    FileWriter outputWriter = null;
+    if(downloadPath != null){
+      File output = new File(downloadPath);
+      outputWriter = new FileWriter(output);
+    }
+    
     // read answer
     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
     String inputLine;
     StringBuffer response = new StringBuffer();
+    int count = 0;
+    int lastProgress = 0;
     while ((inputLine = in.readLine()) != null) {
-      response.append(inputLine);
+      if(outputWriter != null) {
+        outputWriter.write(inputLine);
+      }
+      else {
+        response.append(inputLine);
+      }
+      count += inputLine.length();
+      if(logProgress && count - lastProgress > 5000000){
+        LoggerFactory.getLogger().log(LogLevel.INFO, "Progress: " + count);
+        lastProgress = count;
+      }
     }
     in.close();
+    if(outputWriter != null){
+      outputWriter.flush();
+      outputWriter.close();
+    }
     
     return new JSONObject(response.toString());
   }

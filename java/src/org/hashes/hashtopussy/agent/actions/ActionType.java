@@ -24,15 +24,35 @@ enum ActionType {
     public String getString() {
       return "chunk";
     }
-  }, KEYSPACE {
+  },
+  KEYSPACE {
     @Override
     public String getString() {
       return "keyspace";
     }
-  }, BENCHMARK {
+  },
+  BENCHMARK {
     @Override
     public String getString() {
       return "bench";
+    }
+  },
+  DOWNLOAD {
+    @Override
+    public String getString() {
+      return "down";
+    }
+  },
+  HASHLIST {
+    @Override
+    public String getString() {
+      return "hashes";
+    }
+  },
+  FILE {
+    @Override
+    public String getString() {
+      return "file";
     }
   };
   //TODO: add more actionTypes

@@ -1,5 +1,9 @@
 package org.hashes.hashtopussy.agent.common;
 
+import org.hashes.hashtopussy.agent.api.Request;
+import org.hashes.hashtopussy.agent.api.query.LoginQuery;
+import org.hashes.hashtopussy.agent.api.response.ErrorResponse;
+import org.hashes.hashtopussy.agent.api.response.LoginResponse;
 import org.hashes.hashtopussy.agent.objects.Chunk;
 import org.hashes.hashtopussy.agent.objects.Task;
 import org.json.JSONArray;

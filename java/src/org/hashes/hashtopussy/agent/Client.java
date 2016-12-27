@@ -104,7 +104,17 @@ public class Client {
             break;
           case DOWNLOADS_REQUIRED:
             // download file dependencies
-            //TODO: download files
+            action = new DownloadAction();
+            mapping = new HashMap<>();
+            mapping.put(MappingType.CLIENTSTATUS, clientStatus);
+            action.act(mapping);
+            if(!Utils.downloadsRequired(clientStatus)){
+              clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
+            }
+            else{
+              LoggerFactory.getLogger().log(LogLevel.WARN, "Retry downloading files in 5 seconds...");
+              Thread.sleep(5000);
+            }
             break;
           case ERROR:
             LoggerFactory.getLogger().log(LogLevel.FATAL, "Client is in ERROR state, aborting!");
