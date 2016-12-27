@@ -61,6 +61,9 @@ public class Client {
             action.act(mapping);
             if (clientStatus.getTask() != null) {
               //TODO: when task is received, we need to download files and hashlist
+              if(Utils.downloadsRequired(clientStatus)){
+                clientStatus.setCurrentState(ClientState.DOWNLOADS_REQUIRED);
+              }
               Utils.printTaskInfo(clientStatus.getTask());
               clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
             } else {
@@ -98,6 +101,10 @@ public class Client {
           case CHUNK_RECEIVED:
             // do cracking process
             //TODO: do cracking
+            break;
+          case DOWNLOADS_REQUIRED:
+            // download file dependencies
+            //TODO: download files
             break;
           case ERROR:
             LoggerFactory.getLogger().log(LogLevel.FATAL, "Client is in ERROR state, aborting!");

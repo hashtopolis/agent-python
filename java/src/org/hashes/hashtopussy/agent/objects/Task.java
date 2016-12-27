@@ -8,9 +8,9 @@ public class Task {
   private int hashlistId;
   private String bench;
   private int statustimer;
-  private int[] files;
+  private String[] files;
   
-  public Task(int taskId, int wait, String attackCmd, String cmdPars, int hashlistId, String bench, int statustimer, int[] files) {
+  public Task(int taskId, int wait, String attackCmd, String cmdPars, int hashlistId, String bench, int statustimer, String[] files) {
     this.taskId = taskId;
     this.wait = wait;
     this.attackCmd = attackCmd;
@@ -54,7 +54,7 @@ public class Task {
     return statustimer;
   }
   
-  public int[] getFiles() {
+  public String[] getFiles() {
     return files;
   }
 }

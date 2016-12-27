@@ -1,17 +1,16 @@
 package org.hashes.hashtopussy.agent.actions;
 
 import org.hashes.hashtopussy.agent.api.Request;
-import org.hashes.hashtopussy.agent.api.query.ChunkQuery;
+import org.hashes.hashtopussy.agent.api.query.BenchmarkQuery;
 import org.hashes.hashtopussy.agent.api.query.KeyspaceQuery;
-import org.hashes.hashtopussy.agent.api.response.ChunkResponse;
+import org.hashes.hashtopussy.agent.api.response.BenchmarkResponse;
 import org.hashes.hashtopussy.agent.api.response.ErrorResponse;
 import org.hashes.hashtopussy.agent.api.response.KeyspaceResponse;
 import org.hashes.hashtopussy.agent.common.*;
 import org.hashes.hashtopussy.agent.exceptions.InvalidQueryException;
 import org.hashes.hashtopussy.agent.exceptions.InvalidUrlException;
 import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
-import org.hashes.hashtopussy.agent.objects.Chunk;
-import org.hashes.hashtopussy.agent.objects.Task;
+import org.hashes.hashtopussy.agent.objects.Benchmark;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -23,10 +22,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class KeyspaceAction extends AbstractAction {
+public class BenchmarkAction extends AbstractAction {
   
-  public KeyspaceAction() {
-    this.actionType = ActionType.KEYSPACE;
+  public BenchmarkAction() {
+    this.actionType = ActionType.BENCHMARK;
   }
   
   @Override
@@ -37,11 +36,11 @@ public class KeyspaceAction extends AbstractAction {
     List<String> cmd = new ArrayList<>();
     cmd.add((String) Settings.get(Setting.HASHCAT_BINARY));
     cmd.add("--machine-readable");
-    cmd.add("--keyspace");
+    //TODO: handle benchmarking type
     List<String> arguments = Utils.splitArguments(clientStatus.getTask().getAttackCmd() + " " + clientStatus.getTask().getCmdPars());
     for(String a: arguments){
       if(a.equals("#HL#")){
-        //ignore, as this argument shouldn't be in command line on benchmark
+        cmd.add("hashlists/" + clientStatus.getTask().getHashlistId());
       }
       else if(Arrays.asList(clientStatus.getTask().getFiles()).contains(a)){
         cmd.add("files/" + a);
@@ -55,6 +54,13 @@ public class KeyspaceAction extends AbstractAction {
     ProcessBuilder processBuilder = new ProcessBuilder();
     processBuilder.command(cmd);
     Process process = processBuilder.start();
+    try {
+      Thread.sleep(10000);
+    } catch (InterruptedException e) {
+      //TODO: handle exception
+      e.printStackTrace();
+    }
+    process.destroy();
     InputStream is = process.getInputStream();
     InputStreamReader isr = new InputStreamReader(is);
     BufferedReader br = new BufferedReader(isr);
@@ -64,29 +70,37 @@ public class KeyspaceAction extends AbstractAction {
       output += line;
     }
     
+    //TODO: parse benchmarking result
+    String benchProgress = "";
+    String benchTotal = "";
+    String benchState = "";
+    
     // send keyspace to server
     JSONObject query = new JSONObject();
-    query.put(KeyspaceQuery.ACTION.identifier(), this.actionType.getString());
-    query.put(KeyspaceQuery.TOKEN.identifier(), Settings.get(Setting.TOKEN));
-    query.put(KeyspaceQuery.TASK.identifier(), clientStatus.getTask().getTaskId());
-    query.put(KeyspaceQuery.KEYSPACE.identifier(), Integer.parseInt(output));
+    query.put(BenchmarkQuery.ACTION.identifier(), this.actionType.getString());
+    query.put(BenchmarkQuery.TOKEN.identifier(), Settings.get(Setting.TOKEN));
+    query.put(BenchmarkQuery.TASK.identifier(), clientStatus.getTask().getTaskId());
+    //TODO: benchmark sending should be changed to flexible way
+    query.put(BenchmarkQuery.PROGRESS.identifier(), benchProgress);
+    query.put(BenchmarkQuery.TOTAL.identifier(), benchTotal);
+    query.put(BenchmarkQuery.STATE.identifier(), benchState);
     Request request = new Request();
     request.setQuery(query);
     JSONObject answer = request.execute();
     if (answer.get(KeyspaceResponse.RESPONSE.identifier()) == null) {
       LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
       LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
-    } else if (!answer.get(KeyspaceResponse.RESPONSE.identifier()).equals("SUCCESS")) {
-      LoggerFactory.getLogger().log(LogLevel.ERROR, "Getting chunk failed: " + answer.get(ErrorResponse.MESSAGE.identifier()));
+    } else if (!answer.get(BenchmarkResponse.RESPONSE.identifier()).equals("SUCCESS")) {
+      LoggerFactory.getLogger().log(LogLevel.ERROR, "Setting benchmark result failed: " + answer.get(ErrorResponse.MESSAGE.identifier()));
       return new JSONObject();
     }
     
-    if(!answer.get(KeyspaceResponse.KEYSPACE.identifier()).equals("OK")){
-      LoggerFactory.getLogger().log(LogLevel.ERROR, "Server didn't accept keyspace result!");
-      clientStatus.setCurrentState(ClientState.KEYSPACE_REQUIRED);
+    if(!answer.get(BenchmarkResponse.BENCHMARK.identifier()).equals("OK")){
+      LoggerFactory.getLogger().log(LogLevel.ERROR, "Server didn't accept benchmark result!");
+      clientStatus.setCurrentState(ClientState.BENCHMARK_REQUIRED);
     }
     else{
-      LoggerFactory.getLogger().log(LogLevel.INFO, "Server accepted keyspace result!");
+      LoggerFactory.getLogger().log(LogLevel.INFO, "Server accepted benchmark result!");
       clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
     }
     

@@ -5,14 +5,15 @@ import org.hashes.hashtopussy.agent.objects.Task;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
-  public static int[] jsonToArray(JSONArray json) {
-    int[] arr = new int[json.length()];
+  public static String[] jsonToArray(JSONArray json) {
+    String[] arr = new String[json.length()];
     for (int i = 0; i < json.length(); i++) {
-      arr[i] = json.getInt(i);
+      arr[i] = json.getString(i);
     }
     return arr;
   }
@@ -60,5 +61,24 @@ public class Utils {
       list.add(current);
     }
     return list;
+  }
+  
+  public static boolean downloadsRequired(ClientStatus clientStatus) {
+    Task task = clientStatus.getTask();
+    
+    //check for hashlist
+    File hashlist = new File("hashlists/" + task.getHashlistId());
+    if(!hashlist.exists()){
+      return true;
+    }
+    
+    //check for files
+    for(String f: task.getFiles()){
+      File file = new File("files/" + f);
+      if(!file.exists()){
+        return true;
+      }
+    }
+    return false;
   }
 }
