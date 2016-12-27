@@ -21,6 +21,11 @@ public class Task {
     this.files = files;
   }
   
+  public String[] buildKeyspaceCommand(){
+    String[] args = new String[attackCmd.split(" ").length + cmdPars.split(" ").length + 2];
+    return args;
+  }
+  
   public int getTaskId() {
     return taskId;
   }

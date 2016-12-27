@@ -24,6 +24,11 @@ enum ActionType {
     public String getString() {
       return "chunk";
     }
+  }, KEYSPACE {
+    @Override
+    public String getString() {
+      return "keyspace";
+    }
   };
   //TODO: add more actionTypes
   

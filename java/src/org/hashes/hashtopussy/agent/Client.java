@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
-  public boolean isRunning;
+  private boolean isRunning;
   private ClientStatus clientStatus;
   
   public Client() {
@@ -76,21 +76,27 @@ public class Client {
             if (clientStatus.getChunk() != null) {
               Utils.printChunkInfo(clientStatus.getChunk());
               clientStatus.setCurrentState(ClientState.CHUNK_RECEIVED);
-            } else if (clientStatus.getCurrentState() == ClientState.BENCHMARK_REQUIRED || clientStatus.getCurrentState() == ClientState.KEYSPACE_REQUIRED) {
-              //everything is well
-            } else {
+            } else if (clientStatus.getCurrentState() != ClientState.BENCHMARK_REQUIRED && clientStatus.getCurrentState() != ClientState.KEYSPACE_REQUIRED) {
               Thread.sleep(5000);
             }
             break;
           case BENCHMARK_REQUIRED:
+            // do the benchmark
             //TODO: do benchmark
             clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
             break;
           case KEYSPACE_REQUIRED:
-            //TODO: do keyspace calc
-            clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
+            // do keyspace calculation
+            action = new KeyspaceAction();
+            mapping = new HashMap<>();
+            mapping.put(MappingType.CLIENTSTATUS, clientStatus);
+            action.act(mapping);
+            if (clientStatus.getCurrentState() != ClientState.TASK_RECEIVED) {
+              Thread.sleep(5000);
+            }
             break;
           case CHUNK_RECEIVED:
+            // do cracking process
             //TODO: do cracking
             break;
           case ERROR:

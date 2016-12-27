@@ -71,6 +71,24 @@ public enum Setting {
     public Object parse(Object in) {
       return Boolean.valueOf(in.toString());
     }
+  },
+  HASHCAT_BINARY {
+    @Override
+    public Object getDefault() {
+      String arch = "32";
+      if(Utils.is64bitArchitecture()){
+        arch = "64";
+      }
+      if(System.getProperty("os.name").contains("Windows")){
+        return "hashcat" + arch + ".exe";
+      }
+      return "hashcat" + arch + ".bin";
+    }
+  
+    @Override
+    public Object parse(Object in) {
+      return in.toString();
+    }
   };
   
   public abstract Object getDefault();
