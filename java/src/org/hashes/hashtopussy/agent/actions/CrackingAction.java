@@ -68,7 +68,6 @@ public class CrackingAction extends AbstractAction {
     LoggerFactory.getLogger().log(LogLevel.NORMAL, "Start cracking chunk...");
     List<String> cracks = new ArrayList<>();
     while((line = br.readLine()) != null) {
-      LoggerFactory.getLogger().log(LogLevel.DEBUG, line);
       if(line.contains(":") && !line.startsWith("Watchdog") && !line.startsWith("Hashes") && !line.startsWith("Bitmaps") && !line.startsWith("Applicable") && !line.startsWith("Pars") && !line.startsWith("Cache") && !line.startsWith("Rules")){
         cracks.add(line);
         LoggerFactory.getLogger().log(LogLevel.DEBUG, "CRACK: " + line);
