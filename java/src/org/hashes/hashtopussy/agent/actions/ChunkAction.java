@@ -9,6 +9,7 @@ import org.hashes.hashtopussy.agent.exceptions.InvalidQueryException;
 import org.hashes.hashtopussy.agent.exceptions.InvalidUrlException;
 import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
 import org.hashes.hashtopussy.agent.objects.Chunk;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -29,7 +30,14 @@ public class ChunkAction extends AbstractAction {
     query.put(ChunkQuery.TASK.identifier(), clientStatus.getTask().getTaskId());
     Request request = new Request();
     request.setQuery(query);
-    JSONObject answer = request.execute();
+    JSONObject answer = null;
+    try {
+      answer = request.execute();
+    } catch (JSONException e){
+      LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
+      LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
+      return new JSONObject();
+    }
     if (answer.get(ChunkResponse.RESPONSE.identifier()) == null) {
       LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
       LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());

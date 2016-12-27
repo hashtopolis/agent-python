@@ -13,10 +13,7 @@ import org.hashes.hashtopussy.agent.exceptions.WrongResponseCodeException;
 import org.hashes.hashtopussy.agent.objects.Benchmark;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,36 +51,47 @@ public class BenchmarkAction extends AbstractAction {
     ProcessBuilder processBuilder = new ProcessBuilder();
     processBuilder.command(cmd);
     Process process = processBuilder.start();
-    try {
-      Thread.sleep(10000);
-    } catch (InterruptedException e) {
-      //TODO: handle exception
-      e.printStackTrace();
-    }
-    process.destroy();
+    OutputStream os = process.getOutputStream();
     InputStream is = process.getInputStream();
     InputStreamReader isr = new InputStreamReader(is);
     BufferedReader br = new BufferedReader(isr);
     String line;
-    String output = "";
-    while ((line = br.readLine()) != null) {
-      output += line;
+    long startTime = System.currentTimeMillis();
+    while (System.currentTimeMillis() - startTime < 10000) {
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        // nothing
+      }
+    }
+    LoggerFactory.getLogger().log(LogLevel.DEBUG, "Sending q to benchmark task..");
+    os.write('q');
+    os.flush();
+    String statusLine = "";
+    while((line = br.readLine()) != null) {
+      if(line.contains("STATUS")){
+        statusLine = line.substring(line.indexOf("STATUS"));
+      }
+    }
+    if(statusLine.length() == 0){
+      LoggerFactory.getLogger().log(LogLevel.WARN, "Benchmark was not able to get status info, you might need to increase benchmark time!");
+      return new JSONObject();
     }
     
-    //TODO: parse benchmarking result
-    String benchProgress = "";
-    String benchTotal = "";
-    String benchState = "";
+    String[] stat = statusLine.split("\t");
+    long totalProgress = Long.parseLong(stat[11]);
+    long benchProgress = Long.parseLong(stat[10]);
+    double bench = Math.round(benchProgress/(double)totalProgress*10000000000.d)/10000000.d;
     
     // send keyspace to server
     JSONObject query = new JSONObject();
     query.put(BenchmarkQuery.ACTION.identifier(), this.actionType.getString());
     query.put(BenchmarkQuery.TOKEN.identifier(), Settings.get(Setting.TOKEN));
     query.put(BenchmarkQuery.TASK.identifier(), clientStatus.getTask().getTaskId());
-    //TODO: benchmark sending should be changed to flexible way
-    query.put(BenchmarkQuery.PROGRESS.identifier(), benchProgress);
-    query.put(BenchmarkQuery.TOTAL.identifier(), benchTotal);
-    query.put(BenchmarkQuery.STATE.identifier(), benchState);
+    //TODO: set benchmarking type
+    query.put(BenchmarkQuery.BENCHTYPE.identifier(), "old");
+    //TODO: the formatting of the double value might be a bit hacky here
+    query.put(BenchmarkQuery.RESULT.identifier(), String.format("%.20f", bench).replaceAll("(\\.\\d+?)0*$", "$1"));
     Request request = new Request();
     request.setQuery(query);
     JSONObject answer = request.execute();

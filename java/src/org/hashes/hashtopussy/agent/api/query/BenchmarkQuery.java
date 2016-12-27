@@ -19,22 +19,16 @@ public enum BenchmarkQuery {
       return "taskId";
     }
   },
-  PROGRESS {
+  BENCHTYPE {
     @Override
     public String identifier() {
-      return "progress";
+      return "type";
     }
   },
-  TOTAL {
+  RESULT {
     @Override
     public String identifier() {
-      return "total";
-    }
-  },
-  STATE {
-    @Override
-    public String identifier() {
-      return "state";
+      return "result";
     }
   };
   

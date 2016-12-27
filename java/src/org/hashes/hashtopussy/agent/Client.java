@@ -60,9 +60,10 @@ public class Client {
             mapping.put(MappingType.CLIENTSTATUS, clientStatus);
             action.act(mapping);
             if (clientStatus.getTask() != null) {
-              //TODO: when task is received, we need to download files and hashlist
+              // when task is received, we need to download files and hashlist
               if(Utils.downloadsRequired(clientStatus)){
                 clientStatus.setCurrentState(ClientState.DOWNLOADS_REQUIRED);
+                break;
               }
               Utils.printTaskInfo(clientStatus.getTask());
               clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
@@ -85,8 +86,10 @@ public class Client {
             break;
           case BENCHMARK_REQUIRED:
             // do the benchmark
-            //TODO: do benchmark
-            clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
+            action = new BenchmarkAction();
+            mapping = new HashMap<>();
+            mapping.put(MappingType.CLIENTSTATUS, clientStatus);
+            action.act(mapping);
             break;
           case KEYSPACE_REQUIRED:
             // do keyspace calculation

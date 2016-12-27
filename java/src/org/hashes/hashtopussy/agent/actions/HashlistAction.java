@@ -42,7 +42,7 @@ public class HashlistAction extends AbstractAction {
     Request request = new Request();
     request.setQuery(query);
     JSONObject answer = request.execute(true, "hashlists/" + clientStatus.getTask().getHashlistId());
-    if(answer.get(HashlistResponse.RESPONSE.identifier()) == null){
+    if(answer.isNull(HashlistResponse.RESPONSE.identifier())){
       // hashlist was downloaded successfully
     }
     else{

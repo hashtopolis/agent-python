@@ -76,7 +76,7 @@ public class Request {
     int lastProgress = 0;
     while ((inputLine = in.readLine()) != null) {
       if(outputWriter != null) {
-        outputWriter.write(inputLine);
+        outputWriter.write(inputLine + "\n");
       }
       else {
         response.append(inputLine);
@@ -91,6 +91,7 @@ public class Request {
     if(outputWriter != null){
       outputWriter.flush();
       outputWriter.close();
+      response.append("{}");
     }
     
     return new JSONObject(response.toString());
