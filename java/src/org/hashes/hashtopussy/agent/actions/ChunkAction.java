@@ -30,16 +30,7 @@ public class ChunkAction extends AbstractAction {
     query.put(ChunkQuery.TASK.identifier(), clientStatus.getTask().getTaskId());
     Request request = new Request();
     request.setQuery(query);
-    JSONObject answer = null;
-    try {
-      answer = request.execute();
-    } catch (JSONException e){
-      LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
-      if(answer != null) {
-        LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
-      }
-      return new JSONObject();
-    }
+    JSONObject answer = answer = request.execute();
     if (answer.get(ChunkResponse.RESPONSE.identifier()) == null) {
       LoggerFactory.getLogger().log(LogLevel.FATAL, "Got invalid message from server!");
       LoggerFactory.getLogger().log(LogLevel.DEBUG, answer.toString());
@@ -59,9 +50,9 @@ public class ChunkAction extends AbstractAction {
       clientStatus.setCurrentState(ClientState.BENCHMARK_REQUIRED);
     } else {
       Chunk chunk = new Chunk(
-          Integer.parseInt((String) answer.get(ChunkResponse.CHUNK.identifier())),
-          Integer.parseInt((String) answer.get(ChunkResponse.SKIP.identifier())),
-          Integer.parseInt((String) answer.get(ChunkResponse.LENGTH.identifier()))
+          answer.getInt(ChunkResponse.CHUNK.identifier()),
+          answer.getLong(ChunkResponse.SKIP.identifier()),
+          answer.getLong(ChunkResponse.LENGTH.identifier())
       );
       clientStatus.setChunk(chunk);
       LoggerFactory.getLogger().log(LogLevel.NORMAL, "Got chunk from server");

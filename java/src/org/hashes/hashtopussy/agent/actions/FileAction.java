@@ -63,6 +63,7 @@ public class FileAction extends AbstractAction {
       cmd.add("7z");
       cmd.add("x");
       cmd.add("files/" + mapping.get(MappingType.FILENAME));
+      cmd.add("-ofiles");
       ProcessBuilder processBuilder = new ProcessBuilder();
       processBuilder.command(cmd);
       Process process = processBuilder.start();

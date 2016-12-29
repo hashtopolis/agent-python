@@ -30,7 +30,7 @@ public class RegisterAction extends AbstractAction {
     
     //TODO: determine registering values for uid, os, gpus, name
     String[] gpus = {"ATI HD 7970", "GTX 1070"};
-    query.put(RegisterQuery.NAME.identifier(), "Java Client");
+    query.put(RegisterQuery.NAME.identifier(), java.net.InetAddress.getLocalHost().getHostName());
     query.put(RegisterQuery.OS.identifier(), 0);
     query.put(RegisterQuery.UID.identifier(), "123-456-789");
     query.put(RegisterQuery.GPUS.identifier(), gpus);

@@ -107,6 +107,7 @@ public class Client {
             mapping = new HashMap<>();
             mapping.put(MappingType.CLIENTSTATUS, clientStatus);
             action.act(mapping);
+            clientStatus.setCurrentState(ClientState.TASK_RECEIVED);
             break;
           case DOWNLOADS_REQUIRED:
             // download file dependencies
@@ -123,8 +124,8 @@ public class Client {
             }
             break;
           case ERROR:
-            LoggerFactory.getLogger().log(LogLevel.FATAL, "Client is in ERROR state, aborting!");
-            System.exit(-1);
+            LoggerFactory.getLogger().log(LogLevel.FATAL, "Client is in ERROR state, resetting!");
+            clientStatus.reset();
         }
         Thread.sleep(100);
       }

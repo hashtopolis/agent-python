@@ -53,4 +53,11 @@ public class ClientStatus {
     }
     clientState = state;
   }
+  
+  public void reset(){
+    clientState = ClientState.LOGIN_DONE;
+    chunk = null;
+    task = null;
+    benchmark = null;
+  }
 }

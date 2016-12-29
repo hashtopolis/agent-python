@@ -94,6 +94,14 @@ public class Request {
       response.append("{}");
     }
     
-    return new JSONObject(response.toString());
+    try {
+      JSONObject ans = new JSONObject(response.toString());
+      return ans;
+    }
+    catch (JSONException e){
+      LoggerFactory.getLogger().log(LogLevel.FATAL, "Failed to parse message from server!");
+      LoggerFactory.getLogger().log(LogLevel.DEBUG, response.toString());
+      return new JSONObject();
+    }
   }
 }

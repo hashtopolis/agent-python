@@ -64,9 +64,11 @@ public class BenchmarkAction extends AbstractAction {
         // nothing
       }
     }
-    LoggerFactory.getLogger().log(LogLevel.DEBUG, "Sending q to benchmark task..");
-    os.write('q');
-    os.flush();
+    if(process.isAlive()) {
+      LoggerFactory.getLogger().log(LogLevel.DEBUG, "Sending q to benchmark task..");
+      os.write('q');
+      os.flush();
+    }
     String statusLine = "";
     while((line = br.readLine()) != null) {
       if(line.contains("STATUS")){
