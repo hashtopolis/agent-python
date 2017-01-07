@@ -15,6 +15,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.UUID;
 
 public class RegisterAction extends AbstractAction {
   
@@ -23,16 +25,30 @@ public class RegisterAction extends AbstractAction {
   }
   
   @Override
-  public JSONObject act(Map<MappingType, Object> mapping) throws WrongResponseCodeException, InvalidQueryException, InvalidUrlException, IOException {
+  public JSONObject act(Map<MappingType, Object> mapping) throws WrongResponseCodeException, InvalidQueryException, InvalidUrlException, IOException, InterruptedException {
     JSONObject query = new JSONObject();
     query.put(RegisterQuery.ACTION.identifier(), this.actionType.getString());
     query.put(RegisterQuery.VOUCHER.identifier(), mapping.get(MappingType.VOUCHER));
     
     //TODO: determine registering values for uid, os, gpus, name
-    String[] gpus = {"ATI HD 7970", "GTX 1070"};
+    //String[] gpus = {"ATI HD 7970", "GTX 1070"};
     query.put(RegisterQuery.NAME.identifier(), java.net.InetAddress.getLocalHost().getHostName());
-    query.put(RegisterQuery.OS.identifier(), 0);
-    query.put(RegisterQuery.UID.identifier(), "123-456-789");
+    String os = System.getProperty("os.name");
+    int osNumber = 0;
+    if(os.contains("Windows")){
+      osNumber = 1;
+    }
+    else if(os.contains("OS X")){
+      osNumber = 2;
+    }
+    query.put(RegisterQuery.OS.identifier(), osNumber);
+    query.put(RegisterQuery.UID.identifier(), UUID.randomUUID().toString());
+    System.out.println("Please enter the gpus of this agent, separated by comma:");
+    Scanner input = new Scanner(System.in);
+    while (!input.hasNext()) {
+      Thread.sleep(100);
+    }
+    String[] gpus = input.nextLine().split(",");
     query.put(RegisterQuery.GPUS.identifier(), gpus);
     
     Request request = new Request();

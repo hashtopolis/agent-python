@@ -1,6 +1,8 @@
 package org.hashes.hashtopussy.agent.common;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Logger {
   private PrintWriter writer;
@@ -22,7 +24,7 @@ public class Logger {
     if (this.level.ordinal() > level.ordinal()) {
       return;
     }
-    writer.println("[TIME][" + level + "]: " + message);
+    writer.println("[" + new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss.SSS").format(new Date()) + "][" + level + "]: " + message);
     writer.flush();
   }
 }

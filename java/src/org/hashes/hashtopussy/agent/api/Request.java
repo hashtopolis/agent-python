@@ -62,21 +62,32 @@ public class Request {
       throw new WrongResponseCodeException("Got response code: " + responseCode);
     }
     
-    FileWriter outputWriter = null;
+    DataOutputStream outputWriter = null;
     if(downloadPath != null){
       File output = new File(downloadPath);
-      outputWriter = new FileWriter(output);
+      outputWriter = new DataOutputStream(new FileOutputStream(output));
     }
     
     // read answer
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    InputStream in = con.getInputStream();
     String inputLine;
     StringBuffer response = new StringBuffer();
     int count = 0;
     int lastProgress = 0;
-    while ((inputLine = in.readLine()) != null) {
+    boolean json = false;
+    String jsonBuffer = "";
+    byte buffer[] = new byte[1024];
+    int len;
+    while ((len = in.read(buffer)) != -1) {
+      inputLine = new String(buffer, 0, len);
       if(outputWriter != null) {
-        outputWriter.append(inputLine + "\n");
+        if(inputLine.startsWith("{") && count == 0){
+          json = true;
+        }
+        if(json){
+          jsonBuffer += inputLine;
+        }
+        outputWriter.write(buffer, 0, len);
       }
       else {
         response.append(inputLine);
@@ -89,9 +100,13 @@ public class Request {
     }
     in.close();
     if(outputWriter != null){
-      outputWriter.flush();
       outputWriter.close();
-      response.append("{}");
+      if(json){
+        response.append(jsonBuffer);
+      }
+      else {
+        response.append("{}");
+      }
     }
     
     try {

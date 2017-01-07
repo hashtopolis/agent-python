@@ -46,6 +46,8 @@ public class BenchmarkAction extends AbstractAction {
         cmd.add(a);
       }
     }
+  
+    LoggerFactory.getLogger().log(LogLevel.DEBUG, "Benchmark measure: " + cmd.toString());
     
     // run hashcat command
     ProcessBuilder processBuilder = new ProcessBuilder();
@@ -53,6 +55,9 @@ public class BenchmarkAction extends AbstractAction {
     Process process = processBuilder.start();
     OutputStream os = process.getOutputStream();
     InputStream is = process.getInputStream();
+    InputStream eis = process.getErrorStream();
+    InputStreamReader eisr = new InputStreamReader(eis);
+    BufferedReader ebr = new BufferedReader(eisr);
     InputStreamReader isr = new InputStreamReader(is);
     BufferedReader br = new BufferedReader(isr);
     String line;
@@ -75,6 +80,15 @@ public class BenchmarkAction extends AbstractAction {
         statusLine = line.substring(line.indexOf("STATUS"));
       }
     }
+  
+    String error = "";
+    while ((line = ebr.readLine()) != null) {
+      error += line + "\n";
+    }
+    if(error.length() > 0){
+      LoggerFactory.getLogger().log(LogLevel.ERROR, "Keyspace measuring error: " + error);
+    }
+    
     if(statusLine.length() == 0){
       LoggerFactory.getLogger().log(LogLevel.WARN, "Benchmark was not able to get status info, you might need to increase benchmark time!");
       return new JSONObject();

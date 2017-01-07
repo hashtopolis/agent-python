@@ -51,8 +51,6 @@ public class CrackingAction extends AbstractAction {
       }
     }
     
-    System.out.println(cmd);
-    
     // run hashcat command
     ProcessBuilder processBuilder = new ProcessBuilder();
     processBuilder.command(cmd);

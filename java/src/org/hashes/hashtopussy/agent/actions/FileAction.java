@@ -1,13 +1,9 @@
 package org.hashes.hashtopussy.agent.actions;
 
-import jdk.jfr.events.FileReadEvent;
 import org.hashes.hashtopussy.agent.api.Request;
 import org.hashes.hashtopussy.agent.api.query.FileQuery;
-import org.hashes.hashtopussy.agent.api.query.HashlistQuery;
 import org.hashes.hashtopussy.agent.api.response.ErrorResponse;
 import org.hashes.hashtopussy.agent.api.response.FileResponse;
-import org.hashes.hashtopussy.agent.api.response.HashlistResponse;
-import org.hashes.hashtopussy.agent.api.response.RegisterResponse;
 import org.hashes.hashtopussy.agent.common.*;
 import org.hashes.hashtopussy.agent.exceptions.InvalidQueryException;
 import org.hashes.hashtopussy.agent.exceptions.InvalidUrlException;
@@ -16,7 +12,6 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

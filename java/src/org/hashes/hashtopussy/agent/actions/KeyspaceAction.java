@@ -39,8 +39,12 @@ public class KeyspaceAction extends AbstractAction {
     cmd.add("--machine-readable");
     cmd.add("--keyspace");
     List<String> arguments = Utils.splitArguments(clientStatus.getTask().getAttackCmd() + " " + clientStatus.getTask().getCmdPars());
+    //TODO: I don't like this, it's very hacky. Should be done better
     for(String a: arguments){
-      if(a.equals("#HL#")){
+      if(a.contains("--hash-type")){
+        continue;
+      }
+      else if(a.equals("#HL#")){
         //ignore, as this argument shouldn't be in command line on benchmark
       }
       else if(Arrays.asList(clientStatus.getTask().getFiles()).contains(a)){
@@ -51,18 +55,33 @@ public class KeyspaceAction extends AbstractAction {
       }
     }
     
+    LoggerFactory.getLogger().log(LogLevel.DEBUG, "Keyspace measure: " + cmd.toString());
+    
     // run hashcat command
     ProcessBuilder processBuilder = new ProcessBuilder();
     processBuilder.command(cmd);
     Process process = processBuilder.start();
     InputStream is = process.getInputStream();
+    InputStream eis = process.getErrorStream();
     InputStreamReader isr = new InputStreamReader(is);
+    InputStreamReader eisr = new InputStreamReader(eis);
     BufferedReader br = new BufferedReader(isr);
+    BufferedReader ebr = new BufferedReader(eisr);
     String line;
     String output = "";
     while ((line = br.readLine()) != null) {
       output = line;
     }
+    
+    String error = "";
+    while ((line = ebr.readLine()) != null) {
+      error += line + "\n";
+    }
+    if(error.length() > 0){
+      LoggerFactory.getLogger().log(LogLevel.ERROR, "Keyspace measuring error: " + error);
+    }
+    
+    LoggerFactory.getLogger().log(LogLevel.DEBUG, "Keyspace result: " + output);
     
     // send keyspace to server
     JSONObject query = new JSONObject();

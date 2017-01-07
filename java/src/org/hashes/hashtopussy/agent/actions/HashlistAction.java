@@ -47,6 +47,7 @@ public class HashlistAction extends AbstractAction {
     }
     else{
       LoggerFactory.getLogger().log(LogLevel.ERROR, "Download of hashlist failed: " + answer.toString());
+      new File("hashlists/" + clientStatus.getTask().getHashlistId()).delete();
       return new JSONObject();
     }
     
