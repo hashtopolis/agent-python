@@ -297,8 +297,7 @@ namespace hashtopussy
 
         public void stdOutTrigger(string stdOut)
         {
-            Console.WriteLine("Output triggered");
-            
+           
             if (!string.IsNullOrEmpty(stdOut))
             {
                 
@@ -313,7 +312,6 @@ namespace hashtopussy
                 }
                 else //Is a status output
                 {
-                    Console.WriteLine("================================================");
 
                     if (!stdOut.Contains("STATUS"))
                     {
