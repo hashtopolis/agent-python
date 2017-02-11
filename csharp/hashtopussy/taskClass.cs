@@ -35,6 +35,8 @@ namespace hashtopussy
         private string appPath;
         private string zapPath;
         private string tasksPath;
+        private int osID;
+
 
         private List<string> primaryCracked; //Stores the cracked hashes as they come
 
@@ -54,9 +56,10 @@ namespace hashtopussy
 
         }
 
-        public void setToken(string intoken)
+        public void setToken(string intoken, int os)
         {
             tok = intoken;
+            osID = os;
         }
 
         public class Task
@@ -464,10 +467,12 @@ namespace hashtopussy
                 token = tok
             };
 
+
+            _7zClass sevenZip = new _7zClass();
+            sevenZip.init7z(appPath, osID,tok );
+
             jsonClass jsC = new jsonClass();
-            
             string jsonString = jsC.toJson(get);
-            Console.WriteLine(jsonString);
             string ret = jsC.jsonSend(jsonString);
 
 
@@ -492,6 +497,19 @@ namespace hashtopussy
                         if (!File.Exists(actualFile))
                         {
                             getFile(fileItem);
+                           
+                            if (fileItem.ToLower().EndsWith(".7z"))
+                            {
+                                if (sevenZip.xtract(actualFile, filepath))
+                                {
+                                    // and save space by filling the original archive with short string
+                                    File.WriteAllText(actualFile, "UNPACKED");
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
                         }
                     }
 
