@@ -91,7 +91,7 @@ namespace hashtopussy
 
             taskClass tasks = new taskClass();
             tasks.setDirs(AppPath);
-            tasks.setToken(tokenHdl.retToken());
+            tasks.setToken(tokenHdl.retToken(),tokenHdl.getOS());
             
             while(true) //Keep waiting for 5 seconds and checking for tasks
             {
