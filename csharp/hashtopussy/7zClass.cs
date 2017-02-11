@@ -38,18 +38,22 @@ namespace hashtopussy
             {
                 binPath += ".exe";
             }
-
+            Console.WriteLine(binPath);
 
             if (!File.Exists(binPath))
             {
+                Console.WriteLine("Download 7zip binary");
                 jsonClass jsC = new jsonClass();
                 string jsonString = jsC.toJson(dlzip);
                 string ret = jsC.jsonSend(jsonString);
 
-                if (ret[0] != '{' && ret[ret.Length - 1] != '}')
+                if (jsC.isJsonSuccess(ret))
                 {
-                    File.WriteAllText(binPath, ret);
+                    string base64bin = jsC.getRetVar(ret, "executable");
+                    byte[] binArray = System.Convert.FromBase64String(base64bin);
+                    File.WriteAllBytes(binPath, binArray);
                 }
+
 
             }
 
