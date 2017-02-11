@@ -27,10 +27,7 @@ namespace hashtopussy
     class Program
     {
 
-
-
         public static string AppPath;
-
 
         static void initDirs()
         {
@@ -58,7 +55,6 @@ namespace hashtopussy
 
         static void Main(string[] args)
         {
-
 
 
             AppPath = AppDomain.CurrentDomain.BaseDirectory;

@@ -182,24 +182,24 @@ namespace hashtopussy
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
 
-            Process hcProc = new Process();
-            hcProc.StartInfo = pInfo;
+            Process hcProcBenchmark = new Process();
+            hcProcBenchmark.StartInfo = pInfo;
 
-            hcProc.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
+            hcProcBenchmark.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
 
             Console.WriteLine("Server requsted {0} second benchmark", benchSecs);
 
             try
             {
-                hcProc.Start();
-                hcProc.BeginErrorReadLine();
+                hcProcBenchmark.Start();
+                hcProcBenchmark.BeginErrorReadLine();
 
-                while (!hcProc.HasExited)
+                while (!hcProcBenchmark.HasExited)
                 {
-                    while (!hcProc.StandardOutput.EndOfStream)
+                    while (!hcProcBenchmark.StandardOutput.EndOfStream)
                     {
 
-                        string stdOut = hcProc.StandardOutput.ReadLine().TrimEnd();
+                        string stdOut = hcProcBenchmark.StandardOutput.ReadLine().TrimEnd();
                         stdOutBuild.AppendLine(stdOut);
                         if (stdOut.Contains("STATUS\t") && benchMethod !=2)
                         {
@@ -212,12 +212,12 @@ namespace hashtopussy
                         }
                     }
                 }
-                hcProc.StandardOutput.Close();
+                hcProcBenchmark.StandardOutput.Close();
 
             }
             finally
             {
-                hcProc.Close();
+                hcProcBenchmark.Close();
             }
 
             if (benchMethod == 2)
@@ -249,37 +249,36 @@ namespace hashtopussy
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
 
-            
-            hcProc.StartInfo = pInfo;
-
-            hcProc.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
+            Process hcProcKeyspace = new Process();
+            hcProcKeyspace.StartInfo = pInfo;
+            hcProcKeyspace.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
 
             try
             {
-                hcProc.Start();
-                hcProc.BeginErrorReadLine();
+                hcProcKeyspace.Start();
+                hcProcKeyspace.BeginErrorReadLine();
 
-                while (!hcProc.HasExited)
+                while (!hcProcKeyspace.HasExited)
                 {
-                    while (!hcProc.StandardOutput.EndOfStream)
+                    while (!hcProcKeyspace.StandardOutput.EndOfStream)
                     {
 
-                        string stdOut = hcProc.StandardOutput.ReadLine().TrimEnd();
+                        string stdOut = hcProcKeyspace.StandardOutput.ReadLine().TrimEnd();
                         stdOutBuild.AppendLine(stdOut);
                     }
                 }
-                hcProc.StandardOutput.Close();
+                hcProcKeyspace.StandardOutput.Close();
 
             }
             finally
             {
-                if (hcProc.ExitCode != 0)
+                if (hcProcKeyspace.ExitCode != 0)
                 {
                     Console.WriteLine("Something went wrong with keyspace measuring");
                 }
-                hcProc.CancelOutputRead();
-                hcProc.CancelErrorRead();
-                hcProc.Close();
+                hcProcKeyspace.CancelOutputRead();
+                hcProcKeyspace.CancelErrorRead();
+                hcProcKeyspace.Close();
             }
 
             parseKeyspace(stdOutBuild.ToString(),ref keySpace);
