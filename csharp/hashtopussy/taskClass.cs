@@ -487,7 +487,9 @@ namespace hashtopussy
 
                     foreach (string fileItem in files)
                     {
-                        if (!File.Exists(fileItem))
+                        string actualFile = Path.Combine(filepath, fileItem);
+                        attackcmd = attackcmd.Replace(fileItem, actualFile);
+                        if (!File.Exists(actualFile))
                         {
                             getFile(fileItem);
                         }
@@ -508,7 +510,7 @@ namespace hashtopussy
 
                     while (gotChunk != 0)
                     {
-                        getChunk(taskID);
+                        gotChunk = getChunk(taskID);
                     }
 
                     return true;
