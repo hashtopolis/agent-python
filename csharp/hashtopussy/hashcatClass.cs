@@ -17,6 +17,7 @@ namespace hashtopussy
         public Process hcProc = new Process();
 
         private string workingDir = "";
+        private string filesDir = "";
         private string hcDir = "hashcat";
         private string hcBin = "hashcat64.exe";
         private string separator = "";
@@ -52,6 +53,7 @@ namespace hashtopussy
         {
             hcDir = Path.Combine(fpath, "hashcat\\");
             workingDir = Path.Combine(fpath, "tasks\\");
+            filesDir = Path.Combine(fpath, "files\\");
         }
 
         public void runUpdate()
@@ -243,7 +245,7 @@ namespace hashtopussy
             string suffixArgs = " --session=hashtopussy --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = hcDir + hcBin;
-            pInfo.WorkingDirectory = workingDir;
+            pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
@@ -276,7 +278,6 @@ namespace hashtopussy
                 {
                     Console.WriteLine("Something went wrong with keyspace measuring");
                 }
-                hcProcKeyspace.CancelOutputRead();
                 hcProcKeyspace.CancelErrorRead();
                 hcProcKeyspace.Close();
             }
@@ -350,7 +351,7 @@ namespace hashtopussy
 
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = hcDir + hcBin;
-            pinfo.Arguments = hcArgs + " -d 3 --gpu-temp-disable --potfile-disable --quiet --restore-disable --session=hashtopus --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " --skip=" + skip + " --limit= " + size;
+            pinfo.Arguments = hcArgs + " -d 3 --gpu-temp-disable --potfile-disable --quiet --restore-disable --session=hashtopus --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " --skip=" + skip + " --limit=" + size;
             pinfo.WorkingDirectory = taskPath;
             pinfo.UseShellExecute = false;
             pinfo.RedirectStandardError = true;
