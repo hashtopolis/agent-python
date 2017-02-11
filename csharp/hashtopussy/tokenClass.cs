@@ -8,6 +8,12 @@ public class tokenClass
 {
     private string tokenPath;
     private string token;
+    private int osID;
+
+    public int getOS()
+    {
+        return osID;
+    }
 
     public void setPath(string path)
     {
@@ -43,14 +49,17 @@ public class tokenClass
         }
         String guid = Guid.NewGuid().ToString(); //Generate GUID
 
+
+        osID = 1; //Harc-code OS
+
         Register regist = new Register
             {
                 action = "register",
                 voucher = iVoucher,
-            //name = System.Environment.MachineName,
-            name = "Gabe",
-            uid = guid,
-                os = 1, //Hard-code windows
+                //name = System.Environment.MachineName,
+                name = "Gabe",
+                uid = guid,
+                os = osID, 
                 gpus = gpuList
             };
 
