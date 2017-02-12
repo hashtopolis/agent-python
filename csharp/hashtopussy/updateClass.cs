@@ -8,7 +8,9 @@ public class updateClass
 
     private string htpVersion;
     private string parentProc;
-    private string parentPath;
+    public string parentPath { set; get; }
+    public string[] arguments { set; get; }
+
     private static string launcherProcName = "HTPLauncherUpd.exe";
 
     public void setVersion(string versionID)
@@ -16,10 +18,6 @@ public class updateClass
         htpVersion = versionID;
     }
 
-    public void setParentPath(string strParentPath)
-    {
-        parentPath = strParentPath;
-    }
 
     public void setParent(string strParentProc)
     {
@@ -28,13 +26,28 @@ public class updateClass
 
     public void runUpdate()
 	{
-        string currentBin = AppDomain.CurrentDomain.FriendlyName;
+
+
+        string currentBin = Environment.GetCommandLineArgs()[0]; //Grab current bin name
         if (currentBin == launcherProcName) //Check if we are the launcher
         {
+
+            //If spawned bin, grab original passed name
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                if (arguments[i] != "debug")
+                {
+                    parentProc = (arguments[i]);
+                }
+                break;
+            }
+
+            //Looks like user isn't using custom name, use the default one
             if (string.IsNullOrEmpty(parentProc))
             {
                 parentProc = "hashtopussy.exe";
             }
+
             waitForProcess(parentProc);
             File.Copy(launcherProcName, parentProc, true);
             Process reSpawn = new Process();
@@ -42,8 +55,10 @@ public class updateClass
             reSpawn.Start();
             Environment.Exit(0);
         }
-        else //Ensure launcher is not running
+        else //We are either user-run bin or spanwed bin
         {
+
+
             waitForProcess(launcherProcName);
             if (File.Exists(launcherProcName))
             {

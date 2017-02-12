@@ -46,18 +46,14 @@ namespace hashtopussy
 
            
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
-            updateClass updater = new updateClass();
-            updater.setParentPath (AppPath);
-            for (int i = 0; i < args.Length; i++)
+            updateClass updater = new updateClass
             {
-                if (args[i] != "debug")
-                {
-                    updater.setParent(args[i]);
-                }
-            }
+                parentPath = AppPath,
+                arguments = args
+                
+            };
 
             updater.runUpdate();
-
 
             initDirs();
 
@@ -68,7 +64,6 @@ namespace hashtopussy
                 Console.WriteLine("Logged in to server");
             }
 
-            downloadClass dlHdl = new downloadClass();
             //Run code to self-update
 
             _7zClass zipper = new _7zClass
