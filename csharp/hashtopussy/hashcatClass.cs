@@ -31,7 +31,7 @@ namespace hashtopussy
         List<Packets> passedPackets;
 
 
-        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator)
+        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator, int osID)
         {
             passedPackets = refPacketlist;
             separator = passSeparator;
@@ -40,6 +40,15 @@ namespace hashtopussy
             hashlist = new List<string> { }; //New collection to store cracks
             crackedLock = new object();
             statusLock = new object();
+
+            if(osID ==0)
+            {
+                hcBin = "hashcat64.bin";
+            }
+            else
+            {
+                hcBin = "hashcat64.exe";
+            }
 
         }
          
@@ -174,7 +183,7 @@ namespace hashtopussy
             {
                 suffixExtra = " --progress-only";
             }
-            string suffixArgs = "  -d 3 --runtime=5 --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --gpu-temp-disable --weak=0" + suffixExtra;
+            string suffixArgs = " --runtime=5 --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --gpu-temp-disable --weak=0" + suffixExtra;
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = hcDir + hcBin;
@@ -353,7 +362,7 @@ namespace hashtopussy
 
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = hcDir + hcBin;
-            pinfo.Arguments = hcArgs + " -d 3 --gpu-temp-disable --potfile-disable --quiet --restore-disable --session=hashtopus --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " --skip=" + skip + " --limit=" + size;
+            pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopus --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " --skip=" + skip + " --limit=" + size;
             pinfo.WorkingDirectory = filesDir;
             pinfo.UseShellExecute = false;
             pinfo.RedirectStandardError = true;
