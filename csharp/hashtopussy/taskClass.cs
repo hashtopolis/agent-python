@@ -336,7 +336,7 @@ namespace hashtopussy
 
                         List<Packets> uploadPackets = new List<Packets>();
 
-                        hcClass.setDirs(appPath);
+                        hcClass.setDirs(appPath,osID);
                         hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString()); 
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
@@ -346,7 +346,7 @@ namespace hashtopussy
                         return 1;
 
                     case "keyspace_required":
-                        hcClass.setDirs(appPath);
+                        hcClass.setDirs(appPath,osID);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, ""); //Remove out the #HL#
                         hcClass.setArgs(attackcmdMod);
@@ -373,7 +373,7 @@ namespace hashtopussy
                         return 0;
 
                     case "benchmark":
-                        hcClass.setDirs(appPath);
+                        hcClass.setDirs(appPath, osID);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + hashpath + hashlistID.ToString() + "\""); //Add the path to Hashlist
                         hcClass.setArgs(attackcmdMod);

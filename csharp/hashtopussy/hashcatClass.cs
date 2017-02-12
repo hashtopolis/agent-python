@@ -31,7 +31,7 @@ namespace hashtopussy
         List<Packets> passedPackets;
 
 
-        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator, int osID)
+        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator)
         {
             passedPackets = refPacketlist;
             separator = passSeparator;
@@ -41,14 +41,6 @@ namespace hashtopussy
             crackedLock = new object();
             statusLock = new object();
 
-            if(osID ==0)
-            {
-                hcBin = "hashcat64.bin";
-            }
-            else
-            {
-                hcBin = "hashcat64.exe";
-            }
 
         }
          
@@ -58,11 +50,20 @@ namespace hashtopussy
             hcArgs = args;
         }
 
-        public void setDirs(string fpath)
+        public void setDirs(string fpath, int osID)
         {
             hcDir = Path.Combine(fpath, "hashcat\\");
             workingDir = Path.Combine(fpath, "tasks\\");
             filesDir = Path.Combine(fpath, "files\\");
+
+            if (osID == 0)
+            {
+                hcBin = "hashcat64.bin";
+            }
+            else
+            {
+                hcBin = "hashcat64.exe";
+            }
         }
 
         public void runUpdate()
