@@ -4,28 +4,33 @@ using System.IO;
 using System.Management;
 
 
-public class tokenClass
+public class registerClass
 {
     private string tokenPath;
-    private string token;
-    private int osID;
+    public string tokenID { get; set; }
+    public int osID { get; set; }
 
-    public int getOS()
+    //Detect whether we are running under mono
+    private void setOS()
     {
-        return osID;
+        if (Type.GetType("Mono.Runtime") != null)
+        {
+            Console.WriteLine("System is Linux");
+            osID = 0;
+        }
+        else
+        {
+            Console.WriteLine("System is Windows");
+            osID = 1;
+        }
     }
 
     public void setPath(string path)
     {
         tokenPath = Path.Combine(path,"token");
     }
-   
-    public string retToken()
-    {
-        return token;
-    }
 
-    public class Register
+    private class Register
     {
         public string action { get; set; }
         public string voucher { get; set; }
@@ -38,7 +43,7 @@ public class tokenClass
     private bool registerAgent(string iVoucher)
     {
         jsonClass jsC = new jsonClass();
-
+        
         ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Description FROM Win32_VideoController"); //Prep object to query windows GPUs
         List<string> gpuList;
 
@@ -50,7 +55,7 @@ public class tokenClass
         String guid = Guid.NewGuid().ToString(); //Generate GUID
 
 
-        osID = 1; //Harc-code OS
+        setOS();
 
         Register regist = new Register
             {
@@ -68,8 +73,8 @@ public class tokenClass
 
             if (jsC.isJsonSuccess(ret))
             {
-                token = jsC.getRetVar(ret,"token");
-                File.WriteAllText(tokenPath, token);
+                tokenID = jsC.getRetVar(ret,"token");
+                File.WriteAllText(tokenPath, tokenID);
                 return true;
             }
             return false;
@@ -90,21 +95,19 @@ public class tokenClass
         }
         else
         {
-            Console.WriteLine("Token Loaded");
-
-
+            Console.WriteLine("Existing token found");
             jsonClass jsC = new jsonClass();
 
             var arrayKey = new Dictionary<string, string>
                {
                    { "action", "login" },
-                   { "token",token},
+                   { "token",tokenID},
             };
             
             string jsonString = jsC.toJson(arrayKey);
             Console.WriteLine(jsonString);
             string ret = jsC.jsonSend(jsonString);
-           
+
             if (jsC.isJsonSuccess(ret))
             {
                 return true;
@@ -128,8 +131,8 @@ public class tokenClass
     {
         if (File.Exists(tokenPath))
         {
-            token = File.ReadAllText(tokenPath);
-            if (token == "")
+            tokenID = File.ReadAllText(tokenPath);
+            if (tokenID == "")
             {
                 File.Delete(tokenPath);
                 return false;
@@ -139,6 +142,7 @@ public class tokenClass
         {
             return false;
         }
+        setOS();
         return true;
     }
 
