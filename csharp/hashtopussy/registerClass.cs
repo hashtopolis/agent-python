@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Management;
-
+using System.Diagnostics;
 
 public class registerClass
 {
@@ -43,26 +43,74 @@ public class registerClass
     private bool registerAgent(string iVoucher)
     {
         jsonClass jsC = new jsonClass();
-        
+
+        setOS();
+
+        string machineName = "default";
+
         ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Description FROM Win32_VideoController"); //Prep object to query windows GPUs
         List<string> gpuList;
 
         gpuList = new List<string> { };
-        foreach (ManagementObject mo in searcher.Get())
+
+        if (osID == 1)
         {
-            gpuList.Add(mo.Properties["Description"].Value.ToString().Trim()); //Add all GPU names to list
+            foreach (ManagementObject mo in searcher.Get())
+            {
+                gpuList.Add(mo.Properties["Description"].Value.ToString().Trim()); //Add all GPU names to list
+            }
+
+
+            machineName = System.Environment.MachineName;
         }
+        else if(osID ==  0)
+        {
+            ProcessStartInfo pinfo = new ProcessStartInfo();
+            pinfo.FileName = "lspci";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardOutput = true;
+            Process lspci = new Process();
+            lspci.StartInfo = pinfo;
+            lspci.Start();
+            while (!lspci.HasExited)
+            {
+                // dig through the output
+                while (!lspci.StandardOutput.EndOfStream)
+                {
+                    string vystup = lspci.StandardOutput.ReadLine();
+                    int pozi = vystup.IndexOf("VGA compatible controller: ");
+                    if (pozi != -1)
+                    {
+                        gpuList.Add(vystup.Substring(pozi + 27));
+                    }
+                }
+            }
+
+            pinfo = new ProcessStartInfo();
+            pinfo.FileName = "uname";
+            pinfo.Arguments = "-n";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardOutput = true;
+            Process uname = new Process();
+            uname.StartInfo = pinfo;            uname.Start();
+            while (!uname.HasExited)
+            {
+                // dig through the output
+                while (!uname.StandardOutput.EndOfStream)
+                {
+                    string vystup = uname.StandardOutput.ReadLine();
+                    machineName = vystup;
+                }
+            }
+        }
+
         String guid = Guid.NewGuid().ToString(); //Generate GUID
-
-
-        setOS();
 
         Register regist = new Register
             {
                 action = "register",
                 voucher = iVoucher,
-                //name = System.Environment.MachineName,
-                name = "Gabe",
+                name = machineName,
                 uid = guid,
                 os = osID, 
                 gpus = gpuList
