@@ -1,17 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Net;
-using System.Web.Script.Serialization;
-using System.Dynamic;
-using System.Management;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace hashtopussy
@@ -56,7 +45,7 @@ namespace hashtopussy
         static void Main(string[] args)
         {
 
-
+           
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
             //Directory.SetCurrentDirectory(AppPath);
             //Console.Write(AppPath);
@@ -75,9 +64,9 @@ namespace hashtopussy
 
             initDirs();
 
-            tokenClass tokenHdl = new tokenClass();
-            tokenHdl.setPath( AppPath);
-            if (tokenHdl.loginAgent())
+            registerClass client = new registerClass();
+            client.setPath( AppPath);
+            if (client.loginAgent())
             {
                 Console.WriteLine("Logged in to server");
             }
@@ -85,14 +74,25 @@ namespace hashtopussy
             downloadClass dlHdl = new downloadClass();
             //Run code to self-update
 
-            _7zClass zipper = new _7zClass();
-            zipper.init7z(AppPath, 1, tokenHdl.retToken());
+            _7zClass zipper = new _7zClass
+            {
+                tokenID = client.tokenID,
+                osID = client.osID,
+                appPath = AppPath
+            };
+
+            zipper.init7z(AppPath);
 
 
-            taskClass tasks = new taskClass();
+            taskClass tasks = new taskClass
+            {
+                tokenID = client.tokenID,
+                osID = client.osID,
+                sevenZip = zipper
+            };
+                
             tasks.setDirs(AppPath);
-            tasks.setToken(tokenHdl.retToken(),tokenHdl.getOS());
-            
+
             while(true) //Keep waiting for 5 seconds and checking for tasks
             {
                 Thread.Sleep(5000);

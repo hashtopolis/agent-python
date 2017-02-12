@@ -71,7 +71,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="taskClass.cs" />
-    <Compile Include="tokenClass.cs" />
+    <Compile Include="registerClass.cs" />
     <Compile Include="updateClass.cs" />
   </ItemGroup>
   <ItemGroup>
