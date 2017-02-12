@@ -54,13 +54,13 @@ namespace hashtopussy
 
         }
 
-        public class Task
+        private class Task
         {
             public string action { get; set; }
             public string token { get; set; }
         }
 
-        public class FileProps
+        private class FileProps
         {
             public string action { get; set; }
             public string token { get; set; }
@@ -69,21 +69,21 @@ namespace hashtopussy
         }
 
 
-        public class chunkProps
+        private class chunkProps
         {
             public string action = "chunks";
             public string token { get; set; }
             public int taskId { get; set; }
         }
 
-        public class hashlistProps
+        private class hashlistProps
         {
             public string action = "hashes";
             public string token { get; set; }
             public int hashlist { get; set; }
         }
 
-        public class keyspaceProps
+        private class keyspaceProps
         {
             public string action = "keyspace";
             public string token { get; set; }
@@ -91,7 +91,7 @@ namespace hashtopussy
             public long keyspace { get; set; }
         }
 
-        public class benchProps
+        private class benchProps
         {
             public string action = "bench";
             public string token { get; set; }
@@ -100,7 +100,7 @@ namespace hashtopussy
             public string result { get; set; }
         }
 
-        public class solveProps
+        private class solveProps
         {
             public string action = "solve";
             public string token { get; set; }
