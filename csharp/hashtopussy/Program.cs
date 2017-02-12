@@ -10,7 +10,6 @@ namespace hashtopussy
     {
         public Dictionary<string, double> statusPackets;
         public List<string> crackedPackets;
-        public bool stop;
     }
 
     class Program
@@ -47,19 +46,17 @@ namespace hashtopussy
 
            
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
-            //Directory.SetCurrentDirectory(AppPath);
-            //Console.Write(AppPath);
-            updateClass updateHdl = new updateClass();
-            updateHdl.setParentPath (AppPath);
+            updateClass updater = new updateClass();
+            updater.setParentPath (AppPath);
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] != "debug")
                 {
-                    updateHdl.setParent(args[i]);
+                    updater.setParent(args[i]);
                 }
             }
 
-            updateHdl.runUpdate();
+            updater.runUpdate();
 
 
             initDirs();
@@ -81,8 +78,7 @@ namespace hashtopussy
                 appPath = AppPath
             };
 
-            zipper.init7z(AppPath);
-
+            zipper.init7z();
 
             taskClass tasks = new taskClass
             {

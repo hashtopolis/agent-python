@@ -481,7 +481,7 @@ namespace hashtopussy
                     foreach (string fileItem in files)
                     {
                         string actualFile = Path.Combine(filepath, fileItem);
-                        attackcmd = attackcmd.Replace(fileItem, actualFile);
+                        //attackcmd = attackcmd.Replace(fileItem, actualFile);
                         if (!File.Exists(actualFile))
                         {
                             getFile(fileItem);
