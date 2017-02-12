@@ -84,10 +84,18 @@ namespace hashtopussy
                 
             tasks.setDirs(AppPath);
 
+            int backDown = 5;
             while(true) //Keep waiting for 5 seconds and checking for tasks
             {
-                Thread.Sleep(5000);
-                tasks.getTask();
+                Thread.Sleep(backDown * 1000);
+                if (tasks.getTask())
+                {
+                    backDown = 5;
+                }
+                if (backDown <30)
+                {
+                    backDown++;
+                }
             }
 
 
