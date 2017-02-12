@@ -2,8 +2,6 @@
 using System.Collections;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace hashtopussy
@@ -12,7 +10,8 @@ namespace hashtopussy
     {
 
         hashcatClass hcClass = new hashcatClass();
-        private string tok;
+        
+        
         private int taskID;
         private int wait;
         private string attackcmd;
@@ -35,14 +34,13 @@ namespace hashtopussy
         private string appPath;
         private string zapPath;
         private string tasksPath;
-        private int osID;
 
+        public string tokenID { get; set; }
+        public int osID { get; set; }
+        public _7zClass sevenZip { get; set; }
 
         private List<string> primaryCracked; //Stores the cracked hashes as they come
-
-        private object primaryLock = new object(); //Locks to prevent double handling of the lists
-   
-        private object packetLock = new object();
+        private object packetLock = new object(); //Lock to prevent the packetList from being edited as it's passed between the periodicUpload thread and the stdOut reader in hashcatClass
 
   
 
@@ -54,12 +52,6 @@ namespace hashtopussy
             zapPath = Path.Combine(fpath, "hashlists\\zaps");
             tasksPath = Path.Combine(fpath, "tasks\\");
 
-        }
-
-        public void setToken(string intoken, int os)
-        {
-            tok = intoken;
-            osID = os;
         }
 
         public class Task
@@ -138,7 +130,7 @@ namespace hashtopussy
 
             hashlistProps hProps = new hashlistProps
             {
-                token = tok,
+                token = tokenID,
                 hashlist = inTask
             };
 
@@ -193,7 +185,7 @@ namespace hashtopussy
                                     batchList.AddRange(packets.crackedPackets); //Add every-single crack from queue into single list
                                 }
                                 lastPacketNum = uploadPackets.Count - 1;
-                                sProps.token = tok;
+                                sProps.token = tokenID;
                                 sProps.chunk = chunkNo;
                                 sProps.keyspaceProgress = uploadPackets[lastPacketNum].statusPackets["CURKU"];
                                 sProps.progress = uploadPackets[lastPacketNum].statusPackets["PROGRESS1"];
@@ -208,7 +200,7 @@ namespace hashtopussy
                                 Console.WriteLine("Upload queue {0}", uploadPackets.Count);
 
 
-                                sProps.token = tok;
+                                sProps.token = tokenID;
                                 sProps.chunk = chunkNo;
                                 sProps.keyspaceProgress = uploadPackets[0].statusPackets["CURKU"];
                                 sProps.progress = uploadPackets[0].statusPackets["PROGRESS1"];
@@ -309,7 +301,7 @@ namespace hashtopussy
             chunkProps cProps = new chunkProps
             {
                 action = "chunk",
-                token = tok,
+                token = tokenID,
                 taskId = inTask
             };
 
@@ -364,7 +356,7 @@ namespace hashtopussy
 
                         keyspaceProps kProps = new keyspaceProps
                         {
-                            token = tok,
+                            token = tokenID,
                             taskId = taskID,
                             keyspace = calcKeyspace
                         };
@@ -393,7 +385,7 @@ namespace hashtopussy
 
                         benchProps bProps = new benchProps
                         {
-                            token = tok,
+                            token = tokenID,
                             taskId = taskID,
                             type = "speed",
                             result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString()
@@ -425,7 +417,7 @@ namespace hashtopussy
             FileProps get = new FileProps
             {
                 action = "file",
-                token = tok,
+                token = tokenID,
                 task = taskID,
                 file = fileName
             };
@@ -464,12 +456,8 @@ namespace hashtopussy
             Task get = new Task
             {
                 action = "task",
-                token = tok
+                token = tokenID
             };
-
-
-            _7zClass sevenZip = new _7zClass();
-            sevenZip.init7z(appPath, osID,tok );
 
             jsonClass jsC = new jsonClass();
             string jsonString = jsC.toJson(get);
@@ -502,7 +490,6 @@ namespace hashtopussy
                             {
                                 if (sevenZip.xtract(actualFile, filepath))
                                 {
-                                    // and save space by filling the original archive with short string
                                     File.WriteAllText(actualFile, "UNPACKED");
                                 }
                                 else

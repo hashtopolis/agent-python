@@ -6,7 +6,6 @@ using System.Diagnostics;
 namespace hashtopussy
 {
 
-
     class _7zClass
     {
 
@@ -17,24 +16,17 @@ namespace hashtopussy
             public string token { get; set; }
         }
 
-        int osID = 0;
-        string binPath = "";
-        string appPath = "";
+        public int osID { get; set; }
+        public string tokenID { get; set; }
+        public string appPath { get; set; }
 
-        public Boolean init7z(string path, int os, string tokenString)
+        string binPath = "";
+
+        public Boolean init7z()
         {
 
-            osID = os;
-            appPath = path;
-
-            dlProps dlzip = new dlProps
-            {
-                token = tokenString
-            };
-
-
-            binPath = Path.Combine(path, "7zr");
-            if (os == 1)
+            binPath = Path.Combine(appPath, "7zr");
+            if (osID == 1)
             {
                 binPath += ".exe";
             }
@@ -44,6 +36,13 @@ namespace hashtopussy
             {
                 Console.WriteLine("Download 7zip binary");
                 jsonClass jsC = new jsonClass();
+
+                dlProps dlzip = new dlProps
+                {
+                    token = tokenID
+                };
+
+
                 string jsonString = jsC.toJson(dlzip);
                 string ret = jsC.jsonSend(jsonString);
 
@@ -53,7 +52,6 @@ namespace hashtopussy
                     byte[] binArray = System.Convert.FromBase64String(base64bin);
                     File.WriteAllBytes(binPath, binArray);
                 }
-
 
             }
 
