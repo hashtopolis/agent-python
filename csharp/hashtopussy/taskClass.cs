@@ -47,10 +47,10 @@ namespace hashtopussy
         public void setDirs(string fpath)
         {
             appPath = fpath;
-            filepath = Path.Combine(fpath, "files\\");
+            filepath = Path.Combine(fpath, "files");
             hashpath = Path.Combine(fpath, "hashlists\\");
             zapPath = Path.Combine(fpath, "hashlists\\zaps");
-            tasksPath = Path.Combine(fpath, "tasks\\");
+            tasksPath = Path.Combine(fpath, "tasks");
 
         }
 
@@ -116,7 +116,8 @@ namespace hashtopussy
         public Boolean getHashes(int inTask)
         {
 
-            if (!File.Exists(hashpath + inTask.ToString()))
+            string actualHLpath = Path.Combine(hashpath + inTask.ToString());
+            if (!File.Exists(actualHLpath))
             {
                 Console.WriteLine("Downloading hashlist for this task");
             }
@@ -141,7 +142,7 @@ namespace hashtopussy
             //Check if is json string, a nasty workaround copies from the javaclient to detect whether the return string is json vs hl. Should probably use a proper detector
             if (ret[0] != '{' && ret[ret.Length-1] != '}')
             {
-                File.WriteAllText(hashpath + inTask.ToString(), ret);
+                File.WriteAllText(actualHLpath, ret);
                 Directory.CreateDirectory(Path.Combine(hashpath, "zaps" + inTask.ToString()));
             }
             else
@@ -332,12 +333,13 @@ namespace hashtopussy
 
                 string argBuilder = attackcmd;
                 string attackcmdMod = " " + cmdpars + " ";
+                string actualHLpath = Path.Combine(hashpath, hashlistID.ToString());
 
                 switch (status)
                 {
                     case "OK":
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
-                        attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + hashpath + hashlistID.ToString() + "\" "); //Add the path to Hashlist
+                        attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\" "); //Add the path to Hashlist
                         attackcmdMod += " --outfile-check-dir=\"" + zapPath + hashlistID.ToString() + "\" "; //Add the zap path to the commands
 
                         hcClass.setArgs(attackcmdMod);
@@ -388,7 +390,7 @@ namespace hashtopussy
                     case "benchmark":
                         hcClass.setDirs(appPath, osID);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
-                        attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + hashpath + hashlistID.ToString() + "\""); //Add the path to Hashlist
+                        attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\""); //Add the path to Hashlist
                         hcClass.setArgs(attackcmdMod);
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1

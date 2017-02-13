@@ -88,6 +88,8 @@ namespace hashtopussy
             while(true) //Keep waiting for 5 seconds and checking for tasks
             {
                 Thread.Sleep(backDown * 1000);
+
+
                 if (tasks.getTask())
                 {
                     backDown = 5;
