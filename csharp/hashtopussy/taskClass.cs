@@ -214,6 +214,7 @@ namespace hashtopussy
 
                             jsonString = jsC.toJson(sProps);
                             Console.WriteLine(jsonString);
+
                             ret = jsC.jsonSend(jsonString);
                             if (jsC.isJsonSuccess(ret))
                             {
@@ -238,6 +239,11 @@ namespace hashtopussy
 
                             else //We received an error from the server, terminate the run
                             {
+
+                                Console.WriteLine("Interruption occured");
+                                continue; //Repeat  send on error
+
+                                /*
                                 if (!hcClass.hcProc.HasExited)
                                 {
                                     Console.WriteLine("Terminating chunk due to interruption");
@@ -246,8 +252,8 @@ namespace hashtopussy
                                     hcClass.hcProc.Kill();
                                     run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
                                     Console.WriteLine("Terminating chunk due to interruption");
-
                                 }
+                                */
 
                             }
 
@@ -281,12 +287,17 @@ namespace hashtopussy
                         catch (Exception e)
                         {
                             Console.WriteLine(e.Message);
+
+                            /*
                             hcClass.hcProc.CancelOutputRead();
                             hcClass.hcProc.CancelErrorRead();
                             if (!hcClass.hcProc.HasExited)
                             {
                                 hcClass.hcProc.Kill();
                             }
+                            */
+
+                            continue;
                             
                         }
 
@@ -295,17 +306,19 @@ namespace hashtopussy
             }
         }
 
+        private jsonClass jsC = new jsonClass();
+
         public int getChunk(int inTask)
         {
 
-            chunkProps cProps = new chunkProps
+             chunkProps cProps = new chunkProps
             {
                 action = "chunk",
                 token = tokenID,
                 taskId = inTask
             };
 
-            jsonClass jsC = new jsonClass();
+            
             primaryCracked = new List<string> { };
 
             string jsonString = jsC.toJson(cProps);
@@ -449,6 +462,8 @@ namespace hashtopussy
             Int64 fSize = new FileInfo(hashpath + hashlistID.ToString()).Length;
             return fSize;
         }
+
+
         public Boolean getTask()
         {
 
@@ -461,7 +476,8 @@ namespace hashtopussy
 
             jsonClass jsC = new jsonClass();
             string jsonString = jsC.toJson(get);
-            string ret = jsC.jsonSend(jsonString);
+             string   ret = jsC.jsonSend(jsonString);
+
 
 
             if (jsC.isJsonSuccess(ret))
