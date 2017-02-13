@@ -27,7 +27,7 @@ namespace hashtopussy
         private object packetLock;
         private object crackedLock;
         private object statusLock;
-        private int count = 0;
+
 
         List<Packets> passedPackets;
 
