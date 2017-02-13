@@ -380,16 +380,16 @@ namespace hashtopussy
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
 
-                        hcClass.runBenchmark(2,5,ref collection);
+                        hcClass.runBenchmark(1,5,ref collection);
 
 
                         benchProps bProps = new benchProps
                         {
                             token = tokenID,
                             taskId = taskID,
-                            type = "speed",
-                            result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString()
-                            //result = collection["PROGRESS_DIV"].ToString()
+                            type = "run",
+                            //result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString()
+                            result = collection["PROGRESS_DIV"].ToString("0." + new string('#', 100))
 
                         };
 

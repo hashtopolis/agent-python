@@ -13,8 +13,8 @@ namespace hashtopussy
 {
     class hashcatClass
     {
-        public List<string> hashlist;
-        public Process hcProc = new Process();
+        public List<string> hashlist = new List<string> { }; //New collection to store cracks
+        public Process hcProc;
 
         private string workingDir = "";
         private string filesDir = "";
@@ -27,6 +27,7 @@ namespace hashtopussy
         private object packetLock;
         private object crackedLock;
         private object statusLock;
+        private int count = 0;
 
         List<Packets> passedPackets;
 
@@ -37,7 +38,6 @@ namespace hashtopussy
             separator = passSeparator;
             packetLock = objpacketLock;
 
-            hashlist = new List<string> { }; //New collection to store cracks
             crackedLock = new object();
             statusLock = new object();
 
@@ -79,7 +79,9 @@ namespace hashtopussy
         public static void parseStatus1(string line,ref  Dictionary<string, double> collection)
         {
 
+
             Console.WriteLine(line);
+
             string[] items = line.Split('\t');
             double speedData = 0;
             double countStep = 0;
@@ -184,7 +186,7 @@ namespace hashtopussy
             {
                 suffixExtra = " --progress-only";
             }
-            string suffixArgs = " --runtime=5 --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --gpu-temp-disable --weak=0" + suffixExtra;
+            string suffixArgs = " --runtime=5 --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --weak=0" + suffixExtra;
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = hcDir + hcBin;
@@ -310,7 +312,7 @@ namespace hashtopussy
 
         public void stdOutTrigger(string stdOut)
         {
-           
+
             if (!string.IsNullOrEmpty(stdOut))
             {
                 
@@ -371,8 +373,10 @@ namespace hashtopussy
 
             Console.WriteLine(pinfo.FileName +" "+ pinfo.Arguments);
 
+            hcProc = new Process { };
             hcProc.StartInfo = pinfo;
             // create event handlers for normal and error output
+
             hcProc.OutputDataReceived += (sender, argu) => stdOutTrigger(argu.Data);
             hcProc.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
             hcProc.EnableRaisingEvents = true;
@@ -384,6 +388,8 @@ namespace hashtopussy
             hcProc.CancelErrorRead();
             hcProc.CancelOutputRead();
             Console.WriteLine("Attack finished");
+
+            hcProc.Dispose();
 
             return true;
 

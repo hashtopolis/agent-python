@@ -17,26 +17,36 @@ public class jsonClass
     public Boolean isJsonSuccess(string jsonString)
     {
         Console.WriteLine(jsonString);
-        var jss = new JavaScriptSerializer();
-        var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
 
-        if (dict.ContainsKey("response"))
+        try
         {
-            if (dict["response"] == "SUCCESS")
+            var jss = new JavaScriptSerializer();
+            var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
+
+            if (dict.ContainsKey("response"))
             {
-                return true;
-            }
-            else
-            {
-                Console.WriteLine(dict["response"]);
-                if (dict.ContainsKey("message"))
+                if (dict["response"] == "SUCCESS")
                 {
-                    Console.WriteLine(dict["message"]);
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine(dict["response"]);
+                    if (dict.ContainsKey("message"))
+                    {
+                        Console.WriteLine(dict["message"]);
+                    }
                 }
             }
+
+            return false;
+        }
+        catch
+        {
+            Console.WriteLine("Empty string for success check");
+            return false;
         }
 
-        return false;
     }
 
     //Returns variable from json string, values are casted to string
@@ -94,6 +104,7 @@ public class jsonClass
         var request = (HttpWebRequest)WebRequest.Create("https://alpha.hashes.org/src/api/server.php");
         request.ContentType = "application/x-www-form-urlencoded";
         request.Method = "POST";
+        request.KeepAlive = false;
         int randomTime = 0;
 
         HttpWebResponse response = null;
