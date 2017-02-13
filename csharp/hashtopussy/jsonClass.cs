@@ -11,7 +11,7 @@ public class jsonClass
 {
 
     Random rnd = new Random(Guid.NewGuid().GetHashCode()); //init and seed the random generator for use in re-try backdown 
-
+    JavaScriptSerializer jss = new JavaScriptSerializer();
     //Checks if json string has success response
     //Will print the error messages on fail
     public Boolean isJsonSuccess(string jsonString)
@@ -20,8 +20,8 @@ public class jsonClass
 
         try
         {
-            var jss = new JavaScriptSerializer();
-            var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
+            
+            Dictionary<string, dynamic> dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
 
             if (dict.ContainsKey("response"))
             {
@@ -38,7 +38,6 @@ public class jsonClass
                     }
                 }
             }
-
             return false;
         }
         catch
@@ -52,7 +51,7 @@ public class jsonClass
     //Returns variable from json string, values are casted to string
     public string getRetVar(string jsonString, string itemVar)
     {
-        var jss = new JavaScriptSerializer();
+
         var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
         if (dict.ContainsKey(itemVar))
         {
@@ -66,7 +65,7 @@ public class jsonClass
     //This is probably redundant as we can use the below function gerRetList to return a better typed array
     public ArrayList getRetArray(string jsonString, string itemVar)
     {
-        var jss = new JavaScriptSerializer();
+
         var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
         if (dict.ContainsKey(itemVar))
         {
@@ -79,7 +78,7 @@ public class jsonClass
     //Return json string array to list with type string
     public List<string> getRetList(string jsonString, string itemVar)
     {
-        var jss = new JavaScriptSerializer();
+
         var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
         if (dict.ContainsKey(itemVar))
         {
@@ -93,7 +92,7 @@ public class jsonClass
     //Converts array=>key to jason string format
     public string toJson(object obj)
     {
-        var jss = new JavaScriptSerializer();
+
         var json = jss.Serialize(obj);
         return json;
     }
@@ -105,6 +104,7 @@ public class jsonClass
         request.ContentType = "application/x-www-form-urlencoded";
         request.Method = "POST";
         request.KeepAlive = false;
+ 
         int randomTime = 0;
 
         HttpWebResponse response = null;
@@ -188,6 +188,7 @@ public class jsonClass
             Console.WriteLine("terminating");
             Environment.Exit(0);
         }
+
         return result; //Return json string
 
     }
