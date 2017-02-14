@@ -52,9 +52,9 @@ namespace hashtopussy
 
         public void setDirs(string fpath, int osID)
         {
-            hcDir = Path.Combine(fpath, "hashcat\\");
-            workingDir = Path.Combine(fpath, "tasks\\");
-            filesDir = Path.Combine(fpath, "files\\");
+            hcDir = Path.Combine(fpath, "hashcat");
+            workingDir = Path.Combine(fpath, "tasks").TrimEnd();
+            filesDir = Path.Combine(fpath, "files"," ").TrimEnd();
 
             if (osID == 0)
             {
@@ -189,7 +189,7 @@ namespace hashtopussy
             string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --weak=0" + suffixExtra;
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
-            pInfo.FileName = hcDir + hcBin;
+            pInfo.FileName = Path.Combine(hcDir , hcBin);
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
@@ -258,7 +258,7 @@ namespace hashtopussy
             StringBuilder stdOutBuild = new StringBuilder();
             string suffixArgs = " --session=hashtopussy --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
-            pInfo.FileName = hcDir + hcBin;
+            pInfo.FileName = Path.Combine(hcDir , hcBin);
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
@@ -364,7 +364,8 @@ namespace hashtopussy
 
 
             ProcessStartInfo pinfo = new ProcessStartInfo();
-            pinfo.FileName = hcDir + hcBin;
+
+            pinfo.FileName = Path.Combine(hcDir , hcBin);
             pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopus --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " --skip=" + skip + " --limit=" + size;
             pinfo.WorkingDirectory = filesDir;
             pinfo.UseShellExecute = false;

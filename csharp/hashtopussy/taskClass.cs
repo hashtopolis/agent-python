@@ -18,7 +18,7 @@ namespace hashtopussy
         private string cmdpars;
         private int benchTime;
         private int hashlistID;
-        private int statustimer;
+        private int statusTimer;
         private ArrayList files;
         
         private static string prefixServerdl = "https://alpha.hashes.org/src/";
@@ -48,8 +48,8 @@ namespace hashtopussy
         {
             appPath = fpath;
             filepath = Path.Combine(fpath, "files");
-            hashpath = Path.Combine(fpath, "hashlists\\");
-            zapPath = Path.Combine(fpath, "hashlists\\zaps");
+            hashpath = Path.Combine(fpath, "hashlists");
+            zapPath = Path.Combine(fpath, "hashlists","zaps");
             tasksPath = Path.Combine(fpath, "tasks");
 
         }
@@ -116,7 +116,7 @@ namespace hashtopussy
         public Boolean getHashes(int inTask)
         {
 
-            string actualHLpath = Path.Combine(hashpath + inTask.ToString());
+            string actualHLpath = Path.Combine(hashpath , Path.GetFileName(inTask.ToString()));
             if (!File.Exists(actualHLpath))
             {
                 Console.WriteLine("Downloading hashlist for this task");
@@ -153,7 +153,7 @@ namespace hashtopussy
 
             return true;
         }
-
+       
 
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
@@ -162,7 +162,7 @@ namespace hashtopussy
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret; //Return string from json post
             string jsonString ="";
-            string zapfilePath = zapPath + hashlistID.ToString() + "\\zap";
+            string zapfilePath = zapPath + hashlistID.ToString();
             long zapCount = 0;
             Boolean batchJob = false;
             List<string> batchList = new List<string> { };
@@ -357,7 +357,9 @@ namespace hashtopussy
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
 
-                        hcClass.startAttack(0, skip, length, separator.ToString(), 5, tasksPath); //Start the hashcat binary
+                        hcClass.startAttack(0, skip, length, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
+                        thread.Join();
+                      
                         return 1;
 
                     case "keyspace_required":
@@ -461,7 +463,7 @@ namespace hashtopussy
 
         private Int64 fileSize(string filePath)
         {
-            Int64 fSize = new FileInfo(hashpath + hashlistID.ToString()).Length;
+            Int64 fSize = new FileInfo(Path.Combine(hashpath , Path.GetFileName(hashlistID.ToString()))).Length;
             return fSize;
         }
 
@@ -492,7 +494,7 @@ namespace hashtopussy
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
                     hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
-                    statustimer = Int32.Parse(jsC.getRetVar(ret, "statustimer"));
+                    statusTimer = Int32.Parse(jsC.getRetVar(ret, "statustimer"));
                     files = jsC.getRetArray(ret, "files");
                     int gotChunk = 1;
 
@@ -524,7 +526,7 @@ namespace hashtopussy
                     }
                     
 
-                    if (fileSize(hashpath + hashlistID.ToString()) == 0)
+                    if (fileSize(Path.Combine(hashpath, Path.GetFileName(hashlistID.ToString()))) == 0)
                     {
                         Console.WriteLine("Hashlist is 0 bytes");
                         return false;
