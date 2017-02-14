@@ -186,7 +186,7 @@ namespace hashtopussy
             {
                 suffixExtra = " --progress-only";
             }
-            string suffixArgs = " --runtime=5 --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --weak=0" + suffixExtra;
+            string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --weak=0" + suffixExtra;
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = hcDir + hcBin;

@@ -16,7 +16,7 @@ namespace hashtopussy
         private int wait;
         private string attackcmd;
         private string cmdpars;
-        private string bench;
+        private int benchTime;
         private int hashlistID;
         private int statustimer;
         private ArrayList files;
@@ -395,7 +395,7 @@ namespace hashtopussy
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
 
-                        hcClass.runBenchmark(1,5,ref collection);
+                        hcClass.runBenchmark(1, benchTime, ref collection);
 
 
                         benchProps bProps = new benchProps
@@ -491,7 +491,7 @@ namespace hashtopussy
                     attackcmd = (jsC.getRetVar(ret, "attackcmd"));
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
                     hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
-                    bench = (jsC.getRetVar(ret, "bench"));
+                    benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
                     statustimer = Int32.Parse(jsC.getRetVar(ret, "statustimer"));
                     files = jsC.getRetArray(ret, "files");
                     int gotChunk = 1;
