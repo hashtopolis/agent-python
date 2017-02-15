@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Management;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 public class registerClass
 {
@@ -10,13 +11,51 @@ public class registerClass
     public string tokenID { get; set; }
     public int osID { get; set; }
 
+
+    [DllImport("libc")]
+    static extern int uname(IntPtr buf);
+
+    //Code from Pinta Core Project
+    private bool IsRunningOnMac()
+    {
+        IntPtr buf = IntPtr.Zero;
+        try
+        {
+            buf = Marshal.AllocHGlobal(8192);
+            // This is a hacktastic way of getting sysname from uname ()
+            if (uname(buf) == 0)
+            {
+                string os = Marshal.PtrToStringAnsi(buf);
+                if (os == "Darwin")
+                    return true;
+            }
+        }
+        catch
+        {
+        }
+        finally
+        {
+            if (buf != IntPtr.Zero)
+                Marshal.FreeHGlobal(buf);
+        }
+        return false;
+    }
+
     //Detect whether we are running under mono
     private void setOS()
     {
         if (Type.GetType("Mono.Runtime") != null)
         {
-            Console.WriteLine("System is Linux");
-            osID = 0;
+            if (!IsRunningOnMac())
+            {
+                Console.WriteLine("System is Linux");
+                osID = 0;
+            }
+            else
+            {
+                Console.WriteLine("System is Mac");
+                osID = 2;
+            }
         }
         else
         {
@@ -55,16 +94,21 @@ public class registerClass
 
         if (osID == 1)
         {
+
+            //Get Devices (Windows)
             foreach (ManagementObject mo in searcher.Get())
             {
-                gpuList.Add(mo.Properties["Description"].Value.ToString().Trim()); //Add all GPU names to list
+                gpuList.Add(mo.Properties["Description"].Value.ToString().Trim());
             }
 
 
+            //Get Machine Name (Windows)
             machineName = System.Environment.MachineName;
         }
         else if(osID ==  0)
         {
+
+            //Get Devices (Linux)
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = "lspci";
             pinfo.UseShellExecute = false;
@@ -74,7 +118,6 @@ public class registerClass
             lspci.Start();
             while (!lspci.HasExited)
             {
-                // dig through the output
                 while (!lspci.StandardOutput.EndOfStream)
                 {
                     string vystup = lspci.StandardOutput.ReadLine();
@@ -86,20 +129,77 @@ public class registerClass
                 }
             }
 
+            //Get Machine Name (Linux)
             pinfo = new ProcessStartInfo();
             pinfo.FileName = "uname";
             pinfo.Arguments = "-n";
             pinfo.UseShellExecute = false;
             pinfo.RedirectStandardOutput = true;
             Process uname = new Process();
-            uname.StartInfo = pinfo;            uname.Start();
+            uname.StartInfo = pinfo;
+            uname.Start();
             while (!uname.HasExited)
             {
-                // dig through the output
                 while (!uname.StandardOutput.EndOfStream)
                 {
-                    string vystup = uname.StandardOutput.ReadLine();
-                    machineName = vystup;
+                    string stdOut = uname.StandardOutput.ReadLine();
+                    machineName = stdOut;
+                }
+            }
+        }
+        else if(osID == 2)
+        {
+            //Get Machine Name (Mac)
+            ProcessStartInfo pinfo = new ProcessStartInfo();
+            pinfo.FileName = "scutil";
+            pinfo.Arguments = " --get ComputerName";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardError = true;
+            pinfo.RedirectStandardOutput = true;
+
+            Process getMachineName = new Process();
+            getMachineName.StartInfo = pinfo;
+            getMachineName.Start();
+            while (!getMachineName.HasExited)
+            {
+                while (!getMachineName.StandardOutput.EndOfStream)
+                {
+                    string stdOut = getMachineName.StandardOutput.ReadLine();
+                    machineName = stdOut;
+                }
+            }
+
+            //Get Devices (Mac)
+            pinfo.FileName = "system_profiler";
+            pinfo.Arguments = " -detaillevel mini";
+            Process getDevices = new Process();
+            getDevices.StartInfo = pinfo;
+
+            getDevices.Start();
+            Boolean triggerRead = false;
+
+            string searchID = "Chipset Model: ";
+            while (!getDevices.StandardOutput.EndOfStream)
+            {
+
+                string stdOut = getDevices.StandardOutput.ReadLine().TrimEnd();
+
+                if (triggerRead == true)
+                {
+                    if (stdOut.Contains("Hardware:"))
+                    {
+                        break;
+                    }
+                    int pos = stdOut.IndexOf(searchID);
+                    if (pos != -1)
+                    {
+                        gpuList.Add(stdOut.Substring(pos + searchID.Length));
+                    }
+
+                }
+                if (stdOut.Contains("Graphics/Displays:"))
+                {
+                    triggerRead = true;
                 }
             }
         }
