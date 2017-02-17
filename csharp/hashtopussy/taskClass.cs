@@ -242,9 +242,7 @@ namespace hashtopussy
                             {
 
                                 Console.WriteLine("Interruption occured");
-                                continue; //Repeat  send on error
 
-                                /*
                                 if (!hcClass.hcProc.HasExited)
                                 {
                                     Console.WriteLine("Terminating chunk due to interruption");
@@ -254,7 +252,7 @@ namespace hashtopussy
                                     run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
                                     Console.WriteLine("Terminating chunk due to interruption");
                                 }
-                                */
+                                
 
                             }
 
@@ -357,7 +355,7 @@ namespace hashtopussy
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
 
-                        hcClass.startAttack(0, skip, length, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
+                        hcClass.startAttack(0, skip, length+skip, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
                         thread.Join();
                       
                         return 1;
