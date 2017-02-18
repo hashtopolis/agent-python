@@ -44,13 +44,14 @@ namespace hashtopussy
         static void Main(string[] args)
         {
 
-           
+            string AppVersion = "0.1";
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
             updateClass updater = new updateClass
             {
+                htpVersion = AppVersion,
                 parentPath = AppPath,
-                arguments = args
-                
+                arguments = args,
+
             };
 
             updater.runUpdate();

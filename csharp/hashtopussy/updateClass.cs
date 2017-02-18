@@ -6,18 +6,21 @@ using System.IO;
 public class updateClass
 {
 
-    private string htpVersion;
+    public string htpVersion { set; get; }
     private string parentProc;
     public string parentPath { set; get; }
     public string[] arguments { set; get; }
 
-    private static string launcherProcName = "HTPLauncherUpd.exe";
+    private string launcherProcName = "HTPLauncherUpd.exe";
 
-    public void setVersion(string versionID)
+
+    private class updProps
     {
-        htpVersion = versionID;
-    }
+        public string action = "update";
+        public string version { get; set; }
+        public string type = "csharp";
 
+    }
 
     public void setParent(string strParentProc)
     {
@@ -26,7 +29,6 @@ public class updateClass
 
     public void runUpdate()
 	{
-
 
         string currentBin = Environment.GetCommandLineArgs()[0]; //Grab current bin name
         if (currentBin == launcherProcName) //Check if we are the launcher
