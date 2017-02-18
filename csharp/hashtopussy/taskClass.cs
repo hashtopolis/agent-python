@@ -13,7 +13,6 @@ namespace hashtopussy
         
         
         private int taskID;
-        private int wait;
         private string attackcmd;
         private string cmdpars;
         private int benchTime;
@@ -123,7 +122,7 @@ namespace hashtopussy
             }
             else
             {
-                Console.WriteLine("Hashlist for this task already exists, skiping download");
+                Console.WriteLine("Hashlist for this task already exists, skipping download");
                 return true;
             }
 
@@ -310,7 +309,6 @@ namespace hashtopussy
 
         public int getChunk(int inTask)
         {
-
              chunkProps cProps = new chunkProps
             {
                 action = "chunk",
@@ -379,9 +377,7 @@ namespace hashtopussy
 
 
                         jsonString = jsC.toJson(kProps);
-                        Console.WriteLine(jsonString);
                         ret = jsC.jsonSend(jsonString);
-                        Console.WriteLine(ret);
 
                         return 2;
 
@@ -417,10 +413,7 @@ namespace hashtopussy
 
 
                         jsonString = jsC.toJson(bProps);
-                        Console.WriteLine(jsonString);
                         ret = jsC.jsonSend(jsonString);
-                        Console.WriteLine(ret);
-
                         if (!jsC.isJsonSuccess(ret))
                         {
                             Console.WriteLine("Server rejected benchmark");
@@ -495,7 +488,6 @@ namespace hashtopussy
                 if (jsC.getRetVar(ret, "task") != "NONE")
                 {
                     taskID = Int32.Parse(jsC.getRetVar(ret, "task"));
-                    wait = Int32.Parse(jsC.getRetVar(ret, "wait"));
                     attackcmd = (jsC.getRetVar(ret, "attackcmd"));
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
                     hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
@@ -507,7 +499,6 @@ namespace hashtopussy
                     foreach (string fileItem in files)
                     {
                         string actualFile = Path.Combine(filepath, fileItem);
-                        //attackcmd = attackcmd.Replace(fileItem, actualFile);
                         if (!File.Exists(actualFile))
                         {
                             getFile(fileItem);
@@ -547,8 +538,7 @@ namespace hashtopussy
                     return true;
                 }
 
-                //Download all the necessary files
-                //Download all necessary hashlists
+
 
             }
 
