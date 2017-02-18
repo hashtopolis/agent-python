@@ -68,10 +68,21 @@ public class updateClass
                 File.Delete(launcherProcName);
             }
 
+            Console.WriteLine("Checking for client updates");
+            updProps uProps = new updProps
+            {
+                version = htpVersion
+            };
+
+            jsonClass jsC = new jsonClass { debugFlag = true };
+            string jsonString = jsC.toJson(uProps);
+            string ret = jsC.jsonSend(jsonString);
+
+            jsC.isJsonSuccess(ret);
             //Check whether we need updating
-                //Need code to send current version to server, probably a hash?
+            //Need code to send current version to server, probably a hash?
             //Download the launcher
-                //Need to process res and download 
+            //Need to process res and download 
 
             //Run the launcher and exit current
             /*
@@ -81,7 +92,7 @@ public class updateClass
             Spawn.Start();
             Environment.Exit(0);
             */
-        }
+}
     }
 
 
