@@ -305,7 +305,7 @@ namespace hashtopussy
             }
         }
 
-        private jsonClass jsC = new jsonClass();
+        private jsonClass jsC = new jsonClass { debugFlag = true };
 
         public int getChunk(int inTask)
         {
@@ -321,7 +321,7 @@ namespace hashtopussy
 
             string jsonString = jsC.toJson(cProps);
             string ret = jsC.jsonSend(jsonString);
-
+            
 
             if (jsC.isJsonSuccess(ret))
             {
@@ -537,7 +537,6 @@ namespace hashtopussy
 
                     return true;
                 }
-
 
 
             }

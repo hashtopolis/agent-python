@@ -10,13 +10,16 @@ using System.Threading;
 public class jsonClass
 {
 
+    public Boolean debugFlag { get; set; }
+
     Random rnd = new Random(Guid.NewGuid().GetHashCode()); //init and seed the random generator for use in re-try backdown 
     JavaScriptSerializer jss = new JavaScriptSerializer();
     //Checks if json string has success response
     //Will print the error messages on fail
     public Boolean isJsonSuccess(string jsonString)
     {
-        Console.WriteLine(jsonString);
+        if (debugFlag)
+            Console.WriteLine(jsonString);
 
         try
         {
@@ -94,6 +97,8 @@ public class jsonClass
     {
 
         var json = jss.Serialize(obj);
+        if (debugFlag)
+            Console.WriteLine(json);
         return json;
     }
 
