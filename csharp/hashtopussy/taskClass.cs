@@ -167,10 +167,8 @@ namespace hashtopussy
             Boolean batchJob = false;
             List<string> batchList = new List<string> { };
             int lastPacketNum = 0;
-            Boolean initPacketset = false;
-            double initPacket = 0;
             double chunkPercent = 0;
-
+            double chunkStart = 0;
             Boolean run = true;
             while (run)
             {
@@ -223,20 +221,11 @@ namespace hashtopussy
                             if (jsC.isJsonSuccess(ret))
                             {
 
-                                if (initPacketset == false)
-                                {
-                                    initPacketset = true;
-                                    initPacket = uploadPackets[0].statusPackets["PROGRESS1"];
-                                }
-                                else
-                                {
-                                     chunkPercent =  Math.Round(Convert.ToDouble(uploadPackets[0].statusPackets["PROGRESS1"] - initPacket) / Convert.ToInt64(uploadPackets[0].statusPackets["PROGRESS2"] - initPacket), 4) * 100; //Total progress value
+                                chunkStart = Math.Floor(uploadPackets[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
+                                chunkPercent = Math.Round((Convert.ToDouble(uploadPackets[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(uploadPackets[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
 
-                                }
-                                //Console.WriteLine("Progress:{0}/{1} ({2}%)", uploadPackets[0].statusPackets["PROGRESS1"], uploadPackets[0].statusPackets["PROGRESS2"], (uploadPackets[0].statusPackets["PROGRESS_DIV"] * 100));
-                                Console.WriteLine("Progress:{0}/{1} ({2}%)", (uploadPackets[0].statusPackets["PROGRESS1"]- initPacket), (uploadPackets[0].statusPackets["PROGRESS2"] - initPacket), chunkPercent);
+                                Console.WriteLine("Progress: {0}% Speed: {1}", chunkPercent, uploadPackets[0].statusPackets["SPEED_TOTAL"]);
 
-                                Console.WriteLine("Total Speed:{0}", uploadPackets[0].statusPackets["SPEED_TOTAL"]);
 
                                 if (uploadPackets[0].crackedPackets.Count != 0) //Give some info if cracks were submitted
                                 {
@@ -344,7 +333,7 @@ namespace hashtopussy
                 string argBuilder = attackcmd;
                 string attackcmdMod = " " + cmdpars + " ";
                 string actualHLpath = Path.Combine(hashpath, hashlistID.ToString());
-
+                int benchMarkMethod = 1;
                 switch (status)
                 {
                     case "OK":
@@ -409,16 +398,23 @@ namespace hashtopussy
 
                         hcClass.runBenchmark(1, benchTime, ref collection);
 
-
                         benchProps bProps = new benchProps
                         {
                             token = tokenID,
                             taskId = taskID,
-                            type = "run",
-                            //result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString()
-                            result = collection["PROGRESS_DIV"].ToString("0." + new string('#', 100))
-
                         };
+
+                        if (benchMarkMethod == 1) //Old benchmark method using actual run
+                        {
+                            bProps.type = "run";
+                            bProps.result = collection["PROGRESS_DIV"].ToString("0." + new string('#', 100));
+                        }
+                        else //New benchmark method using --speed param
+                        {
+                            bProps.type = "speed"; 
+                            bProps.result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString();
+                        }
+
 
                         jsonString = jsC.toJson(bProps);
                         Console.WriteLine(jsonString);
