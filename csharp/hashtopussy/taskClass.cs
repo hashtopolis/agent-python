@@ -167,6 +167,9 @@ namespace hashtopussy
             Boolean batchJob = false;
             List<string> batchList = new List<string> { };
             int lastPacketNum = 0;
+            Boolean initPacketset = false;
+            double initPacket = 0;
+            double chunkPercent = 0;
 
             Boolean run = true;
             while (run)
@@ -219,7 +222,20 @@ namespace hashtopussy
                             ret = jsC.jsonSend(jsonString);
                             if (jsC.isJsonSuccess(ret))
                             {
-                                Console.WriteLine("Progress:{0}/{1} ({2}%)", uploadPackets[0].statusPackets["PROGRESS1"], uploadPackets[0].statusPackets["PROGRESS2"], (uploadPackets[0].statusPackets["PROGRESS_DIV"] * 100));
+
+                                if (initPacketset == false)
+                                {
+                                    initPacketset = true;
+                                    initPacket = uploadPackets[0].statusPackets["PROGRESS1"];
+                                }
+                                else
+                                {
+                                     chunkPercent =  Math.Round(Convert.ToDouble(uploadPackets[0].statusPackets["PROGRESS1"] - initPacket) / Convert.ToInt64(uploadPackets[0].statusPackets["PROGRESS2"] - initPacket), 4) * 100; //Total progress value
+
+                                }
+                                //Console.WriteLine("Progress:{0}/{1} ({2}%)", uploadPackets[0].statusPackets["PROGRESS1"], uploadPackets[0].statusPackets["PROGRESS2"], (uploadPackets[0].statusPackets["PROGRESS_DIV"] * 100));
+                                Console.WriteLine("Progress:{0}/{1} ({2}%)", (uploadPackets[0].statusPackets["PROGRESS1"]- initPacket), (uploadPackets[0].statusPackets["PROGRESS2"] - initPacket), chunkPercent);
+
                                 Console.WriteLine("Total Speed:{0}", uploadPackets[0].statusPackets["SPEED_TOTAL"]);
 
                                 if (uploadPackets[0].crackedPackets.Count != 0) //Give some info if cracks were submitted
@@ -241,18 +257,14 @@ namespace hashtopussy
                             else //We received an error from the server, terminate the run
                             {
 
-                                Console.WriteLine("Interruption occured");
-
                                 if (!hcClass.hcProc.HasExited)
                                 {
-                                    Console.WriteLine("Terminating chunk due to interruption");
                                     hcClass.hcProc.CancelOutputRead();
                                     hcClass.hcProc.CancelErrorRead();
                                     hcClass.hcProc.Kill();
                                     run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
-                                    Console.WriteLine("Terminating chunk due to interruption");
+                                    //The server would need to accept the chunk but return an error
                                 }
-                                
 
                             }
 
@@ -355,7 +367,7 @@ namespace hashtopussy
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
 
-                        hcClass.startAttack(0, skip, length+skip, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
+                        hcClass.startAttack(0, skip, length, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
                         thread.Join();
                       
                         return 1;
