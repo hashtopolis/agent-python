@@ -20,6 +20,7 @@ namespace hashtopussy
         private int statusTimer;
         private ArrayList files;
         
+
         private static string prefixServerdl = "https://alpha.hashes.org/src/";
         private static string hashlistAlias = "#HL#";
         public static char separator = ':';
@@ -34,6 +35,7 @@ namespace hashtopussy
         private string zapPath;
         private string tasksPath;
 
+        public string connectURL { get; set; }
         public string tokenID { get; set; }
         public int osID { get; set; }
         public _7zClass sevenZip { get; set; }
@@ -134,7 +136,7 @@ namespace hashtopussy
                 hashlist = inTask
             };
 
-            jsonClass jsC = new jsonClass();
+            jsonClass jsC = new jsonClass { serverURL = connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString);
 
@@ -156,7 +158,7 @@ namespace hashtopussy
 
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
-            jsonClass jsC = new jsonClass();//Initis the json class
+            jsonClass jsC = new jsonClass { serverURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret; //Return string from json post
@@ -305,7 +307,7 @@ namespace hashtopussy
             }
         }
 
-        private jsonClass jsC = new jsonClass { debugFlag = true };
+        private jsonClass jsC = new jsonClass { serverURL = connectURL };
 
         public int getChunk(int inTask)
         {

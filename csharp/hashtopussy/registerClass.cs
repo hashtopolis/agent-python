@@ -10,6 +10,7 @@ public class registerClass
     private string tokenPath;
     public string tokenID { get; set; }
     public int osID { get; set; }
+    public string connectURL { get; set; }
 
 
     [DllImport("libc")]

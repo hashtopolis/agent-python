@@ -41,16 +41,52 @@ namespace hashtopussy
 
         }
 
+        private static string urlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"URL");
+        private static string serverURL = "";
+
+        public static bool loadURL()
+        {
+            if (File.Exists(urlPath))
+            {
+                serverURL = File.ReadAllText(urlPath);
+                if (serverURL == "")
+                {
+                    File.Delete(urlPath);
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+            return true;
+        }
+
         static void Main(string[] args)
         {
 
             string AppVersion = "0.1";
+
+            while (!loadURL())
+            {
+                Console.WriteLine("Could not locate server URL, please enter URL:");
+                string url = Console.ReadLine();
+                if (!url.StartsWith("http"))
+                {
+                    url = "https://" + url;
+                }
+                File.WriteAllText(urlPath, url);
+                
+            }
+
+            Console.WriteLine(AppVersion);
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
             updateClass updater = new updateClass
             {
                 htpVersion = AppVersion,
                 parentPath = AppPath,
                 arguments = args,
+                connectURL = serverURL
 
             };
 
@@ -80,11 +116,13 @@ namespace hashtopussy
             {
                 tokenID = client.tokenID,
                 osID = client.osID,
-                sevenZip = zipper
+                sevenZip = zipper,
+                connectURL = serverURL
+
             };
                 
             tasks.setDirs(AppPath);
-
+            
             int backDown = 5;
             while(true) //Keep waiting for 5 seconds and checking for tasks
             {

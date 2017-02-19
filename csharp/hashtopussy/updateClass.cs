@@ -15,6 +15,7 @@ namespace hashtopussy
         private string parentProc;
         public string parentPath { set; get; }
         public string[] arguments { set; get; }
+        public string connectURL { get; set; }
 
         private string launcherProcName = "HTPLauncherUpd.exe";
 

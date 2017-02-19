@@ -11,7 +11,7 @@ public class jsonClass
 {
 
     public Boolean debugFlag { get; set; }
-
+    public string connectURL { get; set; }
     Random rnd = new Random(Guid.NewGuid().GetHashCode()); //init and seed the random generator for use in re-try backdown 
     JavaScriptSerializer jss = new JavaScriptSerializer();
     //Checks if json string has success response
@@ -105,7 +105,8 @@ public class jsonClass
     //On fail, the client will use a backdown algorithm and retry 30 times
     public string jsonSend(string json)
     {
-        var request = (HttpWebRequest)WebRequest.Create("https://alpha.hashes.org/src/api/server.php");
+        connectURL = "https://alpha.hashes.org/src/api/server.php";
+        var request = (HttpWebRequest)WebRequest.Create(connectURL);
         request.ContentType = "application/x-www-form-urlencoded";
         request.Method = "POST";
         request.KeepAlive = false;
