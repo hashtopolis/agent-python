@@ -18,6 +18,7 @@ namespace hashtopussy
         private int benchTime;
         private int hashlistID;
         private int statusTimer;
+        private int benchMethod;
         private ArrayList files;
         
 
@@ -333,7 +334,6 @@ namespace hashtopussy
                 string argBuilder = attackcmd;
                 string attackcmdMod = " " + cmdpars + " ";
                 string actualHLpath = Path.Combine(hashpath, hashlistID.ToString());
-                int benchMarkMethod = 1;
                 switch (status)
                 {
                     case "OK":
@@ -394,7 +394,7 @@ namespace hashtopussy
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
 
-                        hcClass.runBenchmark(1, benchTime, ref collection);
+                        hcClass.runBenchmark(benchMethod, benchTime, ref collection);
 
                         benchProps bProps = new benchProps
                         {
@@ -402,7 +402,7 @@ namespace hashtopussy
                             taskId = taskID,
                         };
 
-                        if (benchMarkMethod == 1) //Old benchmark method using actual run
+                        if (benchMethod == 1) //Old benchmark method using actual run
                         {
                             bProps.type = "run";
                             bProps.result = collection["PROGRESS_DIV"].ToString("0." + new string('#', 100));
@@ -494,6 +494,14 @@ namespace hashtopussy
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
                     hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
+                    if (jsC.getRetVar(ret, "benchType") == "run")
+                    {
+                        benchMethod = 1;
+                    }
+                    else
+                    {
+                        benchMethod = 2;
+                    }
                     statusTimer = Int32.Parse(jsC.getRetVar(ret, "statustimer"));
                     files = jsC.getRetArray(ret, "files");
                     int gotChunk = 1;

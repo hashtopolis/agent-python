@@ -175,7 +175,7 @@ namespace hashtopussy
 
         }
 
-        public Boolean runBenchmark(int benchMethod, int benchSecs,ref Dictionary<string, double> collection)
+        public Boolean runBenchmark(int benchMethod, int benchSecs, ref Dictionary<string, double> collection)
         {
 
             StringBuilder stdOutBuild = new StringBuilder();
@@ -189,7 +189,7 @@ namespace hashtopussy
             string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --weak=0" + suffixExtra;
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
-            pInfo.FileName = Path.Combine(hcDir , hcBin);
+            pInfo.FileName = Path.Combine(hcDir, hcBin);
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
@@ -203,8 +203,16 @@ namespace hashtopussy
 
             hcProcBenchmark.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
 
-            Console.WriteLine("Server requsted {0} second benchmark", benchSecs);
+            if (benchMethod == 1)
+            {
+                Console.WriteLine("Server requsted the client benchark this task for {0} seconds", benchSecs);
 
+            }
+            else
+            {
+                Console.WriteLine("Server has requested the client to perform a speed benchmark");
+
+            }
             try
             {
                 hcProcBenchmark.Start();
