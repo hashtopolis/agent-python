@@ -136,7 +136,7 @@ namespace hashtopussy
                 hashlist = inTask
             };
 
-            jsonClass jsC = new jsonClass { serverURL = connectURL };
+            jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString);
 
@@ -158,7 +158,7 @@ namespace hashtopussy
 
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
-            jsonClass jsC = new jsonClass { serverURL = connectURL };//Initis the json class
+            jsonClass jsC = new jsonClass {debugFlag = true,  connectURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret; //Return string from json post
@@ -216,7 +216,6 @@ namespace hashtopussy
                             }
 
                             jsonString = jsC.toJson(sProps);
-                            Console.WriteLine(jsonString);
 
                             ret = jsC.jsonSend(jsonString);
                             if (jsC.isJsonSuccess(ret))
@@ -307,7 +306,7 @@ namespace hashtopussy
             }
         }
 
-        private jsonClass jsC = new jsonClass { serverURL = connectURL };
+        private  jsonClass jsC = new jsonClass {};
 
         public int getChunk(int inTask)
         {
@@ -317,8 +316,9 @@ namespace hashtopussy
                 token = tokenID,
                 taskId = inTask
             };
+            jsC.debugFlag = true;
 
-            
+            jsC.connectURL = connectURL;
             primaryCracked = new List<string> { };
 
             string jsonString = jsC.toJson(cProps);
@@ -440,7 +440,7 @@ namespace hashtopussy
                 file = fileName
             };
 
-            jsonClass jsC = new jsonClass();
+            jsonClass jsC = new jsonClass {  debugFlag = true, connectURL = connectURL };
             string jsonString = jsC.toJson(get);
             string ret = jsC.jsonSend(jsonString);
 
@@ -479,7 +479,7 @@ namespace hashtopussy
                 token = tokenID
             };
 
-            jsonClass jsC = new jsonClass();
+            jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
             string jsonString = jsC.toJson(get);
              string   ret = jsC.jsonSend(jsonString);
 

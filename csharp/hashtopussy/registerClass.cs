@@ -82,7 +82,7 @@ public class registerClass
 
     private bool registerAgent(string iVoucher)
     {
-        jsonClass jsC = new jsonClass();
+        jsonClass jsC = new jsonClass { connectURL = connectURL };
 
         setOS();
 
@@ -245,7 +245,7 @@ public class registerClass
         else
         {
             Console.WriteLine("Existing token found");
-            jsonClass jsC = new jsonClass();
+            jsonClass jsC = new jsonClass { connectURL = connectURL };
 
             var arrayKey = new Dictionary<string, string>
                {

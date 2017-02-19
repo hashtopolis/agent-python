@@ -65,7 +65,7 @@ namespace hashtopussy
         static void Main(string[] args)
         {
 
-            string AppVersion = "0.1";
+            string AppVersion = "0.2";
 
             while (!loadURL())
             {
@@ -94,7 +94,7 @@ namespace hashtopussy
 
             initDirs();
 
-            registerClass client = new registerClass();
+            registerClass client = new registerClass { connectURL = serverURL };
             client.setPath( AppPath);
             if (client.loginAgent())
             {
