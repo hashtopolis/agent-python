@@ -40,8 +40,7 @@ namespace hashtopussy
 
             if (System.AppDomain.CurrentDomain.FriendlyName == launcherProcName) 
             {
-
-
+                Console.WriteLine("here");
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     if (arguments[i] != "debug")
@@ -95,35 +94,46 @@ namespace hashtopussy
                 string jsonString = jsC.toJson(uProps);
                 string ret = jsC.jsonSend(jsonString);
 
-                jsC.isJsonSuccess(ret);
-                Console.WriteLine(jsC.getRetVar(ret, "url"));
-                downloadClass dl = new downloadClass();
-                string dlFrom = Path.Combine(jsC.getRetVar(ret, "url"));
-                string dlTo = Path.Combine(parentPath, launcherProcName);
-                dl.DownloadFile(dlFrom, dlTo);
-                Console.WriteLine("Finished DL");
-
-                //Check whether we need updating
-                //Need code to send current version to server, probably a hash?
-                //Download the launcher
-                //Need to process res and download 
-
-                //Run the launcher and exit current
-                Console.WriteLine("Relaunching");
-                Process Spawn = new Process();
-                if (Type.GetType("Mono.Runtime") != null)
+                if (jsC.isJsonSuccess(ret))
                 {
-                    Spawn.StartInfo.FileName = "mono";
-                    Spawn.StartInfo.Arguments = launcherProcName + currentBin;
-                }
-                else
-                {
-                    Spawn.StartInfo.FileName = launcherProcName;
-                    Spawn.StartInfo.Arguments =  currentBin;
+                    if (jsC.getRetVar(ret, "version") == "OK")
+                    {
+                        Console.WriteLine("You are using the latest client version");
+                        return;
+                    }
+                    else
+                    {
+                        downloadClass dl = new downloadClass();
+                        string dlFrom = Path.Combine(jsC.getRetVar(ret, "url"));
+                        string dlTo = Path.Combine(parentPath, launcherProcName);
+                        dl.DownloadFile(dlFrom, dlTo);
+                        Console.WriteLine("Finished DL");
+
+                        //Check whether we need updating
+                        //Need code to send current version to server, probably a hash?
+                        //Download the launcher
+                        //Need to process res and download 
+
+                        //Run the launcher and exit current
+                        Console.WriteLine("Relaunching");
+                        Process Spawn = new Process();
+                        if (Type.GetType("Mono.Runtime") != null)
+                        {
+                            Spawn.StartInfo.FileName = "mono";
+                            Spawn.StartInfo.Arguments = launcherProcName + currentBin;
+                        }
+                        else
+                        {
+                            Spawn.StartInfo.FileName = launcherProcName;
+                            Spawn.StartInfo.Arguments = currentBin;
+                        }
+
+                        Spawn.Start();
+                        Environment.Exit(0);
+                    }
                 }
 
-                Spawn.Start();
-                Environment.Exit(0);
+                
                
             }
         }
