@@ -79,7 +79,7 @@ namespace hashtopussy
                 
             }
 
-            Console.WriteLine(AppVersion);
+            Console.WriteLine("Client Version " + AppVersion);
             AppPath = AppDomain.CurrentDomain.BaseDirectory;
             updateClass updater = new updateClass
             {
