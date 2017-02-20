@@ -66,7 +66,7 @@ namespace hashtopussy
             }
             else
             {
-                hcBin = "hashcat.exe";
+                hcBin = "hashcat64.exe";
             }
         }
 
@@ -134,7 +134,7 @@ namespace hashtopussy
                     case "PROGRESS":
                         collection.Add("PROGRESS1", Convert.ToDouble(items[i + 1])); //First progress value
                         collection.Add("PROGRESS2", Convert.ToDouble(items[i + 2])); //Total progress value
-                        collection.Add("PROGRESS_DIV", Math.Round(Convert.ToDouble(items[i + 1])/Convert.ToInt64(items[i + 2]),5)); //Total progress value
+                        collection.Add("PROGRESS_DIV", Math.Round(Convert.ToDouble(items[i + 1])/Convert.ToInt64(items[i + 2]),15)); //Total progress value
                         i += 2;
                         break;
                     case "RECHASH":
