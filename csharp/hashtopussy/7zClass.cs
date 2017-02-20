@@ -19,6 +19,7 @@ namespace hashtopussy
         public int osID { get; set; }
         public string tokenID { get; set; }
         public string appPath { get; set; }
+        public string connectURL { get; set; }
 
         string binPath = "";
 
@@ -35,7 +36,7 @@ namespace hashtopussy
             if (!File.Exists(binPath))
             {
                 Console.WriteLine("Download 7zip binary");
-                jsonClass jsC = new jsonClass();
+                jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
 
                 dlProps dlzip = new dlProps
                 {
