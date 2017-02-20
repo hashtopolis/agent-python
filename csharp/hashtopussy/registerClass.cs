@@ -115,7 +115,7 @@ public class registerClass
         else if(osID ==  0)
         {
 
-            //Get GPU Devices (Linux)
+            //Get GPU Devices (Linux) use lspci to query GPU
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = "lspci";
             pinfo.UseShellExecute = false;
@@ -123,26 +123,27 @@ public class registerClass
             Process lspci = new Process();
             lspci.StartInfo = pinfo;
             lspci.Start();
+            string searchString = "VGA compatible controller: ";
             while (!lspci.HasExited)
             {
                 while (!lspci.StandardOutput.EndOfStream)
                 {
                     string stdOut = lspci.StandardOutput.ReadLine();
-                    int pozi = stdOut.IndexOf("VGA compatible controller: ");
+                    int pozi = stdOut.IndexOf(searchString);
                     if (pozi != -1)
                     {
-                        gpuList.Add(stdOut.Substring(pozi + 27));
+                        gpuList.Add(stdOut.Substring(pozi + searchString.Length));
                     }
                 }
             }
 
-            //Get CPU (Linux)
+            //Get CPU (Linux) use lscpu to query CPU
             pinfo.FileName = "lscpu";
             pinfo.UseShellExecute = false;
             pinfo.RedirectStandardOutput = true;
             lspci.StartInfo = pinfo;
             lspci.Start();
-            string searchString = "Model Name: ";
+            searchString = "Model Name: ";
             while (!lspci.HasExited)
             {
                 while (!lspci.StandardOutput.EndOfStream)
