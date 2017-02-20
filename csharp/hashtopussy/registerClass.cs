@@ -202,6 +202,7 @@ public class registerClass
             Process getDevices = new Process();
             getDevices.StartInfo = pinfo;
 
+            Console.WriteLine("Please wait while devices are being enumerated...");
             getDevices.Start();
             Boolean triggerRead = false;
 
@@ -217,6 +218,10 @@ public class registerClass
                     if (stdOut.Contains("Total Number of Cores:")) //Just incase we go past 
                     {
                         break;
+                    }
+                    if (stdOut.Contains("Hardware:"))
+                    {
+                        searchID = "Processor Name: ";
                     }
                     int pos = stdOut.IndexOf(searchID);
 
@@ -241,14 +246,15 @@ public class registerClass
                         }
                     }
                 }
-                if (stdOut.Contains("Graphics/Displays:"))
+                else if (triggerRead == false)
                 {
-                    triggerRead = true;
+                    if (stdOut.Contains("Graphics/Displays:"))
+                    {
+                        triggerRead = true;
+                    }
                 }
-                if (stdOut.Contains("Hardware:"))
-                {
-                    searchID = "Processor Name: ";
-                }
+
+
             }
         }
 
