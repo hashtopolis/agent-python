@@ -226,7 +226,7 @@ public class registerClass
                         {
 
                             gpuList.Add(stdOut.Substring(pos + searchID.Length));
-                            searchID = "Processor Name: ";
+
                         }
                         else if (searchID == "Processor Name: ")
                         {
@@ -244,6 +244,10 @@ public class registerClass
                 if (stdOut.Contains("Graphics/Displays:"))
                 {
                     triggerRead = true;
+                }
+                if (stdOut.Contains("Hardware:"))
+                {
+                    searchID = "Processor Name: ";
                 }
             }
         }
