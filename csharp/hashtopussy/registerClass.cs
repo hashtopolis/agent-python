@@ -88,13 +88,13 @@ public class registerClass
 
         string machineName = "default";
 
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Description FROM Win32_VideoController"); //Prep object to query windows GPUs
         List<string> gpuList;
 
         gpuList = new List<string> { };
 
         if (osID == 1)
         {
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Description FROM Win32_VideoController"); //Prep object to query windows GPUs
 
             //Get Devices (Windows)
             foreach (ManagementObject mo in searcher.Get())
@@ -102,7 +102,11 @@ public class registerClass
                 gpuList.Add(mo.Properties["Description"].Value.ToString().Trim());
             }
 
-
+            searcher = new ManagementObjectSearcher("SELECT Name from Win32_Processor"); //Prep object to query windows CPUs
+            foreach (ManagementObject mo in searcher.Get())
+            {
+                Console.WriteLine( mo.Properties["Name"].Value.ToString());
+            }
             //Get Machine Name (Windows)
             machineName = System.Environment.MachineName;
         }
