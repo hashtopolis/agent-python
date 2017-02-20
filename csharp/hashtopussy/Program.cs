@@ -12,6 +12,11 @@ namespace hashtopussy
         public List<string> crackedPackets;
     }
 
+    public class testProp
+    {
+        public string action = "test";
+    }
+
     class Program
     {
 
@@ -66,7 +71,8 @@ namespace hashtopussy
         {
 
             string AppVersion = "0.2";
-
+            jsonClass testConnect = new jsonClass { debugFlag = true, };
+            testProp tProp = new testProp();
             while (!loadURL())
             {
                 Console.WriteLine("Could not locate server URL, please enter URL:");
@@ -75,7 +81,16 @@ namespace hashtopussy
                 {
                     url = "https://" + url;
                 }
-                File.WriteAllText(urlPath, url);
+
+                testConnect.connectURL = url;
+                Console.WriteLine(url);
+                string jsonString = testConnect.toJson(tProp);
+                string ret = testConnect.jsonSendOnce(jsonString);
+                if (testConnect.isJsonSuccess(ret))
+                {
+                    File.WriteAllText(urlPath, url);
+                }
+                
                 
             }
 
