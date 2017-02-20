@@ -89,6 +89,7 @@ public class registerClass
         string machineName = "default";
 
         List<string> gpuList;
+        string CPUModel = "";
 
         gpuList = new List<string> { };
 
@@ -102,10 +103,11 @@ public class registerClass
                 gpuList.Add(mo.Properties["Description"].Value.ToString().Trim());
             }
 
+            //Get CPU (Windows)
             searcher = new ManagementObjectSearcher("SELECT Name from Win32_Processor"); //Prep object to query windows CPUs
             foreach (ManagementObject mo in searcher.Get())
             {
-                Console.WriteLine( mo.Properties["Name"].Value.ToString());
+                CPUModel = mo.Properties["Name"].Value.ToString();
             }
             //Get Machine Name (Windows)
             machineName = System.Environment.MachineName;
@@ -113,7 +115,7 @@ public class registerClass
         else if(osID ==  0)
         {
 
-            //Get Devices (Linux)
+            //Get GPU Devices (Linux)
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = "lspci";
             pinfo.UseShellExecute = false;
@@ -125,15 +127,34 @@ public class registerClass
             {
                 while (!lspci.StandardOutput.EndOfStream)
                 {
-                    string vystup = lspci.StandardOutput.ReadLine();
-                    int pozi = vystup.IndexOf("VGA compatible controller: ");
+                    string stdOut = lspci.StandardOutput.ReadLine();
+                    int pozi = stdOut.IndexOf("VGA compatible controller: ");
                     if (pozi != -1)
                     {
-                        gpuList.Add(vystup.Substring(pozi + 27));
+                        gpuList.Add(stdOut.Substring(pozi + 27));
                     }
                 }
             }
 
+            //Get CPU (Linux)
+            pinfo.FileName = "lscpu";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardOutput = true;
+            lspci.StartInfo = pinfo;
+            lspci.Start();
+            string searchString = "Model Name: ";
+            while (!lspci.HasExited)
+            {
+                while (!lspci.StandardOutput.EndOfStream)
+                {
+                    string stdOut = lspci.StandardOutput.ReadLine();
+                    int pos = stdOut.IndexOf(searchString);
+                    if (pos != -1)
+                    {
+                        CPUModel  = (stdOut.Substring(pos + searchString.Length));
+                    }
+                }
+            }
             //Get Machine Name (Linux)
             pinfo = new ProcessStartInfo();
             pinfo.FileName = "uname";
