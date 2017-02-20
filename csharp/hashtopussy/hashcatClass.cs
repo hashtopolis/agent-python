@@ -60,9 +60,13 @@ namespace hashtopussy
             {
                 hcBin = "hashcat64.bin";
             }
+            else if(osID == 2)
+            {
+                hcBin = "hashcat";
+            }
             else
             {
-                hcBin = "hashcat64.exe";
+                hcBin = "hashcat.exe";
             }
         }
 
