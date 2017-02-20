@@ -107,25 +107,19 @@ namespace hashtopussy
                         string dlFrom = Path.Combine(jsC.getRetVar(ret, "url"));
                         string dlTo = Path.Combine(parentPath, launcherProcName);
                         dl.DownloadFile(dlFrom, dlTo);
-                        Console.WriteLine("Finished DL");
-
-                        //Check whether we need updating
-                        //Need code to send current version to server, probably a hash?
-                        //Download the launcher
-                        //Need to process res and download 
-
-                        //Run the launcher and exit current
-                        Console.WriteLine("Relaunching");
+                        Console.WriteLine("Finished downloading latest client");
+                        Console.WriteLine("Client will now relaunch");
                         Process Spawn = new Process();
+                        Spawn.StartInfo.WorkingDirectory = parentPath;
                         if (Type.GetType("Mono.Runtime") != null)
                         {
                             Spawn.StartInfo.FileName = "mono";
-                            Spawn.StartInfo.Arguments = launcherProcName + currentBin;
+                            Spawn.StartInfo.Arguments = launcherProcName + " " +  parentProc;
                         }
                         else
                         {
                             Spawn.StartInfo.FileName = launcherProcName;
-                            Spawn.StartInfo.Arguments = currentBin;
+                            Spawn.StartInfo.Arguments = parentProc;
                         }
 
                         Spawn.Start();
