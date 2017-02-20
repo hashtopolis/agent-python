@@ -107,7 +107,7 @@ public class registerClass
             searcher = new ManagementObjectSearcher("SELECT Name from Win32_Processor"); //Prep object to query windows CPUs
             foreach (ManagementObject mo in searcher.Get())
             {
-                CPUModel = mo.Properties["Name"].Value.ToString();
+                gpuList.Add(mo.Properties["Name"].Value.ToString());
             }
             //Get Machine Name (Windows)
             machineName = System.Environment.MachineName;
@@ -152,7 +152,7 @@ public class registerClass
                     int pos = stdOut.IndexOf(searchString);
                     if (pos != -1)
                     {
-                        CPUModel  = (stdOut.Substring(pos + searchString.Length));
+                        gpuList.Add(stdOut.Substring(pos + searchString.Length));
                     }
                 }
             }
@@ -235,7 +235,8 @@ public class registerClass
                         }
                         else if (searchID == "Processor Speed: ")
                         {
-                            CPUModel = CPUModel + "@" + stdOut.Substring(pos + searchID.Length);
+                            CPUModel = CPUModel + " @ " + stdOut.Substring(pos + searchID.Length);
+                            gpuList.Add(CPUModel);
                             break; 
                         }
                     }
