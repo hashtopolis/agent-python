@@ -206,6 +206,7 @@ public class registerClass
             Boolean triggerRead = false;
 
             string searchID = "Chipset Model: ";
+
             while (!getDevices.StandardOutput.EndOfStream)
             {
 
@@ -213,16 +214,31 @@ public class registerClass
 
                 if (triggerRead == true)
                 {
-                    if (stdOut.Contains("Hardware:"))
+                    if (stdOut.Contains("Total Number of Cores:")) //Just incase we go past 
                     {
                         break;
                     }
                     int pos = stdOut.IndexOf(searchID);
+
                     if (pos != -1)
                     {
-                        gpuList.Add(stdOut.Substring(pos + searchID.Length));
-                    }
+                        if (searchID == "Chipset Model: ")
+                        {
 
+                            gpuList.Add(stdOut.Substring(pos + searchID.Length));
+                            searchID = "Processor Name: ";
+                        }
+                        else if (searchID == "Processor Name: ")
+                        {
+                            CPUModel = stdOut.Substring(pos + searchID.Length);
+                            searchID = "Processor Speed: ";
+                        }
+                        else if (searchID == "Processor Speed: ")
+                        {
+                            CPUModel = CPUModel + "@" + stdOut.Substring(pos + searchID.Length);
+                            break; 
+                        }
+                    }
                 }
                 if (stdOut.Contains("Graphics/Displays:"))
                 {

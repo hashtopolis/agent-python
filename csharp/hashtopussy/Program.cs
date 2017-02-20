@@ -71,7 +71,7 @@ namespace hashtopussy
         {
 
             string AppVersion = "0.2";
-            jsonClass testConnect = new jsonClass { debugFlag = true, };
+            jsonClass testConnect = new jsonClass { debugFlag = true };
             testProp tProp = new testProp();
             while (!loadURL())
             {
