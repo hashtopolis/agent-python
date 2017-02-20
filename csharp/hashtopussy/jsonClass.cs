@@ -102,10 +102,55 @@ public class jsonClass
         return json;
     }
 
+
+    public string jsonSendOnce(string json)
+    {
+        var request = (HttpWebRequest)WebRequest.Create(connectURL);
+        request.ContentType = "application/x-www-form-urlencoded";
+        request.Method = "POST";
+        request.KeepAlive = false;
+
+        int randomTime = 0;
+
+        HttpWebResponse response = null;
+        int tries = 0;
+        {
+            Thread.Sleep(tries * 1000 + randomTime * 1000);
+            try
+            {
+                using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
+                {
+                    streamWriter.Write("query=" + json);
+                }
+
+            }
+            catch (WebException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null ;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+
+            response = (HttpWebResponse)request.GetResponse();
+
+            string result;
+            using (var streamReader = new StreamReader(response.GetResponseStream()))
+            {
+                result = streamReader.ReadToEnd();
+            }
+
+            return result;
+
+        }
+    }
+
     //On fail, the client will use a backdown algorithm and retry 30 times
     public string jsonSend(string json)
     {
-        connectURL = "https://alpha.hashes.org/src/api/server.php";
         var request = (HttpWebRequest)WebRequest.Create(connectURL);
         request.ContentType = "application/x-www-form-urlencoded";
         request.Method = "POST";
