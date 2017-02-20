@@ -135,15 +135,24 @@ public class jsonClass
                 return null;
             }
 
-            response = (HttpWebResponse)request.GetResponse();
-
-            string result;
-            using (var streamReader = new StreamReader(response.GetResponseStream()))
+            try
             {
-                result = streamReader.ReadToEnd();
+                response = (HttpWebResponse)request.GetResponse();
+                string result;
+                using (var streamReader = new StreamReader(response.GetResponseStream()))
+                {
+                    result = streamReader.ReadToEnd();
+                }
+
+                return result;
+            }
+            catch(WebException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
-            return result;
+
+            return null;
 
         }
     }
