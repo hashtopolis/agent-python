@@ -73,23 +73,31 @@ namespace hashtopussy
             string AppVersion = "0.2";
             jsonClass testConnect = new jsonClass { debugFlag = true };
             testProp tProp = new testProp();
+            string urlMsg = "Please enter server connect URL (https will be used unless specified):";
             while (!loadURL())
             {
-                Console.WriteLine("Could not locate server URL, please enter URL:");
+                Console.WriteLine(urlMsg);
                 string url = Console.ReadLine();
                 if (!url.StartsWith("http"))
                 {
                     url = "https://" + url;
                 }
-
+                Console.WriteLine("Testing connection to " + url);
                 testConnect.connectURL = url;
-                Console.WriteLine(url);
                 string jsonString = testConnect.toJson(tProp);
                 string ret = testConnect.jsonSendOnce(jsonString);
-                if (testConnect.isJsonSuccess(ret))
+                if (ret != null)
                 {
-                    File.WriteAllText(urlPath, url);
+                    if (testConnect.isJsonSuccess(ret))
+                    {
+                        File.WriteAllText(urlPath, url);
+                    }
                 }
+                else
+                {
+                    urlMsg = "Test connect failed, please enter URL:";
+                }
+
                 
                 
             }
@@ -122,7 +130,8 @@ namespace hashtopussy
             {
                 tokenID = client.tokenID,
                 osID = client.osID,
-                appPath = AppPath
+                appPath = AppPath,
+                connectURL = serverURL
             };
 
             zipper.init7z();
