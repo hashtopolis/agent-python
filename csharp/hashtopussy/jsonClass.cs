@@ -55,11 +55,20 @@ public class jsonClass
     public string getRetVar(string jsonString, string itemVar)
     {
 
-        var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
-        if (dict.ContainsKey(itemVar))
+        try
         {
-            return Convert.ToString(dict[itemVar]);
+            var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
+            if (dict.ContainsKey(itemVar))
+            {
+                return Convert.ToString(dict[itemVar]);
+            }
         }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+            Console.WriteLine("Error while trying to get {0} from jaon string", itemVar);
+        }
+
 
         return "NULL";
     }
