@@ -452,7 +452,7 @@ namespace hashtopussy
                     string dlFrom = Path.Combine(prefixServerdl, jsC.getRetVar(ret, "url"));
                     string dlTo = Path.Combine(filepath,fileName);
                     dlHdl.DownloadFile(dlFrom, dlTo);
-                    Console.WriteLine("Finished DL");
+                    Console.WriteLine("Finished downloading file");
                     //Check if file exists. check if return success
                     return true;
                 }
