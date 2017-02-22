@@ -544,7 +544,7 @@ namespace hashtopussy
                             string replace = " \"" + absolutePath + "\"";
                             if (File.Exists(absolutePath))
                             {
-                                attackcmd = attackcmd.Replace(match, absolutePath);
+                                attackcmd = attackcmd.Replace(match, replace);
                             }
                         }
 
