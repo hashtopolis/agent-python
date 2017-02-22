@@ -49,9 +49,9 @@ namespace hashtopussy
 
                 if (jsC.isJsonSuccess(ret))
                 {
-                    string base64bin = jsC.getRetVar(ret, "executable");
-                    byte[] binArray = System.Convert.FromBase64String(base64bin);
-                    File.WriteAllBytes(binPath, binArray);
+                    downloadClass dlClass = new downloadClass();
+                    dlClass.DownloadFile(jsC.getRetVar(ret, "executable"), binPath);
+                    Console.WriteLine("Finished downloading file");
                 }
 
             }
