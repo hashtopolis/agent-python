@@ -31,11 +31,10 @@ namespace hashtopussy
             {
                 binPath += ".exe";
             }
-            Console.WriteLine(binPath);
 
             if (!File.Exists(binPath))
             {
-                Console.WriteLine("Download 7zip binary");
+                Console.WriteLine("Downloading 7zip binary");
                 jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
 
                 dlProps dlzip = new dlProps
@@ -46,13 +45,36 @@ namespace hashtopussy
 
                 string jsonString = jsC.toJson(dlzip);
                 string ret = jsC.jsonSend(jsonString);
-
                 if (jsC.isJsonSuccess(ret))
+
                 {
+                    string dlLocation = jsC.getRetVar(ret,"executable");
                     downloadClass dlClass = new downloadClass();
-                    dlClass.DownloadFile(jsC.getRetVar(ret, "executable"), binPath);
-                    Console.WriteLine("Finished downloading file");
+                    if (dlClass.DownloadFile(dlLocation, binPath))
+                    {
+                        Console.WriteLine("Unable to download requested file");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Finished downloading file");
+                    }
+                    
                 }
+                if (osID != 1) //If OS is not windows, we need to set the permissions
+                {
+                    try
+                    {
+                        Console.WriteLine("Applying execution permissions to 7zr binary");
+                        Process.Start("chmod", "+x \"" + binPath + "\"");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Write(e.Data);
+                        Console.WriteLine("Unable to change access permissions of 7zr, execution permissions required");
+                    }
+                }
+
+
 
             }
 
