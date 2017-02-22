@@ -17,20 +17,19 @@ namespace hashtopussy
             using (webClient = new WebClient())
             {
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
+                // The variable that will be holding the url address (making sure it starts with http://)
+
                 if (!urlAddress.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 {
                     urlAddress = "https://" + urlAddress;
                 }
-
                 Uri URL = null;
-                // The variable that will be holding the url address (making sure it starts with http://)
                 try
                 {
                     URL = new Uri(urlAddress);
                 }
-                catch (Exception e)
+                catch
                 {
-                    Console.WriteLine(e.Data);
                     Console.WriteLine("Invalid url for downloading");
                     return false;
                 }
