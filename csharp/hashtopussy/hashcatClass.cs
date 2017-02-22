@@ -194,6 +194,7 @@ namespace hashtopussy
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDir, hcBin);
+            Console.WriteLine("Using {0} as working directory", filesDir);
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
@@ -258,6 +259,7 @@ namespace hashtopussy
 
         private static void parseKeyspace(string line, ref long keySpace)
         {
+            Console.WriteLine("Parsing keyspace: " + line);
             line = line.TrimEnd();
             keySpace = Convert.ToInt64(line);
         }
@@ -268,15 +270,17 @@ namespace hashtopussy
             Console.WriteLine("Server has requested the client to measure the keyspace for this task");
 
             StringBuilder stdOutBuild = new StringBuilder();
+            string stdOutSingle = "";
             string suffixArgs = " --session=hashtopussy --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDir , hcBin);
             pInfo.WorkingDirectory = filesDir;
+            Console.WriteLine("Using {0} as working directory", filesDir);
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
-
+            Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
             Process hcProcKeyspace = new Process();
             hcProcKeyspace.StartInfo = pInfo;
             hcProcKeyspace.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
@@ -292,7 +296,7 @@ namespace hashtopussy
                     {
 
                         string stdOut = hcProcKeyspace.StandardOutput.ReadLine().TrimEnd();
-                        stdOutBuild.AppendLine(stdOut);
+                        stdOutSingle = stdOut; //We just want the last line
                     }
                 }
                 hcProcKeyspace.StandardOutput.Close();
@@ -308,7 +312,7 @@ namespace hashtopussy
                 hcProcKeyspace.Close();
             }
 
-            parseKeyspace(stdOutBuild.ToString(),ref keySpace);
+            parseKeyspace(stdOutSingle,ref keySpace);
 
             return true;
         }
