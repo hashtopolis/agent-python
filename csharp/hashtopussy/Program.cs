@@ -98,8 +98,6 @@ namespace hashtopussy
                     urlMsg = "Test connect failed, please enter URL:";
                 }
 
-                
-                
             }
 
             Console.WriteLine("Client Version " + AppVersion);
@@ -136,7 +134,7 @@ namespace hashtopussy
 
             if (!zipper.init7z())
             {
-                Console.WriteLine("Failed to initialize 7zip, proceeding without. The client may not be able to extract compressed files");
+                Console.WriteLine("Failed to initialize 7zip, proceeding without. \n The client may not be able to extract compressed files");
             }
 
             taskClass tasks = new taskClass
