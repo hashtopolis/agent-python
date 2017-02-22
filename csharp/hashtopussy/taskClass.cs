@@ -213,7 +213,6 @@ namespace hashtopussy
                                 sProps.state = uploadPackets[0].statusPackets["STATUS"];
                                 sProps.cracks = uploadPackets[0].crackedPackets;
 
-
                             }
 
                             jsonString = jsC.toJson(sProps);
@@ -514,7 +513,7 @@ namespace hashtopussy
                             getFile(fileItem);
                            
                             if (fileItem.ToLower().EndsWith(".7z"))
-                            {
+                            {            
                                 if (sevenZip.xtract(actualFile, filepath))
                                 {
                                     File.WriteAllText(actualFile, "UNPACKED");
@@ -527,12 +526,12 @@ namespace hashtopussy
                         }
                     }
 
-                    //Convert implied relative paths to absolute paths only applies to Mac OSX
+                    //Convert implied relative paths to absolute paths only applies to Mac OSX / Linux
                     //We, break up the attack command by space and check whether the file for the full path exists, we it does we replace
                     //Could potentially cause issues if the file names are attack numbers eg 1 2 3 4 5 6 7
                     //File names cannot contain spaces
                     //Altnerative method is to perform find replace on the attackcmd based on the files array
-                    if (osID == 2)
+                    if (osID != 1)
                     {
                         string[] explode = new string[] { };
                         explode = attackcmd.Split(' ');
