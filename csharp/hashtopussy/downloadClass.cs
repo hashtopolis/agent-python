@@ -17,12 +17,20 @@ namespace hashtopussy
             using (webClient = new WebClient())
             {
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
-
+                Uri URL = null;
                 // The variable that will be holding the url address (making sure it starts with http://)
-                Uri URL = urlAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri(urlAddress) : new Uri("https://" + urlAddress);
+                try
+                {
+                    URL  = urlAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri(urlAddress) : new Uri("https://" + urlAddress);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Data);
+                    Console.WriteLine("Invalid url for downloading");
+                    return false;
+                }
 
-                Console.WriteLine(urlAddress);
-                Console.WriteLine(location);
+
                 // Start the stopwatch which we will be using to calculate the download speed
                 sw.Start();
 
