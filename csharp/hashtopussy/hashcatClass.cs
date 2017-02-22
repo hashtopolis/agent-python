@@ -147,9 +147,15 @@ namespace hashtopussy
                         collection.Add("RECSALT2", Convert.ToDouble(items[i + 2])); //Second RECSALT value
                         i += 2;
                         break;
+                    default:
+                        i += 1;
+                        break;
+                    
+
                 }
                 i += 1;
             }
+            Console.WriteLine("Finished parsing status");
         }
 
 
@@ -302,13 +308,17 @@ namespace hashtopussy
                 hcProcKeyspace.StandardOutput.Close();
 
             }
+            catch
+            {
+                Console.WriteLine("Something went wrong with keyspace measuring");
+            }
             finally
             {
                 if (hcProcKeyspace.ExitCode != 0)
                 {
                     Console.WriteLine("Something went wrong with keyspace measuring");
                 }
-                hcProcKeyspace.CancelErrorRead();
+
                 hcProcKeyspace.Close();
             }
 
@@ -382,7 +392,7 @@ namespace hashtopussy
             ProcessStartInfo pinfo = new ProcessStartInfo();
 
             pinfo.FileName = Path.Combine(hcDir , hcBin);
-            pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopus --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " --skip=" + skip + " --limit=" + size;
+            pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " -s " + skip + " -l " + size;
             pinfo.WorkingDirectory = filesDir;
             pinfo.UseShellExecute = false;
             pinfo.RedirectStandardError = true;
