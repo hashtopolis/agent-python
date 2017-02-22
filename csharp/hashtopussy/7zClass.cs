@@ -50,6 +50,7 @@ namespace hashtopussy
                 {
                     string dlLocation = jsC.getRetVar(ret,"executable");
                     downloadClass dlClass = new downloadClass();
+
                     if (dlClass.DownloadFile(dlLocation, binPath))
                     {
                         Console.WriteLine("Unable to download requested file");
@@ -93,13 +94,14 @@ namespace hashtopussy
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = binPath;
             pinfo.WorkingDirectory = appPath;
-            pinfo.Arguments = "x -y -o\"" + outDir + "\" \"" + archivePath + "\"";
+            pinfo.Arguments = " x -y -o\"" + outDir + "\" \"" + archivePath + "\"";
 
             Process unpak = new Process();
             unpak.StartInfo = pinfo;
 
             if (files != "") unpak.StartInfo.Arguments += " " + files;
 
+            Console.WriteLine(pinfo.FileName + pinfo.Arguments);
             Console.WriteLine("Extracting archive " + archivePath + "...");
 
             try
