@@ -527,6 +527,43 @@ namespace hashtopussy
                         }
                     }
 
+                    //Convert implied relative paths to absolute paths only applies to Mac OSX
+                    //We, break up the attack command by space and check whether the file for the full path exists, we it does we replace
+                    //Could potentially cause issues if the file names are attack numbers eg 1 2 3 4 5 6 7
+                    //File names cannot contain spaces
+                    //Altnerative method is to perform find replace on the attackcmd based on the files array
+                    if (osID == 2)
+                    {
+                        string[] explode = new string[] { };
+                        explode = attackcmd.Split(' ');
+
+                        for (int i = 0; i<files.Count; i++)
+                        {
+                            string absolutePath = Path.Combine(filepath, files[i].ToString());
+                            string match = " " + files[i].ToString(); //Prefix a space for better matching
+                            string replace = " \"" + absolutePath + "\"";
+                            if (File.Exists(absolutePath))
+                            {
+                                attackcmd = attackcmd.Replace(match, absolutePath);
+                            }
+                        }
+
+                        /*
+                        for (int i = 0; i<explode.Length; i++)
+                        {
+                            if (files.Contains(explode[i]));
+                            {
+                                string absolutePath = Path.Combine(filepath, explode[i]);
+                                if (File.Exists(absolutePath))
+                                {
+                                    explode[i] = absolutePath;
+                                }
+                            } 
+                        }
+                        attackcmd = String.Join(" ", explode);
+                        */
+                    }
+
                     if (getHashes(hashlistID) == false)
                     {
                         return false;
