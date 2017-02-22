@@ -78,7 +78,7 @@ namespace hashtopussy
             {
                 Console.WriteLine(urlMsg);
                 string url = Console.ReadLine();
-                if (!url.StartsWith("http"))
+                if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 {
                     url = "https://" + url;
                 }
