@@ -134,7 +134,10 @@ namespace hashtopussy
                 connectURL = serverURL
             };
 
-            zipper.init7z();
+            if (!zipper.init7z())
+            {
+                Console.WriteLine("Failed to initialize 7zip, proceeding without. The client may not be able to extract compressed files");
+            }
 
             taskClass tasks = new taskClass
             {
