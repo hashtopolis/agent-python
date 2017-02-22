@@ -43,7 +43,6 @@ public class jsonClass
             return false;
         }
         catch (Exception e)
-
         {
             Console.WriteLine(e.Data);
             Console.WriteLine("Empty string for success check");
