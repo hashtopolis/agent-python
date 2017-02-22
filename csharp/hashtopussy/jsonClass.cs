@@ -23,7 +23,6 @@ public class jsonClass
 
         try
         {
-            
             Dictionary<string, dynamic> dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
 
             if (dict.ContainsKey("response"))
@@ -43,8 +42,10 @@ public class jsonClass
             }
             return false;
         }
-        catch
+        catch (Exception e)
+
         {
+            Console.WriteLine(e.Data);
             Console.WriteLine("Empty string for success check");
             return false;
         }
