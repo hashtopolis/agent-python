@@ -51,7 +51,7 @@ namespace hashtopussy
                     string dlLocation = jsC.getRetVar(ret,"executable");
                     downloadClass dlClass = new downloadClass();
 
-                    if (dlClass.DownloadFile(dlLocation, binPath))
+                    if (!dlClass.DownloadFile(dlLocation, binPath))
                     {
                         Console.WriteLine("Unable to download requested file");
                     }
