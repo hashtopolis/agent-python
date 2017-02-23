@@ -119,15 +119,8 @@ namespace hashtopussy
         {
 
             string actualHLpath = Path.Combine(hashpath , Path.GetFileName(inTask.ToString()));
-            if (!File.Exists(actualHLpath))
-            {
-                Console.WriteLine("Downloading hashlist for this task");
-            }
-            else
-            {
-                Console.WriteLine("Hashlist for this task already exists, skipping download");
-                return true;
-            }
+
+            Console.WriteLine("Downloading hashlist for this task");
 
 
 
