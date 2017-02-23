@@ -155,7 +155,6 @@ namespace hashtopussy
                 }
                 i += 1;
             }
-            Console.WriteLine("Finished parsing status");
         }
 
 
@@ -265,7 +264,6 @@ namespace hashtopussy
 
         private static void parseKeyspace(string line, ref long keySpace)
         {
-            Console.WriteLine("Parsing keyspace: " + line);
             line = line.TrimEnd();
             keySpace = Convert.ToInt64(line);
         }
