@@ -17,6 +17,14 @@ namespace hashtopussy
         public string action = "test";
     }
 
+    public class hcUpdateProp
+    {
+        public string action = "download";
+        public string type = "hashcat";
+        public string token = "";
+        public int force { set; get; }
+    }
+
     class Program
     {
 
@@ -135,6 +143,42 @@ namespace hashtopussy
             if (!zipper.init7z())
             {
                 Console.WriteLine("Failed to initialize 7zip, proceeding without. \n The client may not be able to extract compressed files");
+            }
+            else //We have 7zip, lets check for HC update since that is zipped
+            {
+                hcUpdateProp hcUpd = new hcUpdateProp();
+                jsonClass jsonUpd = new jsonClass { debugFlag = true, connectURL = serverURL };
+                hcUpd.token = client.tokenID;
+                string hcBinName = "hashcat";
+                if (client.osID == 0)
+                {
+                    hcBinName = hcBinName + "64.bin";
+                }
+                else if (client.osID == 1)
+                {
+                    hcBinName = hcBinName + "64.exe";
+                }
+
+                string hcBinLoc = Path.Combine(AppPath, "hashcat",hcBinName);
+                Console.WriteLine(hcBinLoc);
+                if (File.Exists(hcBinLoc))
+                {
+                    hcUpd.force = 1; //HC exists, we don't need to force
+                }
+                else
+                {
+                    hcUpd.force = 1; //HC doesn't exist, we need to force
+                }
+
+                string jsonString = jsonUpd.toJson(hcUpd);
+                string ret = jsonUpd.jsonSend(jsonString);
+                Console.WriteLine(ret);
+                if (jsonUpd.getRetVar(ret,"version") == "NEW")
+                {
+                    downloadClass dlClass = new downloadClass();
+                    dlClass.DownloadFile("https://hashcat.net/files/hashcat-3.30.7z", Path.Combine(AppPath,"hcClient.7z"));
+                    zipper.xtract(Path.Combine(AppPath, "hcClient.7z"), Path.Combine(AppPath, "hcClient"));
+                }
             }
 
             taskClass tasks = new taskClass
