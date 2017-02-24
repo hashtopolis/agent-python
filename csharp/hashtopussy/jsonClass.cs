@@ -172,6 +172,7 @@ public class jsonClass
         var request = (HttpWebRequest)WebRequest.Create(connectURL);
         request.ContentType = "application/x-www-form-urlencoded";
         request.Method = "POST";
+        request.Timeout = 6000;
         request.KeepAlive = false;
  
         int randomTime = 0;
