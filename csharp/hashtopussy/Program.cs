@@ -163,7 +163,7 @@ namespace hashtopussy
                 Console.WriteLine(hcBinLoc);
                 if (File.Exists(hcBinLoc))
                 {
-                    hcUpd.force = 1; //HC exists, we don't need to force
+                    hcUpd.force = 0; //HC exists, we don't need to force
                 }
                 else
                 {

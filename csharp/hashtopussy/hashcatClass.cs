@@ -344,7 +344,6 @@ namespace hashtopussy
                 {
                     lock (crackedLock)
                     {
-                        Console.WriteLine("Cracked");
                         hashlist.Add(stdOut);
                     }
                     
