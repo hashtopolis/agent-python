@@ -155,148 +155,155 @@ namespace hashtopussy
             jsonClass jsC = new jsonClass {debugFlag = true,  connectURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
-            string ret; //Return string from json post
+            string ret =""; //Return string from json post
             string jsonString ="";
             string zapfilePath = zapPath + hashlistID.ToString();
             long zapCount = 0;
-            Boolean batchJob = false;
             List<string> batchList = new List<string> { };
             int lastPacketNum = 0;
             double chunkPercent = 0;
             double chunkStart = 0;
             Boolean run = true;
+            List<Packets> singlePacket  = new List<Packets> { };
+            int sleepTime = 2500;
+
             while (run)
             {
-                Thread.Sleep(2500); //Delay this thread for 2.5 seconds, if this falls behind it will batch the jobs
+                Thread.Sleep(sleepTime); //Delay this thread for 2.5 seconds, if this falls behind it will batch the jobs
                 lock (objPacketlock)
                 {
                     if (uploadPackets.Count > 0)
                     {
-                        try
+                        singlePacket.Add(uploadPackets[0]);
+                        Console.WriteLine("Upload queue {0}", uploadPackets.Count);
+                        uploadPackets.RemoveAt(0);
+                        if (uploadPackets.Count > 3)
+
+                        sleepTime = 200; //Decrese the time we process the queue
+                    }
+                    else
+                    {
+                        sleepTime = 2500; //Decrese the time we process the queue
+                    }
+                }
+
+
+                if (singlePacket.Count == 0)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    {
+                        
+                        sProps.token = tokenID;
+                        sProps.chunk = chunkNo;
+                        sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
+                        sProps.progress = singlePacket[0].statusPackets["PROGRESS1"];
+                        sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
+                        sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
+                        sProps.state = singlePacket[0].statusPackets["STATUS"];
+
+                        if (singlePacket[0].crackedPackets.Count > 200)
                         {
-                            if (uploadPackets.Count > 10)
+                            int max = 200;
+
+                            //Process the requests in batches of 1000
+                            while (singlePacket[0].crackedPackets.Count != 0)
                             {
-                                batchJob = true;
-                                foreach (Packets packets in uploadPackets)
+                                List<string> subChunk = new List<string>(singlePacket[0].crackedPackets.GetRange(0, max));
+                                singlePacket[0].crackedPackets.RemoveRange(0, max);
+                                if (singlePacket[0].crackedPackets.Count < max)
                                 {
-                                    batchList.AddRange(packets.crackedPackets); //Add every-single crack from queue into single list
+                                    max = singlePacket[0].crackedPackets.Count;
                                 }
-                                lastPacketNum = uploadPackets.Count - 1;
-                                sProps.token = tokenID;
-                                sProps.chunk = chunkNo;
-                                sProps.keyspaceProgress = uploadPackets[lastPacketNum].statusPackets["CURKU"];
-                                sProps.progress = uploadPackets[lastPacketNum].statusPackets["PROGRESS1"];
-                                sProps.total = uploadPackets[lastPacketNum].statusPackets["PROGRESS2"];
-                                sProps.speed = uploadPackets[lastPacketNum].statusPackets["SPEED_TOTAL"];
-                                sProps.state = uploadPackets[lastPacketNum].statusPackets["STATUS"];
-                                sProps.cracks = batchList;
+                                sProps.cracks = subChunk;
+                                jsonString = jsC.toJson(sProps);
+                                ret = jsC.jsonSend(jsonString);
+                                Console.WriteLine(ret);
                             }
-
-                            else
-                            {
-                                Console.WriteLine("Upload queue {0}", uploadPackets.Count);
-
-
-                                sProps.token = tokenID;
-                                sProps.chunk = chunkNo;
-                                sProps.keyspaceProgress = uploadPackets[0].statusPackets["CURKU"];
-                                sProps.progress = uploadPackets[0].statusPackets["PROGRESS1"];
-                                sProps.total = uploadPackets[0].statusPackets["PROGRESS2"];
-                                sProps.speed = uploadPackets[0].statusPackets["SPEED_TOTAL"];
-                                sProps.state = uploadPackets[0].statusPackets["STATUS"];
-                                sProps.cracks = uploadPackets[0].crackedPackets;
-
-                            }
+                                    
+                        }
+                        else
+                        {
+                            sProps.cracks = singlePacket[0].crackedPackets;
 
                             jsonString = jsC.toJson(sProps);
-
                             ret = jsC.jsonSend(jsonString);
-                            if (jsC.isJsonSuccess(ret))
-                            {
-
-                                chunkStart = Math.Floor(uploadPackets[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
-                                chunkPercent = Math.Round((Convert.ToDouble(uploadPackets[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(uploadPackets[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
-
-                                Console.WriteLine("Progress: {0}% Speed: {1}", chunkPercent, uploadPackets[0].statusPackets["SPEED_TOTAL"]);
-
-
-                                if (uploadPackets[0].crackedPackets.Count != 0) //Give some info if cracks were submitted
-                                {
-                                    Console.WriteLine("Uploaded {0} cracks, server accepted {1}", uploadPackets[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"));
-                                }
-
-                                receivedZaps = jsC.getRetList(ret, "zaps"); //Check whether the server sent out hashes to zap
-                                if (receivedZaps.Count > 0)
-                                {
-                                    zapCount++;
-                                    File.WriteAllLines(zapfilePath + zapCount.ToString(), receivedZaps); //Write hashes for zapping
-                                    Console.WriteLine("Zapped {0} hashes", receivedZaps.Count);
-                                    receivedZaps.Clear();
-                                }
-                            }
-
-
-                            else //We received an error from the server, terminate the run
-                            {
-
-                                if (!hcClass.hcProc.HasExited)
-                                {
-                                    hcClass.hcProc.CancelOutputRead();
-                                    hcClass.hcProc.CancelErrorRead();
-                                    hcClass.hcProc.Kill();
-                                    run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
-                                    //The server would need to accept the chunk but return an error
-                                }
-
-                            }
-
-
-                            if (batchJob == false)
-                            {
-                                if (uploadPackets[0].statusPackets["STATUS"] >= 4 && uploadPackets.Count == 1) //We are the last upload task
-                                {
-                                    Console.WriteLine("Finished last chunk");
-                                    uploadPackets.Clear();
-                                    run = false;
-                                }
-                                else
-                                {
-                                    uploadPackets.RemoveAt(0);
-                                }
-                                
-                            }
-                            else
-                            {
-                                if (uploadPackets[lastPacketNum].statusPackets["STATUS"] >= 4) //We are the last upload task
-                                {
-                                    Console.WriteLine("Finished last chunk");
-                                    uploadPackets.Clear();
-                                    run = false;
-                                }
-                                uploadPackets.Clear();
-                            }
-
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.Message);
+                    }
 
-                            /*
+                   
+
+                    if (jsC.isJsonSuccess(ret))
+                    {
+
+                        chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
+                        chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
+
+                        Console.WriteLine("Progress:{0}% Speed:{1} Crackes:{2} Accepted:{3}", chunkPercent, singlePacket[0].statusPackets["SPEED_TOTAL"], singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"));
+
+
+
+                        receivedZaps = jsC.getRetList(ret, "zaps"); //Check whether the server sent out hashes to zap
+                        if (receivedZaps.Count > 0)
+                        {
+                            zapCount++;
+                            File.WriteAllLines(zapfilePath + zapCount.ToString(), receivedZaps); //Write hashes for zapping
+                            Console.WriteLine("Zapped {0} hashes", receivedZaps.Count);
+                            receivedZaps.Clear();
+                        }
+                    }
+
+
+                    else //We received an error from the server, terminate the run
+                    {
+
+                        if (!hcClass.hcProc.HasExited)
+                        {
                             hcClass.hcProc.CancelOutputRead();
                             hcClass.hcProc.CancelErrorRead();
-                            if (!hcClass.hcProc.HasExited)
-                            {
-                                hcClass.hcProc.Kill();
-                            }
-                            */
-
-                            continue;
-                            
+                            hcClass.hcProc.Kill();
+                            run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
+                            //The server would need to accept the chunk but return an error
                         }
 
                     }
+
+
+
+                    {
+                        if (singlePacket[lastPacketNum].statusPackets["STATUS"] >= 4) //We are the last upload task
+                        {
+                            Console.WriteLine("Finished last chunk");
+                            singlePacket.Clear();
+                            run = false;
+                        }
+                        singlePacket.RemoveAt(0);
+                    }
+
+
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+
+                    /*
+                    hcClass.hcProc.CancelOutputRead();
+                    hcClass.hcProc.CancelErrorRead();
+                    if (!hcClass.hcProc.HasExited)
+                    {
+                        hcClass.hcProc.Kill();
+                    }
+                    */
+
+                    continue;
+                            
+                }
+
             }
+   
         }
 
         private  jsonClass jsC = new jsonClass {};
