@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-
+using System.Diagnostics;
 namespace hashtopussy
 {
 
@@ -184,6 +184,12 @@ namespace hashtopussy
                     }
                     Directory.Move(Path.Combine(AppPath, "hcClient", "hashcat-3.30"), Path.Combine(AppPath, "hashcat"));
                     Directory.Delete(Path.Combine(AppPath, "hcClient"));
+
+                    if (client.osID != 1) //Chmod for non windows
+                    {
+                        Console.WriteLine("Applying execution permissions to 7zr binary");
+                        Process.Start("chmod", "+x \"" + Path.Combine(AppPath, "hcClient", "hashcat-3.30", hcBinName) + "\"");
+                    }
                 }
             }
 
