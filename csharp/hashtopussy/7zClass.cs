@@ -75,8 +75,6 @@ namespace hashtopussy
                     }
                 }
 
-
-
             }
 
             if (File.Exists(binPath))
