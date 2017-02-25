@@ -163,7 +163,7 @@ namespace hashtopussy
                 Console.WriteLine(hcBinLoc);
                 if (File.Exists(hcBinLoc))
                 {
-                    hcUpd.force = 0; //HC exists, we don't need to force
+                    hcUpd.force = 1; //HC exists, we don't need to force
                 }
                 else
                 {
@@ -178,6 +178,12 @@ namespace hashtopussy
                     downloadClass dlClass = new downloadClass();
                     dlClass.DownloadFile("https://hashcat.net/files/hashcat-3.30.7z", Path.Combine(AppPath,"hcClient.7z"));
                     zipper.xtract(Path.Combine(AppPath, "hcClient.7z"), Path.Combine(AppPath, "hcClient"));
+                    if (Directory.Exists(Path.Combine(AppPath, "hashcat")))
+                    {
+                        Directory.Delete(Path.Combine(AppPath, "hashcat"), true);
+                    }
+                    Directory.Move(Path.Combine(AppPath, "hcClient", "hashcat-3.30"), Path.Combine(AppPath, "hashcat"));
+                    Directory.Delete(Path.Combine(AppPath, "hcClient"));
                 }
             }
 
