@@ -92,7 +92,7 @@ namespace hashtopussy
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = binPath;
             pinfo.WorkingDirectory = appPath;
-            pinfo.Arguments = " x -y -o \"" + outDir + "\" \"" + archivePath + "\"";
+            pinfo.Arguments = " x -y -o\"" + outDir + "\" \"" + archivePath + "\"";
 
             Process unpak = new Process();
             unpak.StartInfo = pinfo;

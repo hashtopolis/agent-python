@@ -176,14 +176,14 @@ namespace hashtopussy
                 if (jsonUpd.getRetVar(ret,"version") == "NEW")
                 {
                     downloadClass dlClass = new downloadClass();
-                    dlClass.DownloadFile("https://hashcat.net/files/hashcat-3.30.7z", Path.Combine(AppPath,"hcClient.7z"));
+                    dlClass.DownloadFile(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath,"hcClient.7z"));
                     zipper.xtract(Path.Combine(AppPath, "hcClient.7z"), Path.Combine(AppPath, "hcClient"));
                     if (Directory.Exists(Path.Combine(AppPath, "hashcat")))
                     {
                         Directory.Delete(Path.Combine(AppPath, "hashcat"), true);
                     }
-                    Directory.Move(Path.Combine(AppPath, "hcClient", "hashcat-3.30"), Path.Combine(AppPath, "hashcat"));
-                    Directory.Delete(Path.Combine(AppPath, "hcClient"));
+                    Directory.Move(Path.Combine(AppPath, "hcClient", jsonUpd.getRetVar(ret, "rootdir")), Path.Combine(AppPath, "hashcat"));
+                    //Directory.Delete(Path.Combine(AppPath, "hcClient"));
 
                     if (client.osID != 1) //Chmod for non windows
                     {
