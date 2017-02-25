@@ -10,8 +10,8 @@ namespace hashtopussy
     {
 
         hashcatClass hcClass = new hashcatClass();
-        
-        
+
+
         private int taskID;
         private string attackcmd;
         private string cmdpars;
@@ -20,7 +20,7 @@ namespace hashtopussy
         private int statusTimer;
         private int benchMethod;
         private ArrayList files;
-        
+
 
         private static string prefixServerdl = "https://alpha.hashes.org/src/";
         private static string hashlistAlias = "#HL#";
@@ -44,14 +44,14 @@ namespace hashtopussy
         private List<string> primaryCracked; //Stores the cracked hashes as they come
         private object packetLock = new object(); //Lock to prevent the packetList from being edited as it's passed between the periodicUpload thread and the stdOut reader in hashcatClass
 
-  
+
 
         public void setDirs(string fpath)
         {
             appPath = fpath;
             filepath = Path.Combine(fpath, "files");
             hashpath = Path.Combine(fpath, "hashlists");
-            zapPath = Path.Combine(fpath, "hashlists","zaps");
+            zapPath = Path.Combine(fpath, "hashlists", "zaps");
             tasksPath = Path.Combine(fpath, "tasks");
 
         }
@@ -118,7 +118,7 @@ namespace hashtopussy
         public Boolean getHashes(int inTask)
         {
 
-            string actualHLpath = Path.Combine(hashpath , Path.GetFileName(inTask.ToString()));
+            string actualHLpath = Path.Combine(hashpath, Path.GetFileName(inTask.ToString()));
 
             Console.WriteLine("Downloading hashlist for this task, please wait...");
 
@@ -133,7 +133,7 @@ namespace hashtopussy
             string ret = jsC.jsonSend(jsonString);
 
             //Check if is json string, a nasty workaround copies from the javaclient to detect whether the return string is json vs hl. Should probably use a proper detector
-            if (ret[0] != '{' && ret[ret.Length-1] != '}')
+            if (ret[0] != '{' && ret[ret.Length - 1] != '}')
             {
                 File.WriteAllText(actualHLpath, ret);
                 Directory.CreateDirectory(Path.Combine(hashpath, "zaps" + inTask.ToString()));
@@ -146,11 +146,43 @@ namespace hashtopussy
 
             return true;
         }
-       
+
+        public string speedCalc(double speed)
+        {
+            int count = 0;
+            while (speed > 1000)
+            {
+                speed = speed / 1000;
+                count++;
+            }
+
+            speed = Math.Round(speed, 2);
+
+            if (count == 0)
+            {
+                return speed.ToString() + "KH/s";
+            }
+            else if (count == 1)
+            {
+                return speed.ToString() + "MH/s";
+            }
+            else if (count == 2)
+            {
+                return speed.ToString() + "GH/s";
+            }
+            else if (count == 3)
+            {
+                return speed.ToString() + "TH/s";
+            }
+
+            return speed.ToString();
+        }
+
+    
 
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
-            jsonClass jsC = new jsonClass {debugFlag = true,  connectURL = connectURL };//Initis the json class
+            jsonClass jsC = new jsonClass {debugFlag = false,  connectURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret =""; //Return string from json post
@@ -164,6 +196,7 @@ namespace hashtopussy
             Boolean run = true;
             List<Packets> singlePacket  = new List<Packets> { };
             int sleepTime = 2500;
+            long ulQueue = 0;
 
             while (run)
             {
@@ -173,7 +206,7 @@ namespace hashtopussy
                     if (uploadPackets.Count > 0)
                     {
                         singlePacket.Add(uploadPackets[0]);
-                        Console.WriteLine("Upload queue {0}", uploadPackets.Count);
+                        ulQueue = uploadPackets.Count;
                         uploadPackets.RemoveAt(0);
                         if (uploadPackets.Count > 3)
 
@@ -193,8 +226,7 @@ namespace hashtopussy
 
                 try
                 {
-                    {
-                        
+                    { 
                         sProps.token = tokenID;
                         sProps.chunk = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
@@ -240,18 +272,16 @@ namespace hashtopussy
                         chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
                         chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
 
-                        Console.WriteLine("Progress:{0}% Speed:{1} Crackes:{2} Accepted:{3}", chunkPercent, singlePacket[0].statusPackets["SPEED_TOTAL"], singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"));
-
-
 
                         receivedZaps = jsC.getRetList(ret, "zaps"); //Check whether the server sent out hashes to zap
                         if (receivedZaps.Count > 0)
                         {
                             zapCount++;
                             File.WriteAllLines(zapfilePath + zapCount.ToString(), receivedZaps); //Write hashes for zapping
-                            Console.WriteLine("Zapped {0} hashes", receivedZaps.Count);
                             receivedZaps.Clear();
                         }
+                        Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue: {5}", chunkPercent, speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
+
                     }
 
 
@@ -260,6 +290,7 @@ namespace hashtopussy
 
                         if (!hcClass.hcProc.HasExited)
                         {
+                            Console.WriteLine("Error received");
                             hcClass.hcProc.CancelOutputRead();
                             hcClass.hcProc.CancelErrorRead();
                             hcClass.hcProc.Kill();
