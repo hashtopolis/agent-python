@@ -173,7 +173,7 @@ public class jsonClass
         request.ContentType = "application/x-www-form-urlencoded";
         request.Method = "POST";
         request.Timeout = 6000;
-        request.KeepAlive = false;
+        request.KeepAlive = true;
  
         int randomTime = 0;
 
@@ -200,7 +200,6 @@ public class jsonClass
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                Environment.Exit(0);
             }
             break;
         } while (tries <= 30);
@@ -227,6 +226,7 @@ public class jsonClass
                 if (ex.Status == WebExceptionStatus.Timeout)
                 {
                     Console.WriteLine("Server timed out");
+                    Console.WriteLine(ex.Message);
                     tries++;
                     randomTime = rnd.Next(1, tries);
                     Console.WriteLine("Attempting to re-connect in {0} seconds", tries + randomTime);
@@ -240,7 +240,6 @@ public class jsonClass
             catch (Exception)
             {
                 Console.WriteLine("Could not connect to specified server, exiting");
-                Environment.Exit(0);
             }
             break;
         } while (tries <= 10);
