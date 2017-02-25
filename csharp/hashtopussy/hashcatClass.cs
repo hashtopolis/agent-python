@@ -84,7 +84,7 @@ namespace hashtopussy
         {
 
 
-            Console.WriteLine(line);
+            //Console.WriteLine(line);
 
             string[] items = line.Split('\t');
             double speedData = 0;
