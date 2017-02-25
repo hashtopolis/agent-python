@@ -163,7 +163,7 @@ namespace hashtopussy
                 Console.WriteLine(hcBinLoc);
                 if (File.Exists(hcBinLoc))
                 {
-                    hcUpd.force = 1; //HC exists, we don't need to force
+                    hcUpd.force = 0; //HC exists, we don't need to force
                 }
                 else
                 {
@@ -188,8 +188,23 @@ namespace hashtopussy
                     if (client.osID != 1) //Chmod for non windows
                     {
                         Console.WriteLine("Applying execution permissions to 7zr binary");
-                        Process.Start("chmod", "+x \"" + Path.Combine(AppPath, "hcClient", "hashcat-3.30", hcBinName) + "\"");
+                        Process.Start("chmod", "+x \"" + hcBinLoc + "\"");
                     }
+                }
+
+                //Double check just incase
+                if (!File.Exists(hcBinLoc))
+                {
+                    Console.WriteLine("Could not locate {0} binary in hashcat directory", hcBinName);
+                    Console.WriteLine("You can manually download and extract hashcat");
+                    Console.WriteLine("Client will now terminate");
+                    {
+                        Environment.Exit(0);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Hashcat binary located");
                 }
             }
 
