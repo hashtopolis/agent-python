@@ -120,9 +120,7 @@ namespace hashtopussy
 
             string actualHLpath = Path.Combine(hashpath , Path.GetFileName(inTask.ToString()));
 
-            Console.WriteLine("Downloading hashlist for this task");
-
-
+            Console.WriteLine("Downloading hashlist for this task, please wait...");
 
             hashlistProps hProps = new hashlistProps
             {
