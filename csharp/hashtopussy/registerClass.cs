@@ -11,6 +11,7 @@ public class registerClass
     public string tokenID { get; set; }
     public int osID { get; set; }
     public string connectURL { get; set; }
+    public Boolean debugFlag { set; get; }
 
 
     [DllImport("libc")]

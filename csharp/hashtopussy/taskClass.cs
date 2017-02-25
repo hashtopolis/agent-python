@@ -37,6 +37,7 @@ namespace hashtopussy
         private string tasksPath;
 
         public string connectURL { get; set; }
+        public Boolean debugFlag { get; set; }
         public string tokenID { get; set; }
         public int osID { get; set; }
         public _7zClass sevenZip { get; set; }
@@ -280,7 +281,7 @@ namespace hashtopussy
                             File.WriteAllLines(zapfilePath + zapCount.ToString(), receivedZaps); //Write hashes for zapping
                             receivedZaps.Clear();
                         }
-                        Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue: {5}", chunkPercent, speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
+                        Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue:{5}", chunkPercent, speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
 
                     }
 

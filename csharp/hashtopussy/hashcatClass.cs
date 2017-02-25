@@ -27,7 +27,7 @@ namespace hashtopussy
         private object packetLock;
         private object crackedLock;
         private object statusLock;
-
+        public Boolean debugFlag { set; get; }
 
         List<Packets> passedPackets;
 
