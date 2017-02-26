@@ -102,6 +102,14 @@ namespace hashtopussy
             Console.WriteLine(pinfo.FileName + pinfo.Arguments);
             Console.WriteLine("Extracting archive " + archivePath + "...");
 
+            FileInfo f = new FileInfo(archivePath);
+
+            if (f.Length == 0)
+            {
+                Console.WriteLine("File is 0 bytes");
+                return false;
+            }
+
             try
             {
                 if (!unpak.Start()) return false;
