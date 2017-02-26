@@ -52,6 +52,12 @@ namespace hashtopussy
                 Directory.CreateDirectory(taskDir);
             }
 
+            string hcDir = Path.Combine(AppPath, "hashcat");
+            if (!Directory.Exists(hcDir))
+            {
+                Console.WriteLine("Creating hc directory");
+                Directory.CreateDirectory(hcDir);
+            }
         }
 
         private static string urlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"URL");
@@ -176,14 +182,25 @@ namespace hashtopussy
                 if (jsonUpd.getRetVar(ret,"version") == "NEW")
                 {
                     downloadClass dlClass = new downloadClass();
-                    dlClass.DownloadFile(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath,"hcClient.7z"));
+
+                    if (client.osID != 1)
+                    {
+                        dlClass.DownloadFileCurl(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath, "hcClient.7z"));
+                    }
+                    else
+                    {
+                        dlClass.DownloadFile(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath, "hcClient.7z"));
+                    }
+
                     zipper.xtract(Path.Combine(AppPath, "hcClient.7z"), Path.Combine(AppPath, "hcClient"));
                     if (Directory.Exists(Path.Combine(AppPath, "hashcat")))
                     {
                         Directory.Delete(Path.Combine(AppPath, "hashcat"), true);
                     }
                     Directory.Move(Path.Combine(AppPath, "hcClient", jsonUpd.getRetVar(ret, "rootdir")), Path.Combine(AppPath, "hashcat"));
-                    //Directory.Delete(Path.Combine(AppPath, "hcClient"));
+                    Directory.Delete(Path.Combine(AppPath, "hcClient"));
+
+
 
                     if (client.osID != 1) //Chmod for non windows
                     {
