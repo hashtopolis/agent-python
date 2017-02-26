@@ -4,20 +4,46 @@ using System.Net;
 using System.Threading;
 using System.IO;
 
+
 namespace hashtopussy
 {
     class downloadClass
     {
 
-        WebClient webClient;
+
         Stopwatch sw = new Stopwatch();
+
+
+        public bool DownloadFileCurl(string urlAddress, string location)
+        {
+            string AppPath = AppDomain.CurrentDomain.BaseDirectory;
+            ProcessStartInfo pinfo = new ProcessStartInfo();
+            pinfo.FileName = "curl";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardOutput = true;
+
+
+            pinfo.WorkingDirectory = AppPath;
+
+            pinfo.Arguments = " " + urlAddress + " -o" + "\"" + location + "\"";
+
+            Process unpak = new Process();
+            unpak.StartInfo = pinfo;
+            unpak.Start();
+            unpak.WaitForExit();
+            return true;
+
+        }
+
 
         public bool DownloadFile(string urlAddress, string location)
         {
+
+            WebClient webClient;
+
             using (webClient = new WebClient())
             {
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
-                // The variable that will be holding the url address (making sure it starts with http://)
+                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);               
 
                 if (!urlAddress.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 {
@@ -26,6 +52,7 @@ namespace hashtopussy
                 Uri URL = null;
                 try
                 {
+                    Console.WriteLine("Downloading from " + urlAddress);
                     URL = new Uri(urlAddress);
                 }
                 catch
@@ -34,7 +61,7 @@ namespace hashtopussy
                     return false;
                 }
 
-
+                webClient.DownloadFile(URL, location);
                 // Start the stopwatch which we will be using to calculate the download speed
                 sw.Start();
 
@@ -42,6 +69,7 @@ namespace hashtopussy
                 {
                     // Start downloading the file
                     webClient.DownloadFileAsync(URL, location);
+
                 }
                 catch (Exception ex)
                 {
