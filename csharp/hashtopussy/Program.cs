@@ -32,32 +32,28 @@ namespace hashtopussy
 
         static void initDirs()
         {
-            string filesDir = Path.Combine(AppPath,"files");
-            if (!Directory.Exists(filesDir))
+
+            string[] Dirs = new String[] { "files", "hashlists", "tasks", "hashcat" };
+
+            foreach (string dir in Dirs)
             {
-                Console.WriteLine("Creating files directory");
-                Directory.CreateDirectory(filesDir);
-            }
-            string hashlistDir = Path.Combine(AppPath, "hashlists");
-            if (!Directory.Exists(hashlistDir))
-            {
-                Console.WriteLine("Creating hashlist directory");
-                Directory.CreateDirectory(hashlistDir);
+                string enumDir = Path.Combine(AppPath, dir);
+                try
+                {
+                    if (!Directory.Exists(enumDir))
+                    {
+                        Console.WriteLine("Creating {0} directory", dir);
+                        Directory.CreateDirectory(enumDir);
+                    }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Data);
+                    Console.WriteLine("Unable to create dir {0}", dir);
+                }
+
             }
 
-            string taskDir = Path.Combine(AppPath, "tasks");
-            if (!Directory.Exists(taskDir))
-            {
-                Console.WriteLine("Creating tasks directory");
-                Directory.CreateDirectory(taskDir);
-            }
-
-            string hcDir = Path.Combine(AppPath, "hashcat");
-            if (!Directory.Exists(hcDir))
-            {
-                Console.WriteLine("Creating hc directory");
-                Directory.CreateDirectory(hcDir);
-            }
         }
 
         private static string urlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"URL");
