@@ -28,14 +28,16 @@ namespace hashtopussy
     class Program
     {
 
-        public static string AppPath;
+        public static string AppPath = AppDomain.CurrentDomain.BaseDirectory;
+        private static string urlPath = Path.Combine(AppPath, "URL");
+        private static string serverURL = "";
 
         static void initDirs()
         {
 
-            string[] Dirs = new String[] { "files", "hashlists", "tasks", "hashcat" };
+            string[] createDirs = new String[] { "files", "hashlists", "tasks", "hashcat" };
 
-            foreach (string dir in Dirs)
+            foreach (string dir in createDirs)
             {
                 string enumDir = Path.Combine(AppPath, dir);
                 try
@@ -56,8 +58,7 @@ namespace hashtopussy
 
         }
 
-        private static string urlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"URL");
-        private static string serverURL = "";
+
 
         public static bool loadURL()
         {
@@ -77,10 +78,9 @@ namespace hashtopussy
             return true;
         }
 
-        static void Main(string[] args)
-        {
 
-            string AppVersion = "0.2";
+        public static Boolean initConnect()
+        {
             jsonClass testConnect = new jsonClass { debugFlag = true };
             testProp tProp = new testProp();
             string urlMsg = "Please enter server connect URL (https will be used unless specified):";
@@ -110,8 +110,16 @@ namespace hashtopussy
 
             }
 
+            return true;
+        }
+        static void Main(string[] args)
+        {
+
+            string AppVersion = "0.2";
+
+            initConnect();
+
             Console.WriteLine("Client Version " + AppVersion);
-            AppPath = AppDomain.CurrentDomain.BaseDirectory;
             updateClass updater = new updateClass
             {
                 htpVersion = AppVersion,
