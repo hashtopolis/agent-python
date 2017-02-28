@@ -268,12 +268,63 @@ namespace hashtopussy
             keySpace = Convert.ToInt64(line);
         }
 
+        public string getVersion()
+        {
+
+            StringBuilder stdOutBuild = new StringBuilder();
+            string stdOutSingle = "";
+            ProcessStartInfo pInfo = new ProcessStartInfo();
+            pInfo.FileName = Path.Combine(hcDir, hcBin);
+            pInfo.WorkingDirectory = filesDir;
+            pInfo.Arguments = "--version";
+            pInfo.UseShellExecute = false;
+            pInfo.RedirectStandardError = true;
+            pInfo.RedirectStandardOutput = true;
+            Process hcGetVersion = new Process();
+            hcGetVersion.StartInfo = pInfo;
+            hcGetVersion.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
+
+            try
+            {
+                hcGetVersion.Start();
+                hcGetVersion.BeginErrorReadLine();
+
+                while (!hcGetVersion.HasExited)
+                {
+                    while (!hcGetVersion.StandardOutput.EndOfStream)
+                    {
+
+                        string stdOut = hcGetVersion.StandardOutput.ReadLine().TrimEnd();
+                        stdOutSingle = stdOut; //We just want the last line
+                    }
+                }
+                hcGetVersion.StandardOutput.Close();
+
+            }
+            catch
+            {
+                Console.WriteLine("Something went wrong when trying to get HC version");
+            }
+            finally
+            {
+                if (hcGetVersion.ExitCode != 0)
+                {
+                    Console.WriteLine("Something went when trying to get HC version");
+                }
+
+                hcGetVersion.Close();
+            }
+
+            return stdOutSingle;
+
+
+        }
+
         public Boolean runKeyspace(ref long keySpace)
         {
 
             Console.WriteLine("Server has requested the client to measure the keyspace for this task");
 
-            StringBuilder stdOutBuild = new StringBuilder();
             string stdOutSingle = "";
             string suffixArgs = " --session=hashtopussy --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
