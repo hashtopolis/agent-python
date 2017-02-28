@@ -105,7 +105,7 @@ namespace hashtopussy
                 }
                 else
                 {
-                    urlMsg = "Test connect failed, please enter URL:";
+                    urlMsg = "Test connect failed, please enter server connect URL:";
                 }
 
             }
@@ -116,19 +116,17 @@ namespace hashtopussy
         {
 
             string AppVersion = "0.2";
+            Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
 
-            Console.WriteLine("Client Version " + AppVersion);
             updateClass updater = new updateClass
             {
                 htpVersion = AppVersion,
                 parentPath = AppPath,
                 arguments = args,
                 connectURL = serverURL
-
             };
-
             updater.runUpdate();
 
             initDirs();
@@ -225,7 +223,10 @@ namespace hashtopussy
                 }
                 else
                 {
-                    Console.WriteLine("Hashcat binary located");
+                    hashcatClass hcClass = new hashcatClass { };
+                    hcClass.setDirs(AppPath, client.osID);
+                    string hcVersion = (hcClass.getVersion());
+                    Console.WriteLine("Hashcat binary version {0} found",hcVersion);
                 }
             }
 
