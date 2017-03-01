@@ -111,6 +111,7 @@ namespace hashtopussy
             int max = items.Count();
             int i = 0;
 
+            Console.WriteLine(line);
 
             while(i < max)
             {
