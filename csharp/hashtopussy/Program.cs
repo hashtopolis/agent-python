@@ -52,12 +52,13 @@ namespace hashtopussy
                 {
                     Console.WriteLine(e.Data);
                     Console.WriteLine("Unable to create dir {0}", dir);
+                    Console.WriteLine("Client now terminating");
+                    Environment.Exit(0);
                 }
 
             }
 
         }
-
 
 
         public static bool loadURL()
@@ -112,6 +113,7 @@ namespace hashtopussy
 
             return true;
         }
+
         static void Main(string[] args)
         {
 
@@ -226,7 +228,7 @@ namespace hashtopussy
                     hashcatClass hcClass = new hashcatClass { };
                     hcClass.setDirs(AppPath, client.osID);
                     string hcVersion = (hcClass.getVersion());
-                    Console.WriteLine("Hashcat binary version {0} found",hcVersion);
+                    Console.WriteLine("Hashcat version {0} found",hcVersion);
                 }
             }
 
@@ -246,7 +248,6 @@ namespace hashtopussy
             {
                 Thread.Sleep(backDown * 1000);
 
-
                 if (tasks.getTask())
                 {
                     backDown = 5;
@@ -256,7 +257,6 @@ namespace hashtopussy
                     backDown++;
                 }
             }
-
 
         }
     }
