@@ -169,58 +169,54 @@ public class jsonClass
     //On fail, the client will use a backdown algorithm and retry 30 times
     public string jsonSend(string json)
     {
-        var request = (HttpWebRequest)WebRequest.Create(connectURL);
-        request.ContentType = "application/x-www-form-urlencoded";
-        request.Method = "POST";
-        request.Timeout = 6000;
-        request.KeepAlive = true;
- 
-        int randomTime = 0;
 
-        HttpWebResponse response = null;
         int tries = 0;
+        int randomTime = 0;
+        string result = null;
+
         do
         {
             Thread.Sleep(tries * 1000 + randomTime * 1000);
+
             try
             {
+
+                var request = (HttpWebRequest)WebRequest.Create(connectURL);
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Method = "POST";
+                request.Timeout = 6000;
+                request.KeepAlive = true;
+
+                HttpWebResponse response = null;
+
                 using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
                     streamWriter.Write("query=" + json);
                 }
 
-            }
-            catch (WebException ex)
-            {
-                Console.WriteLine(ex.Message);
-                tries++;
-                randomTime = rnd.Next(1, tries);
-                Console.WriteLine("Attempting to re-connect in {0} seconds", tries + randomTime);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            break;
-        } while (tries <= 30);
 
-
-        tries = 0;
-        randomTime = 0;
-        do
-        {
-            Thread.Sleep(tries * 1000 + randomTime * 1000);
-            try
-            {
                 response = (HttpWebResponse)request.GetResponse();
-
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     Console.WriteLine("Invalid HTTP response");
                     Console.WriteLine("terminating");
                     Environment.Exit(0);
                 }
+
+                
+                using (var streamReader = new StreamReader(response.GetResponseStream()))
+                {
+                    result = streamReader.ReadToEnd();
+                }
+                if (string.IsNullOrEmpty(result))
+                {
+                    Console.WriteLine("server is not responding to requests");
+                    Console.WriteLine("terminating");
+                    Environment.Exit(0);
+                }
+                break;
             }
+
             catch (WebException ex)
             {
                 if (ex.Status == WebExceptionStatus.Timeout)
@@ -231,39 +227,19 @@ public class jsonClass
                     randomTime = rnd.Next(1, tries);
                     Console.WriteLine("Attempting to re-connect in {0} seconds", tries + randomTime);
                 }
-                else
-                {
-                    Console.WriteLine("We are here");
-                    throw;
-                }
             }
             catch (Exception)
             {
                 Console.WriteLine("Could not connect to specified server, exiting");
+                break;
             }
-            break;
+           
         } while (tries <= 10);
 
-
-
-        string result;
-        using (var streamReader = new StreamReader(response.GetResponseStream()))
-        {
-            result = streamReader.ReadToEnd();
-        }
-        if (string.IsNullOrEmpty(result))
-        {
-            Console.WriteLine("server is not responding to requests");
-            Console.WriteLine("terminating");
-            Environment.Exit(0);
-        }
 
         return result; //Return json string
 
     }
 
 
-    public jsonClass()
-    {
-    }
 }
