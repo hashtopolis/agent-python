@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace hashtopussy
 {
-    class hashcatClass
+    class hashcatClass : IDisposable
     {
         public List<string> hashlist = new List<string> { }; //New collection to store cracks
         public Process hcProc;
@@ -31,6 +31,23 @@ namespace hashtopussy
 
         List<Packets> passedPackets;
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (!hcProc.HasExited )
+                {
+                    hcProc.Kill();
+                    hcProc.Dispose();
+                }
+            }
+        }
 
         public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator)
         {
