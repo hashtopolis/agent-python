@@ -184,7 +184,7 @@ namespace hashtopussy
         //There is very little discruption to the attack as a very quick lock/unlock is performed on the packet list to pop the job off the queue
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
-            jsonClass jsC = new jsonClass {debugFlag = false,  connectURL = connectURL };//Initis the json class
+            jsonClass jsC = new jsonClass {debugFlag = true,  connectURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret =""; //Return string from json post
@@ -266,7 +266,6 @@ namespace hashtopussy
                         }
                     }
 
-                   
 
                     if (jsC.isJsonSuccess(ret))
                     {
@@ -311,7 +310,11 @@ namespace hashtopussy
                             singlePacket.Clear();
                             run = false;
                         }
-                        singlePacket.RemoveAt(0);
+                        else
+                        {
+                            singlePacket.RemoveAt(0);
+                        }
+                        
                     }
 
 
@@ -319,7 +322,7 @@ namespace hashtopussy
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-
+                    Console.WriteLine("Error processing packet for upload");
                     /*
                     hcClass.hcProc.CancelOutputRead();
                     hcClass.hcProc.CancelErrorRead();
