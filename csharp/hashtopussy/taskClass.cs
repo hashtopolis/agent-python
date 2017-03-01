@@ -11,7 +11,6 @@ namespace hashtopussy
 
         hashcatClass hcClass = new hashcatClass();
 
-
         private int taskID;
         private string attackcmd;
         private string cmdpars;
@@ -20,10 +19,10 @@ namespace hashtopussy
         private int statusTimer;
         private int benchMethod;
         private ArrayList files;
+        private string hashlistAlias = "#HL#";
 
 
         private static string prefixServerdl = "https://alpha.hashes.org/src/";
-        private static string hashlistAlias = "#HL#";
         public static char separator = ':';
 
         private long chunkNo;
@@ -534,6 +533,7 @@ namespace hashtopussy
                         benchMethod = 2;
                     }
                     statusTimer = Int32.Parse(jsC.getRetVar(ret, "statustimer"));
+                    hashlistAlias = jsC.getRetVar(ret, "hashlistAlias");
                     files = jsC.getRetArray(ret, "files");
                     int gotChunk = 1;
 
