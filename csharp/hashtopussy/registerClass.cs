@@ -13,19 +13,23 @@ public class registerClass
     public string connectURL { get; set; }
     public Boolean debugFlag { set; get; }
 
-
-    [DllImport("libc")]
-    static extern int uname(IntPtr buf);
+    //Suppress P/Invoke warning my using NativeMethods
+    internal static class NativeMethods
+    {
+        [DllImport("libc")]
+        public static extern int uname(IntPtr buf);
+    }
 
     //Code from Pinta Core Project
     private bool IsRunningOnMac()
     {
+
         IntPtr buf = IntPtr.Zero;
         try
         {
             buf = Marshal.AllocHGlobal(8192);
             // This is a hacktastic way of getting sysname from uname ()
-            if (uname(buf) == 0)
+            if (NativeMethods.uname(buf) == 0)
             {
                 string os = Marshal.PtrToStringAnsi(buf);
                 if (os == "Darwin")
@@ -42,6 +46,7 @@ public class registerClass
         }
         return false;
     }
+
 
     //Detect whether we are running under mono
     private void setOS()
