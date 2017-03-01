@@ -180,7 +180,9 @@ namespace hashtopussy
         }
 
     
-
+        //This runs as an independant thread and uploads the STATUS generated from the hcAttack
+        //This thread is run on a dynamic timer based on the size of the queue and will range from a base 2500ms down to 200ms
+        //There is very little discruption to the attack as a very quick lock/unlock is performed on the packet list to pop the job off the queue
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
             jsonClass jsC = new jsonClass {debugFlag = false,  connectURL = connectURL };//Initis the json class
