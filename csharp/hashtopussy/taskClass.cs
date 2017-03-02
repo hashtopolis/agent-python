@@ -22,7 +22,7 @@ namespace hashtopussy
         private string hashlistAlias = "#HL#";
 
 
-        private static string prefixServerdl = "https://alpha.hashes.org/src/";
+        private string prefixServerdl = "";
         public static char separator = ':';
 
         private long chunkNo;
@@ -45,7 +45,6 @@ namespace hashtopussy
         private object packetLock = new object(); //Lock to prevent the packetList from being edited as it's passed between the periodicUpload thread and the stdOut reader in hashcatClass
 
 
-
         public void setDirs(string fpath)
         {
             appPath = fpath;
@@ -53,6 +52,7 @@ namespace hashtopussy
             hashpath = Path.Combine(fpath, "hashlists");
             zapPath = Path.Combine(fpath, "hashlists", "zaps");
             tasksPath = Path.Combine(fpath, "tasks");
+            prefixServerdl = connectURL.Substring(0, connectURL.IndexOf("/api/")) + "/";
 
         }
 
