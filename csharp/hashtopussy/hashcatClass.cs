@@ -169,9 +169,17 @@ namespace hashtopussy
                         i += 1;
                         break;
                     
-
                 }
                 i += 1;
+            }
+
+            string[] Vars = new String[] { "STATUS", "SPEED_TOTAL", "EXEC_RUNTIME_AVG", "CURKU", "PROGRESS1","RECHASH1","RECSALT1" };
+            foreach (string variable in Vars)
+            {
+                if (!collection.ContainsKey(variable))
+                {
+                    Console.WriteLine("Failed to parse {0} variable, something went wrong", variable);
+                }
             }
         }
 
