@@ -8,8 +8,10 @@ namespace hashtopussy
 {
 
 
+
     public class updateClass
     {
+
 
         public string htpVersion { set; get; }
         private string parentProc;
@@ -42,7 +44,6 @@ namespace hashtopussy
 
             if (System.AppDomain.CurrentDomain.FriendlyName == launcherProcName) 
             {
-                Console.WriteLine("here");
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     if (arguments[i] != "debug")
@@ -61,19 +62,21 @@ namespace hashtopussy
 
                 waitForProcess(parentProc);
                 File.Copy(launcherProcName, parentProc, true);
-                Process reSpawn = new Process();
+                
 
                 if (Type.GetType("Mono.Runtime") != null)
                 {
-                    reSpawn.StartInfo.FileName = "mono";
-                    reSpawn.StartInfo.Arguments = parentProc;
+                    Console.WriteLine("Client has now been updated, please re-launch the agent");
                 }
                 else
                 {
+                    Process reSpawn = new Process();
                     reSpawn.StartInfo.FileName = parentProc;
+                    reSpawn.Start();
+                    
                 }
-                reSpawn.Start();
                 Environment.Exit(0);
+
             }
             else //We are either user-run bin or spanwed bin
             {
