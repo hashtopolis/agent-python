@@ -1,6 +1,6 @@
 # Hashtopussy Agents
 
-Official agents for using the distributed hashcracker Hashtopussy.
+Official agents for using the distributed hashcracker [Hashtopussy](https://github.com/s3inlc/hashtopussy).
 
 Currently available agents:
 - C# (working)
