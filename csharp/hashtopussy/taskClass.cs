@@ -148,8 +148,17 @@ namespace hashtopussy
             }
             else
             {
-                jsC.isJsonSuccess(ret);
-                return false;
+                if (jsC.isJsonSuccess(ret))
+                {
+                    string b64data = jsC.getRetVar(ret,"data");
+                    byte[] binArray = System.Convert.FromBase64String(b64data);
+                    File.WriteAllBytes(actualHLpath, binArray);
+                }
+                else
+                {
+                    return false;
+                }
+                
             }
 
             return true;
