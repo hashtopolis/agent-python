@@ -129,7 +129,7 @@ public class jsonClass
             {
                 using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
-                    streamWriter.Write("query=" + json);
+                    streamWriter.Write("query=" + Uri.EscapeDataString(json));
                 }
 
             }
@@ -191,7 +191,7 @@ public class jsonClass
 
                 using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
-                    streamWriter.Write("query=" + json);
+                    streamWriter.Write("query=" + Uri.EscapeDataString(json));
                 }
 
 
@@ -203,7 +203,7 @@ public class jsonClass
                     Environment.Exit(0);
                 }
 
-                
+
                 using (var streamReader = new StreamReader(response.GetResponseStream()))
                 {
                     result = streamReader.ReadToEnd();
@@ -233,7 +233,7 @@ public class jsonClass
                 Console.WriteLine("Could not connect to specified server, exiting");
                 break;
             }
-           
+
         } while (tries <= 10);
 
 
