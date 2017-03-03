@@ -102,6 +102,14 @@ namespace hashtopussy
             public string result { get; set; }
         }
 
+        private class errorProps
+        {
+            public string action = "error";
+            public string token { get; set; }
+            public int task { get; set; }
+            public string message { get; set; }
+        }
+
         private class solveProps
         {
             public string action = "solve";
@@ -403,16 +411,31 @@ namespace hashtopussy
 
                         hcClass.runKeyspace(ref calcKeyspace);
 
-                        keyspaceProps kProps = new keyspaceProps
+
+                        if (calcKeyspace == 0)
                         {
-                            token = tokenID,
-                            taskId = taskID,
-                            keyspace = calcKeyspace
-                        };
+                            errorProps eProps = new errorProps
+                            {
+                                token = tokenID,
+                                task = taskID,
+                                message = "Invalid keyspace, keyspace probably too small for this hashtype"
+                            };
+                            jsonString = jsC.toJson(eProps);
+                            ret = jsC.jsonSend(jsonString);
+                            return 0;
+                        }
+                        else
+                        {
+                            keyspaceProps kProps = new keyspaceProps
+                            {
+                                token = tokenID,
+                                taskId = taskID,
+                                keyspace = calcKeyspace
+                            };
+                            jsonString = jsC.toJson(kProps);
+                            ret = jsC.jsonSend(jsonString);
 
-
-                        jsonString = jsC.toJson(kProps);
-                        ret = jsC.jsonSend(jsonString);
+                        }
 
                         return 2;
 
