@@ -312,9 +312,8 @@ namespace hashtopussy
 
             try
             {
-                hcGetVersion.Start();
-                hcGetVersion.BeginErrorReadLine();
 
+                hcGetVersion.Start();
                 while (!hcGetVersion.HasExited)
                 {
                     while (!hcGetVersion.StandardOutput.EndOfStream)
