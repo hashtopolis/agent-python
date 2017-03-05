@@ -15,6 +15,8 @@ namespace hashtopussy
         private string attackcmd;
         private string cmdpars;
         private int benchTime;
+        private Boolean stipPath;
+        private string actualHLpath;
         private int hashlistID;
         private int statusTimer;
         private int benchMethod;
@@ -126,7 +128,7 @@ namespace hashtopussy
         public Boolean getHashes(int inTask)
         {
 
-            string actualHLpath = Path.Combine(hashpath, Path.GetFileName(inTask.ToString()));
+             actualHLpath = Path.Combine(hashpath, Path.GetFileName(inTask.ToString()));
 
             Console.WriteLine("Downloading hashlist for this task, please wait...");
 
@@ -153,6 +155,11 @@ namespace hashtopussy
                     string b64data = jsC.getRetVar(ret,"data");
                     byte[] binArray = System.Convert.FromBase64String(b64data);
                     File.WriteAllBytes(actualHLpath, binArray);
+
+                    if (cmdpars != "--hash-type=2500")
+                    {
+                        stipPath = true;
+                    }
                 }
                 else
                 {
@@ -267,6 +274,15 @@ namespace hashtopussy
                                 {
                                     max = singlePacket[0].crackedPackets.Count;
                                 }
+
+                                if (stipPath == true)
+                                {
+                                    for (int i = 0; i <= subChunk.Count-1; i++)
+                                    {
+                                        subChunk[i] = subChunk[i].Replace(actualHLpath + ":", "");
+                                    }
+                                }
+
                                 sProps.cracks = subChunk;
                                 jsonString = jsC.toJson(sProps);
                                 ret = jsC.jsonSend(jsonString);
@@ -276,6 +292,13 @@ namespace hashtopussy
                         }
                         else
                         {
+                            if (stipPath == true)
+                            {
+                                for (int i =0; i<= singlePacket[0].crackedPackets.Count-1; i++)
+                                {
+                                    singlePacket[i].crackedPackets[i] = singlePacket[0].crackedPackets[i].Replace(actualHLpath + ":", "");
+                                }
+                            }
                             sProps.cracks = singlePacket[0].crackedPackets;
 
                             jsonString = jsC.toJson(sProps);
