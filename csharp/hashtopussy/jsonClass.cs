@@ -115,7 +115,7 @@ public class jsonClass
     public string jsonSendOnce(string json)
     {
         var request = (HttpWebRequest)WebRequest.Create(connectURL);
-        request.ContentType = "application/x-www-form-urlencoded";
+        request.ContentType = "application/json";
         request.Method = "POST";
         request.KeepAlive = false;
 
@@ -129,7 +129,7 @@ public class jsonClass
             {
                 using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
-                    streamWriter.Write("query=" + Uri.EscapeDataString(json));
+                    streamWriter.Write(json);
                 }
 
             }
@@ -182,7 +182,7 @@ public class jsonClass
             {
 
                 var request = (HttpWebRequest)WebRequest.Create(connectURL);
-                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentType = "application/json";
                 request.Method = "POST";
                 request.Timeout = 30000;
                 request.KeepAlive = true;
@@ -191,7 +191,7 @@ public class jsonClass
 
                 using (StreamWriter streamWriter = new StreamWriter(request.GetRequestStream()))
                 {
-                    streamWriter.Write("query=" + Uri.EscapeDataString(json));
+                    streamWriter.Write(json);
                 }
 
 
