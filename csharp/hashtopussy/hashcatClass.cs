@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using System.Threading;
 
 namespace hashtopussy
 {
@@ -136,8 +134,8 @@ namespace hashtopussy
                     case "EXEC_RUNTIME":
                         while (items[i+1] != "CURKU") //Due to multiple cards, perform micro-loop
                         {
-                            collection.Add(("EXEC_RUNTIME" + countStep.ToString()), Math.Round(Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture),2));
-                            execRuntime += Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture);
+                            collection.Add(("EXEC_RUNTIME" + countStep.ToString()), Math.Round(Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.GetCultureInfo("en-US")),2));
+                            execRuntime += Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.GetCultureInfo("en-US"));
                             countStep++;
                             i += 1;
                         }
@@ -198,10 +196,10 @@ namespace hashtopussy
                 string[] items = match.ToString().TrimEnd().Split(':');
 
 
-                collection.Add("LEFT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[1],CultureInfo.InvariantCulture)));
-                collection.Add("RIGHT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture)));
-                leftT += Convert.ToDouble(Decimal.Parse(items[1], CultureInfo.InvariantCulture));
-                rightT += Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture));
+                collection.Add("LEFT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[1],CultureInfo.GetCultureInfo("en-US"))));
+                collection.Add("RIGHT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.GetCultureInfo("en-US"))));
+                leftT += Convert.ToDouble(Decimal.Parse(items[1], CultureInfo.GetCultureInfo("en-US")));
+                rightT += Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.GetCultureInfo("en-US")));
                 counter++;
                 match = match.NextMatch();
             }
@@ -374,7 +372,6 @@ namespace hashtopussy
                 {
                     while (!hcProcKeyspace.StandardOutput.EndOfStream)
                     {
-
                         string stdOut = hcProcKeyspace.StandardOutput.ReadLine().TrimEnd();
                         stdOutSingle = stdOut; //We just want the last line
                     }
