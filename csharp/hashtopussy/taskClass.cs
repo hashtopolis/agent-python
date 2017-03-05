@@ -155,11 +155,8 @@ namespace hashtopussy
                     string b64data = jsC.getRetVar(ret,"data");
                     byte[] binArray = System.Convert.FromBase64String(b64data);
                     File.WriteAllBytes(actualHLpath, binArray);
-
-                    if (cmdpars != "--hash-type=2500")
-                    {
-                        stipPath = true;
-                    }
+                    stipPath = true; //Strip path for all HL recieved binary hashlsits
+            
                 }
                 else
                 {
