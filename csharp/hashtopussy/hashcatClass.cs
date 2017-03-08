@@ -98,6 +98,9 @@ namespace hashtopussy
         public static void parseStatus1(string line,ref  Dictionary<string, double> collection)
         {
 
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
             //Console.WriteLine(line);
 
@@ -134,8 +137,8 @@ namespace hashtopussy
                     case "EXEC_RUNTIME":
                         while (items[i+1] != "CURKU") //Due to multiple cards, perform micro-loop
                         {
-                            collection.Add(("EXEC_RUNTIME" + countStep.ToString()), Math.Round(Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.GetCultureInfo("en-US")),2));
-                            execRuntime += Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.GetCultureInfo("en-US"));
+                            collection.Add(("EXEC_RUNTIME" + countStep.ToString()), Math.Round(Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture),2));
+                            execRuntime += Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture);
                             countStep++;
                             i += 1;
                         }
@@ -185,6 +188,10 @@ namespace hashtopussy
         public static void parseStatus2(string statusLine, ref Dictionary<string, double> collection)
         {
 
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+
             Match match = Regex.Match(statusLine, ":[0-9]{1,}:[0-9.]{1,}(\n|\r|\r\n)", RegexOptions.IgnoreCase); //Match only the progress line using regex
             long counter = 0;
             double leftT = 0;
@@ -196,10 +203,10 @@ namespace hashtopussy
                 string[] items = match.ToString().TrimEnd().Split(':');
 
 
-                collection.Add("LEFT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[1],CultureInfo.GetCultureInfo("en-US"))));
-                collection.Add("RIGHT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.GetCultureInfo("en-US"))));
-                leftT += Convert.ToDouble(Decimal.Parse(items[1], CultureInfo.GetCultureInfo("en-US")));
-                rightT += Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.GetCultureInfo("en-US")));
+                collection.Add("LEFT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[1],CultureInfo.InvariantCulture)));
+                collection.Add("RIGHT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture)));
+                leftT += Convert.ToDouble(Decimal.Parse(items[1], CultureInfo.InvariantCulture));
+                rightT += Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture));
                 counter++;
                 match = match.NextMatch();
             }

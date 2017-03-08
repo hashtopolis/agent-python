@@ -205,6 +205,10 @@ namespace hashtopussy
         //There is very little discruption to the attack as a very quick lock/unlock is performed on the packet list to pop the job off the queue
         public void threadPeriodicUpdate(ref List<Packets> uploadPackets, ref object objPacketlock)
         {
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+
             jsonClass jsC = new jsonClass {debugFlag = true,  connectURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing

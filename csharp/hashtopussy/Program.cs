@@ -117,6 +117,10 @@ namespace hashtopussy
         static void Main(string[] args)
         {
 
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+
             string AppVersion = "0.38";
             Console.WriteLine("Client Version " + AppVersion);
 
