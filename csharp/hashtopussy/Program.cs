@@ -121,7 +121,7 @@ namespace hashtopussy
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
-            string AppVersion = "0.38";
+            string AppVersion = "0.39";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
