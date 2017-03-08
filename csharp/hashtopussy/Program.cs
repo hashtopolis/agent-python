@@ -6,6 +6,8 @@ using System.Diagnostics;
 namespace hashtopussy
 {
 
+    
+
     public struct Packets
     {
         public Dictionary<string, double> statusPackets;
@@ -82,7 +84,7 @@ namespace hashtopussy
 
         public static Boolean initConnect()
         {
-            jsonClass testConnect = new jsonClass { debugFlag = true };
+            jsonClass testConnect = new jsonClass { debugFlag = DebugMode };
             testProp tProp = new testProp();
             string urlMsg = "Please enter server connect URL (https will be used unless specified):";
             while (!loadURL())
@@ -114,6 +116,8 @@ namespace hashtopussy
             return true;
         }
 
+        public static Boolean DebugMode;
+
         static void Main(string[] args)
         {
 
@@ -121,7 +125,17 @@ namespace hashtopussy
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
-            string AppVersion = "0.39";
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "debug")
+                {
+                    DebugMode = true;
+                    break;
+                }
+
+            }
+
+            string AppVersion = "0.40";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
@@ -131,13 +145,15 @@ namespace hashtopussy
                 htpVersion = AppVersion,
                 parentPath = AppPath,
                 arguments = args,
-                connectURL = serverURL
+                connectURL = serverURL,
+                debugFlag = DebugMode
+                
             };
             updater.runUpdate();
 
             initDirs();
 
-            registerClass client = new registerClass { connectURL = serverURL };
+            registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode };
             client.setPath( AppPath);
             if (client.loginAgent())
             {
@@ -161,7 +177,7 @@ namespace hashtopussy
             else //We have 7zip, lets check for HC update since that is zipped
             {
                 hcUpdateProp hcUpd = new hcUpdateProp();
-                jsonClass jsonUpd = new jsonClass { debugFlag = true, connectURL = serverURL };
+                jsonClass jsonUpd = new jsonClass { debugFlag = DebugMode, connectURL = serverURL };
                 hcUpd.token = client.tokenID;
                 string hcBinName = "hashcat";
                 if (client.osID == 0)
@@ -174,7 +190,7 @@ namespace hashtopussy
                 }
 
                 string hcBinLoc = Path.Combine(AppPath, "hashcat",hcBinName);
-                Console.WriteLine(hcBinLoc);
+
                 if (File.Exists(hcBinLoc))
                 {
                     hcUpd.force = 0; //HC exists, we don't need to force
@@ -186,7 +202,7 @@ namespace hashtopussy
 
                 string jsonString = jsonUpd.toJson(hcUpd);
                 string ret = jsonUpd.jsonSend(jsonString);
-                Console.WriteLine(ret);
+
                 if (jsonUpd.getRetVar(ret,"version") == "NEW")
                 {
                     downloadClass dlClass = new downloadClass();
@@ -241,7 +257,8 @@ namespace hashtopussy
                 tokenID = client.tokenID,
                 osID = client.osID,
                 sevenZip = zipper,
-                connectURL = serverURL
+                connectURL = serverURL,
+                debugFlag = DebugMode
 
             };
                 

@@ -138,7 +138,7 @@ namespace hashtopussy
                 hashlist = inTask
             };
 
-            jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
+            jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString);
 
@@ -209,7 +209,7 @@ namespace hashtopussy
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
-            jsonClass jsC = new jsonClass {debugFlag = true,  connectURL = connectURL };//Initis the json class
+            jsonClass jsC = new jsonClass {debugFlag = debugFlag,  connectURL = connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret =""; //Return string from json post
@@ -381,7 +381,7 @@ namespace hashtopussy
    
         }
 
-        private  jsonClass jsC = new jsonClass {};
+        private  jsonClass jsC = new jsonClass { };
 
         public int getChunk(int inTask)
         {
@@ -391,8 +391,8 @@ namespace hashtopussy
                 token = tokenID,
                 taskId = inTask
             };
-            jsC.debugFlag = true;
 
+            jsC.debugFlag = debugFlag;
             jsC.connectURL = connectURL;
             primaryCracked = new List<string> { };
 
@@ -425,7 +425,7 @@ namespace hashtopussy
                         List<Packets> uploadPackets = new List<Packets>();
 
                         hcClass.setDirs(appPath,osID);
-                        hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString()); 
+                        hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString(),debugFlag); 
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
@@ -529,7 +529,7 @@ namespace hashtopussy
                 file = fileName
             };
 
-            jsonClass jsC = new jsonClass {  debugFlag = true, connectURL = connectURL };
+            jsonClass jsC = new jsonClass {  debugFlag = debugFlag, connectURL = connectURL };
             string jsonString = jsC.toJson(get);
             string ret = jsC.jsonSend(jsonString);
 
@@ -568,7 +568,7 @@ namespace hashtopussy
                 token = tokenID
             };
 
-            jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
+            jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
             string jsonString = jsC.toJson(get);
              string   ret = jsC.jsonSend(jsonString);
 

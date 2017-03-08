@@ -25,7 +25,7 @@ namespace hashtopussy
         private object packetLock;
         private object crackedLock;
         private object statusLock;
-        public Boolean debugFlag { set; get; }
+        private Boolean debugFlag;
 
         List<Packets> passedPackets;
 
@@ -47,7 +47,7 @@ namespace hashtopussy
             }
         }
 
-        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator)
+        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator,Boolean debugging)
         {
             passedPackets = refPacketlist;
             separator = passSeparator;
@@ -55,7 +55,7 @@ namespace hashtopussy
 
             crackedLock = new object();
             statusLock = new object();
-
+            debugFlag = debugging;
 
         }
          
@@ -95,7 +95,7 @@ namespace hashtopussy
 
 
 
-        public static void parseStatus1(string line,ref  Dictionary<string, double> collection)
+        private void parseStatus1(string line,ref  Dictionary<string, double> collection)
         {
 
             System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
@@ -112,7 +112,11 @@ namespace hashtopussy
             int max = items.Count();
             int i = 0;
 
-            Console.WriteLine(line);
+            if (debugFlag)
+            {
+                Console.WriteLine(line);
+            }
+            
 
             while(i < max)
             {
@@ -185,7 +189,7 @@ namespace hashtopussy
         }
 
 
-        public static void parseStatus2(string statusLine, ref Dictionary<string, double> collection)
+        private void parseStatus2(string statusLine, ref Dictionary<string, double> collection)
         {
 
             System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
@@ -365,7 +369,11 @@ namespace hashtopussy
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
-            Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
+            if (debugFlag)
+            {
+                Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
+
+            }
             Process hcProcKeyspace = new Process();
             hcProcKeyspace.StartInfo = pInfo;
             hcProcKeyspace.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
@@ -475,7 +483,11 @@ namespace hashtopussy
             pinfo.RedirectStandardError = true;
             pinfo.RedirectStandardOutput = true;
 
-            Console.WriteLine(pinfo.FileName +" "+ pinfo.Arguments);
+            if (debugFlag)
+            {
+                Console.WriteLine(pinfo.FileName + " " + pinfo.Arguments);
+
+            }
 
             hcProc = new Process { };
             hcProc.StartInfo = pinfo;

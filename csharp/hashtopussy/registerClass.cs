@@ -304,7 +304,7 @@ public class registerClass
         else
         {
             Console.WriteLine("Existing token found");
-            jsonClass jsC = new jsonClass { connectURL = connectURL };
+            jsonClass jsC = new jsonClass { connectURL = connectURL, debugFlag = debugFlag };
 
             var arrayKey = new Dictionary<string, string>
                {
@@ -313,7 +313,6 @@ public class registerClass
             };
             
             string jsonString = jsC.toJson(arrayKey);
-            Console.WriteLine(jsonString);
             string ret = jsC.jsonSend(jsonString);
 
             if (jsC.isJsonSuccess(ret))

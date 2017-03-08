@@ -95,7 +95,7 @@ namespace hashtopussy
                     version = htpVersion
                 };
 
-                jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
+                jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
                 string jsonString = jsC.toJson(uProps);
                 string ret = jsC.jsonSend(jsonString);
 
