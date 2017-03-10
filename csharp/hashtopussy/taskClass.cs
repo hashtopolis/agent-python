@@ -128,7 +128,7 @@ namespace hashtopussy
         public Boolean getHashes(int inTask)
         {
 
-             actualHLpath = Path.Combine(hashpath, Path.GetFileName(inTask.ToString()));
+            actualHLpath = Path.Combine(hashpath, Path.GetFileName(inTask.ToString()));
 
             Console.WriteLine("Downloading hashlist for this task, please wait...");
 
@@ -287,7 +287,11 @@ namespace hashtopussy
                                 sProps.cracks = subChunk;
                                 jsonString = jsC.toJson(sProps);
                                 ret = jsC.jsonSend(jsonString);
-                                Console.WriteLine(ret);
+
+                                if (!jsC.isJsonSuccess(ret)) //If we received error, eg task was removed just break
+                                {
+                                    break;
+                                }
                             }
                                     
                         }
@@ -329,10 +333,27 @@ namespace hashtopussy
 
                     else //We received an error from the server, terminate the run
                     {
+                        
+                        string writeCracked = Path.Combine(hashpath, Path.GetFileName(hashlistID.ToString())) + ".cracked";
+                        Console.WriteLine("Writing any cracks in queue to file " + writeCracked);
+                        File.AppendAllLines(writeCracked, singlePacket[0].crackedPackets);
+                        lock (objPacketlock)
+                        {
+                            if (uploadPackets.Count > 0)
+                            {
+                                for (int i = 0; i < uploadPackets.Count; i++)
+                                {
+                                    if (uploadPackets[i].crackedPackets.Count > 0)
+                                    {
+                                        File.AppendAllLines(writeCracked, uploadPackets[i].crackedPackets);
+                                    }
+                                }
+                            }
+                        }
 
+                  
                         if (!hcClass.hcProc.HasExited)
                         {
-                            Console.WriteLine("Error received");
                             hcClass.hcProc.CancelOutputRead();
                             hcClass.hcProc.CancelErrorRead();
                             hcClass.hcProc.Kill();
