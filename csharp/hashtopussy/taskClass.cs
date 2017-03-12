@@ -140,7 +140,7 @@ namespace hashtopussy
 
             jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
             string jsonString = jsC.toJson(hProps);
-            string ret = jsC.jsonSend(jsonString);
+            string ret = jsC.jsonSend(jsonString,300); //300 second timeout
 
             //Check if is json string, a nasty workaround copies from the javaclient to detect whether the return string is json vs hl. Should probably use a proper detector
             if (ret[0] != '{' && ret[ret.Length - 1] != '}')
@@ -232,6 +232,7 @@ namespace hashtopussy
                 {
                     if (uploadPackets.Count > 0)
                     {
+
                         singlePacket.Add(uploadPackets[0]);
                         ulQueue = uploadPackets.Count;
                         uploadPackets.RemoveAt(0);
