@@ -167,7 +167,7 @@ public class jsonClass
     }
 
     //On fail, the client will use a backdown algorithm and retry 30 times
-    public string jsonSend(string json)
+    public string jsonSend(string json, int timeOutSecs = 30)
     {
 
         int tries = 0;
@@ -184,7 +184,7 @@ public class jsonClass
                 var request = (HttpWebRequest)WebRequest.Create(connectURL);
                 request.ContentType = "application/json";
                 request.Method = "POST";
-                request.Timeout = 30000;
+                request.Timeout = timeOutSecs * 1000;
                 request.KeepAlive = true;
 
                 HttpWebResponse response = null;
@@ -231,7 +231,9 @@ public class jsonClass
             catch (Exception)
             {
                 Console.WriteLine("Could not connect to specified server, exiting");
-                break;
+                tries++;
+                randomTime = rnd.Next(1, tries);
+                Console.WriteLine("Attempting to re-connect in {0} seconds", tries + randomTime);
             }
 
         } while (tries <= 10);
