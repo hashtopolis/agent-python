@@ -324,11 +324,11 @@ namespace hashtopussy
                         if (receivedZaps.Count > 0)
                         {
                             zapCount++;
-                            File.WriteAllLines(zapfilePath + zapCount.ToString(), receivedZaps); //Write hashes for zapping
-                            receivedZaps.Clear();
+                            File.WriteAllLines(Path.Combine(zapfilePath + zapCount.ToString()), receivedZaps); //Write hashes for zapping
+                            
                         }
                         Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue:{5}", chunkPercent, speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
-
+                        receivedZaps.Clear();
                         if (jsC.getRetVar(ret,"agent") == "stop") //Special command sent by server, possibly undocumented
                         {
                             hcClass.hcProc.CancelOutputRead();
