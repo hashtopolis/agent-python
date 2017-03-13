@@ -329,6 +329,13 @@ namespace hashtopussy
                         }
                         Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue:{5}", chunkPercent, speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
 
+                        if (jsC.getRetVar(ret,"agent") == "stop") //Special command sent by server, possibly undocumented
+                        {
+                            hcClass.hcProc.CancelOutputRead();
+                            hcClass.hcProc.CancelErrorRead();
+                            hcClass.hcProc.Kill();
+                            run = false;
+                        }
                     }
 
 
