@@ -254,7 +254,13 @@ namespace hashtopussy
 
                 try
                 {
-                    { 
+                    {
+                        //Special override as there is a possible race condition in HC, where STATUS4 doesn't give 100%
+                        if (singlePacket[lastPacketNum].statusPackets["STATUS"] == 4)
+                        {
+                            singlePacket[0].statusPackets["PROGRESS1"] = singlePacket[0].statusPackets["PROGRESS2"];
+                        }
+
                         sProps.token = tokenID;
                         sProps.chunk = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
