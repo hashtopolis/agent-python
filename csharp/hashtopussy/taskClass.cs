@@ -181,22 +181,22 @@ namespace hashtopussy
 
             if (count == 0)
             {
-                return speed.ToString() + "KH/s";
+                return speed.ToString("F") + "KH/s";
             }
             else if (count == 1)
             {
-                return speed.ToString() + "MH/s";
+                return speed.ToString("F") + "MH/s";
             }
             else if (count == 2)
             {
-                return speed.ToString() + "GH/s";
+                return speed.ToString("F") + "GH/s";
             }
             else if (count == 3)
             {
-                return speed.ToString() + "TH/s";
+                return speed.ToString("F") + "TH/s";
             }
 
-            return speed.ToString();
+            return speed.ToString("F");
         }
 
     
@@ -217,7 +217,6 @@ namespace hashtopussy
             string zapfilePath = zapPath + hashlistID.ToString();
             long zapCount = 0;
             List<string> batchList = new List<string> { };
-            int lastPacketNum = 0;
             double chunkPercent = 0;
             double chunkStart = 0;
             Boolean run = true;
@@ -256,7 +255,7 @@ namespace hashtopussy
                 {
                     {
                         //Special override as there is a possible race condition in HC, where STATUS4 doesn't give 100%
-                        if (singlePacket[lastPacketNum].statusPackets["STATUS"] == 4)
+                        if (singlePacket[0].statusPackets["STATUS"] == 4)
                         {
                             singlePacket[0].statusPackets["PROGRESS1"] = singlePacket[0].statusPackets["PROGRESS2"];
                         }
@@ -380,7 +379,7 @@ namespace hashtopussy
 
 
                     {
-                        if (singlePacket[lastPacketNum].statusPackets["STATUS"] >= 4) //We are the last upload task
+                        if (singlePacket[0].statusPackets["STATUS"] >= 4) //We are the last upload task
                         {
                             Console.WriteLine("Finished last chunk");
                             singlePacket.Clear();
