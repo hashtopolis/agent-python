@@ -612,7 +612,7 @@ namespace hashtopussy
 
             jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
             string jsonString = jsC.toJson(get);
-             string   ret = jsC.jsonSend(jsonString);
+            string   ret = jsC.jsonSend(jsonString);
 
 
 
@@ -715,6 +715,10 @@ namespace hashtopussy
                     }
 
                     return true;
+                }
+                else
+                {
+                    Console.WriteLine("No new task assigned to agent");
                 }
 
 
