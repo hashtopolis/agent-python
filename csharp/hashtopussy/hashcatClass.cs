@@ -470,9 +470,14 @@ namespace hashtopussy
 
 
 
-        public Boolean startAttack(long chunk, long skip, long size, string separator, long interval, string taskPath)
+        public Boolean startAttack(long chunk, long taskID, long skip, long size, string separator, long interval, string taskPath)
         {
 
+            string oPath = Path.Combine(taskPath, taskID + "_" + chunk + ".txt"); // Path to write th -o file
+            if (File.Exists(oPath))
+            {
+                File.Delete(oPath); // We need to wipe the outfile if it exists since we want to start at pos 0
+            }
 
             ProcessStartInfo pinfo = new ProcessStartInfo();
 
