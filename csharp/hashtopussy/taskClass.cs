@@ -223,6 +223,9 @@ namespace hashtopussy
             List<Packets> singlePacket  = new List<Packets> { };
             int sleepTime = 2500;
             long ulQueue = 0;
+            long lastOfileSize = 0;
+
+            string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
 
             while (run)
             {
@@ -321,6 +324,15 @@ namespace hashtopussy
                     if (jsC.isJsonSuccess(ret))
                     {
 
+                        if (jsC.getRetVar(ret, "agent") == "stop") //Special command sent by server, possibly undocumented
+                        {
+                            hcClass.hcProc.CancelOutputRead();
+                            hcClass.hcProc.CancelErrorRead();
+                            hcClass.hcProc.Kill();
+                            run = false;
+                            Console.WriteLine("Server has instructed the client terminate the task via stop");
+                        }
+
                         chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
                         chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
 
@@ -334,13 +346,8 @@ namespace hashtopussy
                         }
                         Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue:{5}", chunkPercent.ToString("F"), speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
                         receivedZaps.Clear();
-                        if (jsC.getRetVar(ret,"agent") == "stop") //Special command sent by server, possibly undocumented
-                        {
-                            hcClass.hcProc.CancelOutputRead();
-                            hcClass.hcProc.CancelErrorRead();
-                            hcClass.hcProc.Kill();
-                            run = false;
-                        }
+
+
                     }
 
 
@@ -370,10 +377,10 @@ namespace hashtopussy
                             hcClass.hcProc.CancelOutputRead();
                             hcClass.hcProc.CancelErrorRead();
                             hcClass.hcProc.Kill();
-                            run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
                             //The server would need to accept the chunk but return an error
                         }
-
+                        run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
+                        break;
                     }
 
 
@@ -419,6 +426,7 @@ namespace hashtopussy
 
         public int getChunk(int inTask)
         {
+            Console.WriteLine("Getting chunk...");
              chunkProps cProps = new chunkProps
             {
                 action = "chunk",
@@ -464,7 +472,7 @@ namespace hashtopussy
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
 
-                        hcClass.startAttack(0, skip, length, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
+                        hcClass.startAttack(chunkNo, taskID, skip, length, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
                         thread.Join();
                       
                         return 1;
