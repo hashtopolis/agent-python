@@ -331,7 +331,7 @@ namespace hashtopussy
                             File.WriteAllLines(Path.Combine(zapfilePath + zapCount.ToString()), receivedZaps); //Write hashes for zapping
                             
                         }
-                        Console.WriteLine("Progress:{0}% | Speed:{1} | Cracks:{2} | Accepted:{3} | Zapped:{4} | Queue:{5}", chunkPercent.ToString("F"), speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
+                        Console.WriteLine("Progress:{0,7} | Speed:{1,-4} | Cracks:{2,-4} | Accepted:{3,-4} | Zapped:{4,-4} | Queue:{5,-2}", chunkPercent.ToString("F") + "%", speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
                         receivedZaps.Clear();
 
 
@@ -375,7 +375,7 @@ namespace hashtopussy
                     {
                         if (singlePacket[0].statusPackets["STATUS"] >= 4) //We are the last upload task
                         {
-                            Console.WriteLine("Finished last chunk");
+                            Console.WriteLine("Finished processing chunk");
                             singlePacket.Clear();
                             run = false;
                         }
@@ -541,6 +541,10 @@ namespace hashtopussy
                             return 0; 
                         }
                         return 3;
+
+                    case "hashcat_update":
+
+                        return 4;
                     }    
 
             }
