@@ -508,7 +508,11 @@ namespace hashtopussy
             hcProc.WaitForExit();
             hcProc.CancelErrorRead();
             hcProc.CancelOutputRead();
-            Console.WriteLine("Attack finished");
+            if (debugFlag)
+            {
+                Console.WriteLine("Attack finished");
+            }
+                
 
             hcProc.Dispose();
 
