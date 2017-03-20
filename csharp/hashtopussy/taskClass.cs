@@ -11,31 +11,19 @@ namespace hashtopussy
 
         hashcatClass hcClass = new hashcatClass();
 
-        private int taskID;
         private string attackcmd;
         private string cmdpars;
-        private int benchTime;
         private Boolean stipPath;
         private string actualHLpath;
-        private int hashlistID;
-        private int statusTimer;
-        private int benchMethod;
+        private int benchTime, hashlistID, taskID, statusTimer, benchMethod;
         private ArrayList files;
         private string hashlistAlias = "#HL#";
-
 
         private string prefixServerdl = "";
         public static char separator = ':';
 
-        private long chunkNo;
-        private long skip;
-        private long length;
-
-        private string filepath;
-        private string hashpath;
-        private string appPath;
-        private string zapPath;
-        private string tasksPath;
+        private long chunkNo, skip, length;
+        private string filepath, hashpath, appPath, zapPath, tasksPath;
 
         public string connectURL { get; set; }
         public Boolean debugFlag { get; set; }
@@ -45,7 +33,6 @@ namespace hashtopussy
 
         private List<string> primaryCracked; //Stores the cracked hashes as they come
         private object packetLock = new object(); //Lock to prevent the packetList from being edited as it's passed between the periodicUpload thread and the stdOut reader in hashcatClass
-
 
         public void setDirs(string fpath)
         {
@@ -551,8 +538,7 @@ namespace hashtopussy
                         {
                             Console.WriteLine("Server rejected benchmark");
                             Console.WriteLine("Check the hashlist was downloaded correctly");
-                            Environment.Exit(1);
-                            Console.WriteLine("Terminating task due to bad benchmark");
+                            return 0; 
                         }
                         return 3;
                     }    
@@ -680,20 +666,6 @@ namespace hashtopussy
                             }
                         }
 
-                        /*
-                        for (int i = 0; i<explode.Length; i++)
-                        {
-                            if (files.Contains(explode[i]));
-                            {
-                                string absolutePath = Path.Combine(filepath, explode[i]);
-                                if (File.Exists(absolutePath))
-                                {
-                                    explode[i] = absolutePath;
-                                }
-                            } 
-                        }
-                        attackcmd = String.Join(" ", explode);
-                        */
                     }
 
                     if (getHashes(hashlistID) == false)
