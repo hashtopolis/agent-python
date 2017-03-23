@@ -74,6 +74,7 @@
     <Compile Include="7zClass.cs" />
     <Compile Include="downloadClass.cs" />
     <Compile Include="hashcatClass.cs" />
+    <Compile Include="hashcatUpdateClass.cs" />
     <Compile Include="jsonClass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
