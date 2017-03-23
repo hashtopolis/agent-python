@@ -177,80 +177,26 @@ namespace hashtopussy
             }
             else //We have 7zip, lets check for HC update since that is zipped
             {
-                hcUpdateProp hcUpd = new hcUpdateProp();
-                jsonClass jsonUpd = new jsonClass { debugFlag = DebugMode, connectURL = serverURL };
-                hcUpd.token = client.tokenID;
-                string hcBinName = "hashcat";
-                if (client.osID == 0)
-                {
-                    hcBinName = hcBinName + "64.bin";
-                }
-                else if (client.osID == 1)
-                {
-                    hcBinName = hcBinName + "64.exe";
-                }
 
-                string hcBinLoc = Path.Combine(AppPath, "hashcat",hcBinName);
+                hashcatUpdateClass hcUpdater = new hashcatUpdateClass { connectURL = serverURL, debugFlag = DebugMode, client = client, AppPath = AppPath,sevenZip = zipper};
 
-                if (File.Exists(hcBinLoc))
+                if (hcUpdater.updateHashcat())
                 {
-                    hcUpd.force = 0; //HC exists, we don't need to force
+                    hashcatClass hcClass = new hashcatClass { };
+                    hcClass.setDirs(AppPath, client.osID);
+                    string hcVersion = (hcClass.getVersion());
+                    Console.WriteLine("Hashcat version {0} found", hcVersion);
                 }
                 else
                 {
-                    hcUpd.force = 1; //HC doesn't exist, we need to force
-                }
-
-                string jsonString = jsonUpd.toJson(hcUpd);
-                string ret = jsonUpd.jsonSend(jsonString);
-
-                if (jsonUpd.getRetVar(ret,"version") == "NEW")
-                {
-                    downloadClass dlClass = new downloadClass();
-
-                    if (client.osID != 1)
-                    {
-                        dlClass.DownloadFileCurl(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath, "hcClient.7z"));
-                    }
-                    else
-                    {
-                        dlClass.DownloadFile(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath, "hcClient.7z"));
-                    }
-
-                    zipper.xtract(Path.Combine(AppPath, "hcClient.7z"), Path.Combine(AppPath, "hcClient"));
-                    if (Directory.Exists(Path.Combine(AppPath, "hashcat")))
-                    {
-                        Directory.Delete(Path.Combine(AppPath, "hashcat"), true);
-                    }
-                    Directory.Move(Path.Combine(AppPath, "hcClient", jsonUpd.getRetVar(ret, "rootdir")), Path.Combine(AppPath, "hashcat"));
-                    Directory.Delete(Path.Combine(AppPath, "hcClient"));
-
-
-
-                    if (client.osID != 1) //Chmod for non windows
-                    {
-                        Console.WriteLine("Applying execution permissions to 7zr binary");
-                        Process.Start("chmod", "+x \"" + hcBinLoc + "\"");
-                    }
-                }
-
-                //Double check just incase
-                if (!File.Exists(hcBinLoc))
-                {
-                    Console.WriteLine("Could not locate {0} binary in hashcat directory", hcBinName);
+                    Console.WriteLine("Could not locate hashcat binary");
                     Console.WriteLine("You can manually download and extract hashcat");
                     Console.WriteLine("Client will now terminate");
                     {
                         Environment.Exit(0);
                     }
                 }
-                else
-                {
-                    hashcatClass hcClass = new hashcatClass { };
-                    hcClass.setDirs(AppPath, client.osID);
-                    string hcVersion = (hcClass.getVersion());
-                    Console.WriteLine("Hashcat version {0} found",hcVersion);
-                }
+
             }
 
             taskClass tasks = new taskClass
