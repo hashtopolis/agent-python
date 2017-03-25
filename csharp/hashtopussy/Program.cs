@@ -19,13 +19,7 @@ namespace hashtopussy
         public string action = "test";
     }
 
-    public class hcUpdateProp
-    {
-        public string action = "download";
-        public string type = "hashcat";
-        public string token = "";
-        public int force { set; get; }
-    }
+
 
     class Program
     {
@@ -178,7 +172,7 @@ namespace hashtopussy
             else //We have 7zip, lets check for HC update since that is zipped
             {
 
-                hashcatUpdateClass hcUpdater = new hashcatUpdateClass { connectURL = serverURL, debugFlag = DebugMode, client = client, AppPath = AppPath,sevenZip = zipper};
+                hashcatUpdateClass hcUpdater = new hashcatUpdateClass {debugFlag = DebugMode, client = client, AppPath = AppPath,sevenZip = zipper};
 
                 if (hcUpdater.updateHashcat())
                 {

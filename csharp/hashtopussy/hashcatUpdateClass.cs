@@ -24,12 +24,11 @@ namespace hashtopussy
         public string AppPath { get; set; }
         public _7zClass sevenZip { get; set; }
         public registerClass client { get; set; }
-        public string connectURL { get; set; }
         
         public bool updateHashcat()
         {
             hcUpdateProper hcUpd = new hcUpdateProper();
-            jsonClass jsonUpd = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
+            jsonClass jsonUpd = new jsonClass { debugFlag = debugFlag, connectURL = client.connectURL };
             hcUpd.token = client.tokenID;
             string hcBinName = "hashcat";
             if (client.osID == 0)
