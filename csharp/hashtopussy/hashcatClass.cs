@@ -241,7 +241,11 @@ namespace hashtopussy
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
 
-            Console.WriteLine(pInfo.FileName + pInfo.Arguments);
+            if (debugFlag)
+            {
+                Console.WriteLine(pInfo.FileName + pInfo.Arguments);
+            }
+            
 
             Process hcProcBenchmark = new Process();
             hcProcBenchmark.StartInfo = pInfo;
