@@ -201,12 +201,9 @@ namespace hashtopussy
 
             taskClass tasks = new taskClass
             {
-                tokenID = client.tokenID,
-                osID = client.osID,
                 sevenZip = zipper,
-                connectURL = serverURL,
-                debugFlag = DebugMode
-
+                debugFlag = DebugMode,
+                client = client
             };
                 
             tasks.setDirs(AppPath);

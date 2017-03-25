@@ -25,11 +25,10 @@ namespace hashtopussy
         private long chunkNo, skip, length;
         private string filepath, hashpath, appPath, zapPath, tasksPath;
 
-        public string connectURL { get; set; }
         public Boolean debugFlag { get; set; }
-        public string tokenID { get; set; }
-        public int osID { get; set; }
         public _7zClass sevenZip { get; set; }
+        public registerClass client { get; set; }
+
 
         private List<string> primaryCracked; //Stores the cracked hashes as they come
         private object packetLock = new object(); //Lock to prevent the packetList from being edited as it's passed between the periodicUpload thread and the stdOut reader in hashcatClass
@@ -41,7 +40,7 @@ namespace hashtopussy
             hashpath = Path.Combine(fpath, "hashlists");
             zapPath = Path.Combine(fpath, "hashlists", "zaps");
             tasksPath = Path.Combine(fpath, "tasks");
-            prefixServerdl = connectURL.Substring(0, connectURL.IndexOf("/api/")) + "/";
+            prefixServerdl = client.connectURL.Substring(0, client.connectURL.IndexOf("/api/")) + "/";
 
         }
 
@@ -121,11 +120,11 @@ namespace hashtopussy
 
             hashlistProps hProps = new hashlistProps
             {
-                token = tokenID,
+                token = client.tokenID,
                 hashlist = inTask
             };
 
-            jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
+            jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = client.connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString,300); //300 second timeout
 
@@ -196,7 +195,7 @@ namespace hashtopussy
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
-            jsonClass jsC = new jsonClass {debugFlag = debugFlag,  connectURL = connectURL };//Initis the json class
+            jsonClass jsC = new jsonClass {debugFlag = debugFlag,  connectURL = client.connectURL };//Initis the json class
             solveProps sProps = new solveProps(); //Init the properties to build our json string
             List<string> receivedZaps = new List<string> { }; //List to store incoming zaps for writing
             string ret =""; //Return string from json post
@@ -250,7 +249,7 @@ namespace hashtopussy
                             singlePacket[0].statusPackets["PROGRESS1"] = singlePacket[0].statusPackets["PROGRESS2"];
                         }
 
-                        sProps.token = tokenID;
+                        sProps.token = client.tokenID;
                         sProps.chunk = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
                         sProps.progress = singlePacket[0].statusPackets["PROGRESS1"];
@@ -417,12 +416,12 @@ namespace hashtopussy
              chunkProps cProps = new chunkProps
             {
                 action = "chunk",
-                token = tokenID,
+                token = client.tokenID,
                 taskId = inTask
             };
 
             jsC.debugFlag = debugFlag;
-            jsC.connectURL = connectURL;
+            jsC.connectURL = client.connectURL;
             primaryCracked = new List<string> { };
 
             string jsonString = jsC.toJson(cProps);
@@ -453,7 +452,7 @@ namespace hashtopussy
 
                         List<Packets> uploadPackets = new List<Packets>();
 
-                        hcClass.setDirs(appPath,osID);
+                        hcClass.setDirs(appPath,client.osID);
                         hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString(),debugFlag); 
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
@@ -465,7 +464,7 @@ namespace hashtopussy
                         return 1;
 
                     case "keyspace_required":
-                        hcClass.setDirs(appPath,osID);
+                        hcClass.setDirs(appPath,client.osID);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, ""); //Remove out the #HL#
                         hcClass.setArgs(attackcmdMod);
@@ -478,7 +477,7 @@ namespace hashtopussy
                         {
                             errorProps eProps = new errorProps
                             {
-                                token = tokenID,
+                                token = client.tokenID,
                                 task = taskID,
                                 message = "Invalid keyspace, keyspace probably too small for this hashtype"
                             };
@@ -490,7 +489,7 @@ namespace hashtopussy
                         {
                             keyspaceProps kProps = new keyspaceProps
                             {
-                                token = tokenID,
+                                token = client.tokenID,
                                 taskId = taskID,
                                 keyspace = calcKeyspace
                             };
@@ -505,7 +504,7 @@ namespace hashtopussy
                         return 0;
 
                     case "benchmark":
-                        hcClass.setDirs(appPath, osID);
+                        hcClass.setDirs(appPath, client.osID);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\""); //Add the path to Hashlist
                         hcClass.setArgs(attackcmdMod);
@@ -516,7 +515,7 @@ namespace hashtopussy
 
                         benchProps bProps = new benchProps
                         {
-                            token = tokenID,
+                            token = client.tokenID,
                             taskId = taskID,
                         };
 
@@ -556,12 +555,12 @@ namespace hashtopussy
             FileProps get = new FileProps
             {
                 action = "file",
-                token = tokenID,
+                token = client.tokenID,
                 task = taskID,
                 file = fileName
             };
 
-            jsonClass jsC = new jsonClass {  debugFlag = debugFlag, connectURL = connectURL };
+            jsonClass jsC = new jsonClass {  debugFlag = debugFlag, connectURL = client.connectURL };
             string jsonString = jsC.toJson(get);
             string ret = jsC.jsonSend(jsonString);
 
@@ -597,10 +596,10 @@ namespace hashtopussy
             Task get = new Task
             {
                 action = "task",
-                token = tokenID
+                token = client.tokenID
             };
 
-            jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
+            jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = client.connectURL };
             string jsonString = jsC.toJson(get);
             string   ret = jsC.jsonSend(jsonString);
 
@@ -654,7 +653,7 @@ namespace hashtopussy
                     //Could potentially cause issues if the file names are attack numbers eg 1 2 3 4 5 6 7
                     //File names cannot contain spaces
                     //Altnerative method is to perform find replace on the attackcmd based on the files array
-                    if (osID != 1)
+                    if (client.osID != 1)
                     {
                         string[] explode = new string[] { };
                         explode = attackcmd.Split(' ');
