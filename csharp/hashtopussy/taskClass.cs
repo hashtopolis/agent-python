@@ -542,7 +542,19 @@ namespace hashtopussy
                         return 3;
 
                     case "hashcat_update":
-
+                        Console.WriteLine("A new version of hashcat was found, updating...");
+                        hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip };
+                        if (hcUpdater.updateHashcat())
+                        {
+                            hashcatClass hcClass = new hashcatClass { };
+                            hcClass.setDirs(appPath, client.osID);
+                            string hcVersion = (hcClass.getVersion());
+                            Console.WriteLine("Hashcat version {0} found", hcVersion);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Update failed");
+                        }
                         return 4;
                     }    
 
