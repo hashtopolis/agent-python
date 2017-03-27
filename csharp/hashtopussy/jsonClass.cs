@@ -18,6 +18,8 @@ public class jsonClass
     //Will print the error messages on fail
     public Boolean isJsonSuccess(string jsonString)
     {
+        jss.MaxJsonLength = 2147483647;
+
         if (debugFlag)
             Console.WriteLine(jsonString);
 
@@ -51,9 +53,11 @@ public class jsonClass
 
     }
 
+
     //Returns variable from json string, values are casted to string
     public string getRetVar(string jsonString, string itemVar)
     {
+        jss.MaxJsonLength = 2147483647;
 
         try
         {
@@ -77,6 +81,7 @@ public class jsonClass
     //This is probably redundant as we can use the below function gerRetList to return a better typed array
     public ArrayList getRetArray(string jsonString, string itemVar)
     {
+        jss.MaxJsonLength = 2147483647;
 
         var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
         if (dict.ContainsKey(itemVar))
@@ -90,6 +95,7 @@ public class jsonClass
     //Return json string array to list with type string
     public List<string> getRetList(string jsonString, string itemVar)
     {
+        jss.MaxJsonLength = 2147483647;
 
         var dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonString);
         if (dict.ContainsKey(itemVar))
@@ -104,6 +110,7 @@ public class jsonClass
     //Converts array=>key to jason string format
     public string toJson(object obj)
     {
+        jss.MaxJsonLength = 2147483647;
 
         var json = jss.Serialize(obj);
         if (debugFlag)
