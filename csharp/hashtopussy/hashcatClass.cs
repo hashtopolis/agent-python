@@ -368,7 +368,10 @@ namespace hashtopussy
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDir , hcBin);
             pInfo.WorkingDirectory = filesDir;
-            Console.WriteLine("Using {0} as working directory", filesDir);
+            if (debugFlag)
+            {
+                Console.WriteLine("Using {0} as working directory", filesDir);
+            }
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
