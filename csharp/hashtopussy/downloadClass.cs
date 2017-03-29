@@ -40,6 +40,7 @@ namespace hashtopussy
         {
 
             WebClient webClient;
+            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             using (webClient = new WebClient())
             {
