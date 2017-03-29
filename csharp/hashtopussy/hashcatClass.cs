@@ -25,7 +25,7 @@ namespace hashtopussy
         private object packetLock;
         private object crackedLock;
         private object statusLock;
-        private Boolean debugFlag;
+        public Boolean debugFlag { get; set; }
 
         List<Packets> passedPackets;
 
@@ -234,7 +234,7 @@ namespace hashtopussy
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = "\"" + Path.Combine(hcDir, hcBin) + "\"";
-            Console.WriteLine("Using {0} as working directory", filesDir);
+            
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
@@ -243,6 +243,7 @@ namespace hashtopussy
 
             if (debugFlag)
             {
+                Console.WriteLine("Using {0} as working directory", filesDir);
                 Console.WriteLine(pInfo.FileName + pInfo.Arguments);
             }
             
@@ -368,18 +369,15 @@ namespace hashtopussy
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = "\"" + Path.Combine(hcDir, hcBin) + "\"";
             pInfo.WorkingDirectory = filesDir;
-            if (debugFlag)
-            {
-                Console.WriteLine("Using {0} as working directory", filesDir);
-            }
+
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
             if (debugFlag)
             {
+                Console.WriteLine("Using {0} as working directory", filesDir);
                 Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
-
             }
             Process hcProcKeyspace = new Process();
             hcProcKeyspace.StartInfo = pInfo;
@@ -498,7 +496,6 @@ namespace hashtopussy
             if (debugFlag)
             {
                 Console.WriteLine(pinfo.FileName + " " + pinfo.Arguments);
-
             }
 
             hcProc = new Process { };
