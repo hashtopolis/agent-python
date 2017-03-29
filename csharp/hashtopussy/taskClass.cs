@@ -210,6 +210,7 @@ namespace hashtopussy
             int sleepTime = 2500;
             long ulQueue = 0;
             long lastOfileSize = 0;
+            hcClass.debugFlag = debugFlag;
 
             string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
 
@@ -546,7 +547,7 @@ namespace hashtopussy
                         hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip };
                         if (hcUpdater.updateHashcat())
                         {
-                            hashcatClass hcClass = new hashcatClass { };
+                            hashcatClass hcClass = new hashcatClass {debugFlag = debugFlag};
                             hcClass.setDirs(appPath, client.osID);
                             string hcVersion = (hcClass.getVersion());
                             Console.WriteLine("Hashcat version {0} found", hcVersion);
