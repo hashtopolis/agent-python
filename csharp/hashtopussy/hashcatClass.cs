@@ -170,6 +170,11 @@ namespace hashtopussy
                         collection.Add("RECSALT2", Convert.ToDouble(items[i + 2])); //Second RECSALT value
                         i += 2;
                         break;
+                    case "REJECTED":
+                        collection.Add("REJECTED", Convert.ToDouble(items[i + 1]));
+                        collection.Add("PROGRESS_REJ", Math.Round(((collection["PROGRESS1"])-collection["REJECTED"]) / (collection["PROGRESS2"]), 15)); //Total progress value
+                        i += 1;
+                        break;
                     default:
                         i += 1;
                         break;
