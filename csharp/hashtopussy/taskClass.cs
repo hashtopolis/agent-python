@@ -297,7 +297,7 @@ namespace hashtopussy
                             {
                                 for (int i =0; i<= singlePacket[0].crackedPackets.Count-1; i++)
                                 {
-                                    singlePacket[i].crackedPackets[i] = singlePacket[0].crackedPackets[i].Replace(actualHLpath + ":", "");
+                                    singlePacket[0].crackedPackets[i] = singlePacket[0].crackedPackets[i].Replace(actualHLpath + ":", "");
                                 }
                             }
                             sProps.cracks = singlePacket[0].crackedPackets;
@@ -388,25 +388,21 @@ namespace hashtopussy
 
 
                 }
+
+             
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                     Console.WriteLine("Error processing packet for upload");
-                    /*
-                    hcClass.hcProc.CancelOutputRead();
-                    hcClass.hcProc.CancelErrorRead();
-                    if (!hcClass.hcProc.HasExited)
-                    {
-                        hcClass.hcProc.Kill();
-                    }
-                    */
+
 
                     continue;
                             
                 }
-
+                
+      
             }
-   
+
         }
 
         private  jsonClass jsC = new jsonClass { };
