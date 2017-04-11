@@ -130,7 +130,7 @@ namespace hashtopussy
 
             }
 
-            string AppVersion = "0.43.13";
+            string AppVersion = "0.43.14";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
@@ -178,7 +178,7 @@ namespace hashtopussy
                 {
                     hashcatClass hcClass = new hashcatClass { };
                     hcClass.setDirs(AppPath, client.osID);
-                    string hcVersion = (hcClass.getVersion());
+                    string hcVersion = hcClass.getVersion2();
                     Console.WriteLine("Hashcat version {0} found", hcVersion);
                 }
                 else

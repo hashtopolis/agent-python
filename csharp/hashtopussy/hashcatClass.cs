@@ -130,7 +130,7 @@ namespace hashtopussy
                     case "SPEED":
                         while (items[i+1] != "EXEC_RUNTIME") //Due to multiple cards, perform micro-loop
                         {
-                            collection.Add(("SPEED" + countStep.ToString()), Convert.ToDouble(items[i + 1]));
+                            collection.Add("SPEED" + countStep, Convert.ToDouble(items[i + 1]));
                             speedData += Convert.ToDouble(items[i + 1]);
                             countStep++;
                             i += 2;
@@ -141,7 +141,7 @@ namespace hashtopussy
                     case "EXEC_RUNTIME":
                         while (items[i+1] != "CURKU") //Due to multiple cards, perform micro-loop
                         {
-                            collection.Add(("EXEC_RUNTIME" + countStep.ToString()), Math.Round(Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture),2));
+                            collection.Add("EXEC_RUNTIME" + countStep, Math.Round(Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture),2));
                             execRuntime += Convert.ToDouble(Decimal.Parse(items[i + 1]), CultureInfo.InvariantCulture);
                             countStep++;
                             i += 1;
@@ -172,7 +172,7 @@ namespace hashtopussy
                         break;
                     case "REJECTED":
                         collection.Add("REJECTED", Convert.ToDouble(items[i + 1]));
-                        collection.Add("PROGRESS_REJ", Math.Round(((collection["PROGRESS1"])-collection["REJECTED"]) / (collection["PROGRESS2"]), 15)); //Total progress value
+                        collection.Add("PROGRESS_REJ", Math.Round((collection["PROGRESS1"]-collection["REJECTED"]) / collection["PROGRESS2"], 15)); //Total progress value
                         i += 1;
                         break;
                     default:
@@ -197,7 +197,7 @@ namespace hashtopussy
         private void parseStatus2(string statusLine, ref Dictionary<string, double> collection)
         {
 
-            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            CultureInfo customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
@@ -212,8 +212,8 @@ namespace hashtopussy
                 string[] items = match.ToString().TrimEnd().Split(':');
 
 
-                collection.Add("LEFT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[1],CultureInfo.InvariantCulture)));
-                collection.Add("RIGHT" + counter.ToString(), Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture)));
+                collection.Add("LEFT" + counter, Convert.ToDouble(Decimal.Parse(items[1],CultureInfo.InvariantCulture)));
+                collection.Add("RIGHT" + counter, Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture)));
                 leftT += Convert.ToDouble(Decimal.Parse(items[1], CultureInfo.InvariantCulture));
                 rightT += Convert.ToDouble(Decimal.Parse(items[2], CultureInfo.InvariantCulture));
                 counter++;
@@ -313,10 +313,45 @@ namespace hashtopussy
             keySpace = Convert.ToInt64(line);
         }
 
+        public string getVersion2()
+        {
+            ProcessStartInfo pInfo = new ProcessStartInfo();
+            pInfo.FileName = Path.Combine(hcDir, hcBin);
+            pInfo.WorkingDirectory = filesDir;
+            pInfo.Arguments = "--version";
+            pInfo.UseShellExecute = false;
+            pInfo.RedirectStandardError = true;
+            pInfo.RedirectStandardOutput = true;
+            Process hcGetVersion = new Process();
+
+            hcGetVersion.StartInfo = pInfo;
+            string versionString = "";
+
+            try
+            {
+                hcGetVersion.Start();
+                versionString = hcGetVersion.StandardOutput.ReadToEnd().TrimEnd();
+                hcGetVersion.WaitForExit();
+            }
+            catch
+            {
+                Console.WriteLine("Something went wrong when trying to get HC version");
+            }
+            finally
+            {
+                if (hcGetVersion.ExitCode != 0)
+                {
+                    Console.WriteLine("Something went when trying to get HC version");
+                }
+
+                hcGetVersion.Close();
+            }
+
+            return versionString;
+        }
         public string getVersion()
         {
 
-            StringBuilder stdOutBuild = new StringBuilder();
             string stdOutSingle = "";
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDir, hcBin);
@@ -351,10 +386,6 @@ namespace hashtopussy
             }
             finally
             {
-                if (hcGetVersion.ExitCode != 0)
-                {
-                    Console.WriteLine("Something went when trying to get HC version");
-                }
 
                 hcGetVersion.Close();
             }
