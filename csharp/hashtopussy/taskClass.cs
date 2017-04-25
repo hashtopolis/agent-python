@@ -222,7 +222,6 @@ namespace hashtopussy
             List<string> readFile = new List<string>();
             while (run)
             {
-                Console.WriteLine(("Starting loop"));
                 Thread.Sleep(sleepTime); //Delay this thread for 2.5 seconds, if this falls behind it will batch the jobs
                 lock (objPacketlock)
                 {
@@ -242,13 +241,10 @@ namespace hashtopussy
                     }
                 }
 
-
                 if (singlePacket.Count == 0)
                 {
-                    Console.WriteLine(("Quitting from single Packet count"));
                     continue;
                 }
-
 
                 readFile.Clear();
                 if (!File.Exists(oPath))
