@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.IO;
-
+using System.ComponentModel;
 
 namespace hashtopussy
 {
@@ -12,7 +12,7 @@ namespace hashtopussy
 
 
         Stopwatch sw = new Stopwatch();
-
+        private bool completedFlag = false;
 
         public bool DownloadFileCurl(string urlAddress, string location)
         {
@@ -36,16 +36,18 @@ namespace hashtopussy
         }
 
 
+
         public bool DownloadFile(string urlAddress, string location)
         {
 
+            completedFlag = false;
             WebClient webClient;
             System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
 
             using (webClient = new WebClient())
             {
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);               
-
+                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
+                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(dlFinished);
                 if (!urlAddress.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                 {
                     urlAddress = "https://" + urlAddress;
@@ -62,7 +64,7 @@ namespace hashtopussy
                     return false;
                 }
 
-                webClient.DownloadFile(URL, location);
+                //webClient.DownloadFile(URL, location);
                 // Start the stopwatch which we will be using to calculate the download speed
                 sw.Start();
 
@@ -77,13 +79,12 @@ namespace hashtopussy
                     Console.WriteLine(ex.Message);
                     return false;
                 }
-                while (webClient.IsBusy) Thread.Sleep(500);
+                while (!completedFlag) Thread.Sleep(500);
                 
                 if (File.Exists(location))
                     {
                     FileInfo f = new FileInfo(location);
                     long size = f.Length;
-                    //Console.WriteLine(string.Format(" completed @ {0} kb/s", (size / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00")));
                     Console.WriteLine();
                     return true;
                 }
@@ -95,21 +96,44 @@ namespace hashtopussy
             }
         }
 
+        //This will fire upon filedownload completion
+        void dlFinished(object sender, AsyncCompletedEventArgs e)
+        {
+            completedFlag = true;
+        }
+
         // The event that will fire whenever the progress of the WebClient is changed
         private void ProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            // Calculate download speed and output it to labelSpeed.
-            //Console.WriteLine (string.Format("{0} kb/s", (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00")));
 
-            // Update the progressbar percentage only when the value is not the same.
-            //Console.WriteLine( e.ProgressPercentage);
-            Console.Write("\r{0} {1}% @ {2} kb/s", "Downloading",e.ProgressPercentage, (e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds).ToString("0.00"));
-            // Update the label with how much data have been downloaded so far and the total size of the file we are currently downloading
-            /*
-            Console.WriteLine(string.Format("{0} MB's / {1} MB's",
-                (e.BytesReceived / 1024d / 1024d).ToString("0.00"),
-                (e.TotalBytesToReceive / 1024d / 1024d).ToString("0.00")));
-            */
+            double speed = e.BytesReceived / 1024d / sw.Elapsed.TotalSeconds;
+            int divCount = 0;
+            while (speed > 1000)
+            {
+                speed = speed / 1000;
+                divCount += 1;
+            }
+
+            string speedMetric = "?/s";
+            switch (divCount)
+            {
+                case 0:
+                    speedMetric = "B/s";
+                        break;
+                case 1:
+                    speedMetric = "KB/s";
+                        break;
+                case 2:
+                    speedMetric = "MB/s";
+                        break;
+                case 3:
+                    speedMetric = "GB/s";
+                    break;
+                
+            }
+
+            Console.Write("\r{0} {1}% @ {2} {3}", "Downloading",e.ProgressPercentage, speed.ToString("0.00"), speedMetric);
+
         }
 
 
