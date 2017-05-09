@@ -358,7 +358,8 @@ namespace hashtopussy
                             }
                         }
 
-                  
+                        run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
+
                         if (!hcClass.hcProc.HasExited)
                         {
                             hcClass.hcProc.CancelOutputRead();
@@ -366,10 +367,8 @@ namespace hashtopussy
                             hcClass.hcProc.Kill();
                             //The server would need to accept the chunk but return an error
                         }
-                        run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
                         break;
                     }
-
 
 
                     {
@@ -386,7 +385,6 @@ namespace hashtopussy
                         
                     }
 
-
                 }
 
              
@@ -394,10 +392,6 @@ namespace hashtopussy
                 {
                     Console.WriteLine(e.Message);
                     Console.WriteLine("Error processing packet for upload");
-
-
-                    continue;
-                            
                 }
                 
       
