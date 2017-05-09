@@ -523,7 +523,7 @@ namespace hashtopussy
             ProcessStartInfo pinfo = new ProcessStartInfo();
 
             pinfo.FileName = Path.Combine(hcDir, hcBin);
-            pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable -o " + oPath +  " --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " -s " + skip + " -l " + size;
+            pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " -s " + skip + " -l " + size;
             pinfo.WorkingDirectory = filesDir;
             pinfo.UseShellExecute = false;
             pinfo.RedirectStandardError = true;

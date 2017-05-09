@@ -2,7 +2,6 @@
 using System.Collections;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace hashtopussy
@@ -214,12 +213,7 @@ namespace hashtopussy
             hcClass.debugFlag = debugFlag;
 
             string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
-            FileInfo outFile;
 
-             
-
-            int linesRead = 0;
-            List<string> readFile = new List<string>();
             while (run)
             {
                 Thread.Sleep(sleepTime); //Delay this thread for 2.5 seconds, if this falls behind it will batch the jobs
@@ -241,28 +235,10 @@ namespace hashtopussy
                     }
                 }
 
+
                 if (singlePacket.Count == 0)
                 {
                     continue;
-                }
-
-                readFile.Clear();
-                if (!File.Exists(oPath))
-                {
-                   
-                }
-                else
-                {
-                    outFile = new FileInfo(oPath); //Need this here to refresh the filehandle
-                    if (outFile.Length != lastOfileSize)
-                    {
-                        lastOfileSize = outFile.Length;
-                        IEnumerable<string> newCracks = File.ReadLines(oPath).Skip(linesRead);
-                        linesRead += newCracks.Count();
-                        readFile = new List<string>(newCracks);
-
-                    }
-
                 }
 
                 try
@@ -282,18 +258,18 @@ namespace hashtopussy
                         sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
                         sProps.state = singlePacket[0].statusPackets["STATUS"];
 
-                        if (readFile.Count > 200)
+                        if (singlePacket[0].crackedPackets.Count > 200)
                         {
                             int max = 200;
 
                             //Process the requests in batches of 1000
-                            while (readFile.Count != 0)
+                            while (singlePacket[0].crackedPackets.Count != 0)
                             {
-                                List<string> subChunk = new List<string>(readFile.GetRange(0, max));
-                                readFile.RemoveRange(0, max);
-                                if (readFile.Count < max)
+                                List<string> subChunk = new List<string>(singlePacket[0].crackedPackets.GetRange(0, max));
+                                singlePacket[0].crackedPackets.RemoveRange(0, max);
+                                if (singlePacket[0].crackedPackets.Count < max)
                                 {
-                                    max = readFile.Count;
+                                    max = singlePacket[0].crackedPackets.Count;
                                 }
 
                                 if (stipPath == true)
@@ -319,12 +295,12 @@ namespace hashtopussy
                         {
                             if (stipPath == true)
                             {
-                                for (int i =0; i<= readFile.Count - 1; i++)
+                                for (int i =0; i<= singlePacket[0].crackedPackets.Count-1; i++)
                                 {
-                                    readFile[i] = readFile[i].Replace(actualHLpath + ":", "");
+                                    singlePacket[0].crackedPackets[i] = singlePacket[0].crackedPackets[i].Replace(actualHLpath + ":", "");
                                 }
                             }
-                            sProps.cracks = readFile;
+                            sProps.cracks = singlePacket[0].crackedPackets;
 
                             jsonString = jsC.toJson(sProps);
                             ret = jsC.jsonSend(jsonString);
@@ -402,7 +378,6 @@ namespace hashtopussy
                             Console.WriteLine("Finished processing chunk");
                             singlePacket.Clear();
                             run = false;
-                            File.Delete(oPath);
                         }
                         else
                         {
@@ -698,6 +673,7 @@ namespace hashtopussy
                     if (client.osID != 1)
                     {
                         string[] explode = new string[] { };
+                        explode = attackcmd.Split(' ');
 
                         for (int i = 0; i<files.Count; i++)
                         {
