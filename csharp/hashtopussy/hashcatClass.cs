@@ -11,6 +11,8 @@ namespace hashtopussy
 {
     class hashcatClass : IDisposable
     {
+        public Boolean debugFlag { get; set; }
+
         public List<string> hashlist = new List<string> { }; //New collection to store cracks
         public Process hcProc;
 
@@ -25,7 +27,6 @@ namespace hashtopussy
         private object packetLock;
         private object crackedLock;
         private object statusLock;
-        public Boolean debugFlag { get; set; }
 
         List<Packets> passedPackets;
 
@@ -265,7 +266,7 @@ namespace hashtopussy
             }
             else
             {
-                Console.WriteLine("Server has requested the client to perform a speed benchmark");
+                Console.WriteLine("Server has requested the client perform a speed benchmark");
 
             }
             try
@@ -310,7 +311,13 @@ namespace hashtopussy
         private static void parseKeyspace(string line, ref long keySpace)
         {
             line = line.TrimEnd();
-            keySpace = Convert.ToInt64(line);
+
+            if (!long.TryParse(line, out keySpace))
+            {
+                Console.WriteLine("There was an error parsing the keyspace, setting keyspace to 0. Please review attack cmd");
+                keySpace = 0; //Return 0 which will throw error
+            }
+
         }
 
         public string getVersion2()
@@ -398,13 +405,14 @@ namespace hashtopussy
         public Boolean runKeyspace(ref long keySpace)
         {
 
-            Console.WriteLine("Server has requested the client to measure the keyspace for this task");
+            Console.WriteLine("Server has requested the client measure the keyspace for this task");
 
             string stdOutSingle = "";
             string suffixArgs = " --session=hashtopussy --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName =  Path.Combine(hcDir, hcBin);
             pInfo.WorkingDirectory = filesDir;
+
 
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
@@ -415,6 +423,7 @@ namespace hashtopussy
                 Console.WriteLine("Using {0} as working directory", filesDir);
                 Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
             }
+
             Process hcProcKeyspace = new Process();
             hcProcKeyspace.StartInfo = pInfo;
             hcProcKeyspace.ErrorDataReceived += (sender, argu) => outputError(argu.Data);
@@ -520,22 +529,22 @@ namespace hashtopussy
                 File.Delete(oPath); // We need to wipe the outfile if it exists since we want to start at pos 0
             }
 
-            ProcessStartInfo pinfo = new ProcessStartInfo();
+            ProcessStartInfo pInfo = new ProcessStartInfo();
 
-            pinfo.FileName = Path.Combine(hcDir, hcBin);
-            pinfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " -s " + skip + " -l " + size;
-            pinfo.WorkingDirectory = filesDir;
-            pinfo.UseShellExecute = false;
-            pinfo.RedirectStandardError = true;
-            pinfo.RedirectStandardOutput = true;
+            pInfo.FileName = Path.Combine(hcDir, hcBin);
+            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " -s " + skip + " -l " + size;
+            pInfo.WorkingDirectory = filesDir;
+            pInfo.UseShellExecute = false;
+            pInfo.RedirectStandardError = true;
+            pInfo.RedirectStandardOutput = true;
 
             if (debugFlag)
             {
-                Console.WriteLine(pinfo.FileName + " " + pinfo.Arguments);
+                Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
             }
 
             hcProc = new Process { };
-            hcProc.StartInfo = pinfo;
+            hcProc.StartInfo = pInfo;
             // create event handlers for normal and error output
 
             hcProc.OutputDataReceived += (sender, argu) => stdOutTrigger(argu.Data);
