@@ -123,7 +123,6 @@ namespace hashtopussy
                 token = client.tokenID,
                 hashlist = inTask
             };
-
             jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = client.connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString,300); //300 second timeout
@@ -359,7 +358,7 @@ namespace hashtopussy
                         }
 
                         run = false; //Potentially we can change this so keep submitting the rest of the cracked queue instead of terminating
-
+                     
                         if (!hcClass.hcProc.HasExited)
                         {
                             hcClass.hcProc.CancelOutputRead();
@@ -414,6 +413,7 @@ namespace hashtopussy
             jsC.debugFlag = debugFlag;
             jsC.connectURL = client.connectURL;
             primaryCracked = new List<string> { };
+            hcClass.debugFlag = debugFlag;
 
             string jsonString = jsC.toJson(cProps);
             string ret = jsC.jsonSend(jsonString);
@@ -434,8 +434,7 @@ namespace hashtopussy
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\" "); //Add the path to Hashlist
                         attackcmdMod += " --outfile-check-dir=\"" + zapPath + hashlistID.ToString() + "\" "; //Add the zap path to the commands
 
-                        hcClass.setArgs(attackcmdMod);
-
+                        hcClass.setArgs(attackcmdMod); 
 
                         chunkNo = Convert.ToInt64(jsC.getRetVar(ret, "chunk"));
                         skip = Convert.ToInt64(jsC.getRetVar(ret, "skip"));
