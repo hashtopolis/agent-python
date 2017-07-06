@@ -261,7 +261,7 @@ namespace hashtopussy
 
             if (benchMethod == 1)
             {
-                Console.WriteLine("Server requsted the client benchark this task for {0} seconds", benchSecs);
+                Console.WriteLine("Server requsted the client benchmark this task for {0} seconds", benchSecs);
 
             }
             else
