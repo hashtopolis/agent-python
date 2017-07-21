@@ -625,7 +625,7 @@ namespace hashtopussy
                     hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
 
-                    Console.WriteLine("Server hash assigned client with Task:{0} and Hashlist:{1}",taskID,hashlistID);
+                    Console.WriteLine("Server has assigned client with Task:{0} and Hashlist:{1}",taskID,hashlistID);
                     if (jsC.getRetVar(ret, "benchType") == "run")
                     {
                         benchMethod = 1;
