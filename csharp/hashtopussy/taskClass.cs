@@ -166,21 +166,24 @@ namespace hashtopussy
 
             if (count == 0)
             {
-                return speed.ToString("F") + "KH/s";
+                return speed.ToString("F") + "H/s";
             }
             else if (count == 1)
             {
-                return speed.ToString("F") + "MH/s";
+                return speed.ToString("F") + "KH/s";
             }
             else if (count == 2)
             {
-                return speed.ToString("F") + "GH/s";
+                return speed.ToString("F") + "MH/s";
             }
             else if (count == 3)
             {
+                return speed.ToString("F") + "GH/s";
+            }
+            else if (count == 4)
+            {
                 return speed.ToString("F") + "TH/s";
             }
-
             return speed.ToString("F");
         }
 
