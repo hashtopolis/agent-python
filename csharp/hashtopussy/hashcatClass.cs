@@ -132,7 +132,7 @@ namespace hashtopussy
                         while (items[i+1] != "EXEC_RUNTIME") //Due to multiple cards, perform micro-loop
                         {
                             collection.Add("SPEED" + countStep, Convert.ToDouble(items[i + 1]));
-                            speedData += Convert.ToDouble(items[i + 1]);
+                            speedData = (Convert.ToDouble(items[i + 1]) * 1000) / Convert.ToDouble(items[i + 2]); //For hashcat 3.7 compatability
                             countStep++;
                             i += 2;
                         }
