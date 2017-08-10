@@ -118,16 +118,16 @@ namespace hashtopussy
             switch (divCount)
             {
                 case 0:
-                    speedMetric = "B/s";
-                        break;
-                case 1:
                     speedMetric = "KB/s";
                         break;
-                case 2:
+                case 1:
                     speedMetric = "MB/s";
                         break;
-                case 3:
+                case 2:
                     speedMetric = "GB/s";
+                        break;
+                case 3:
+                    speedMetric = "TB/s";
                     break;
                 
             }
