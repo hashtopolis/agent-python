@@ -245,6 +245,7 @@ namespace hashtopussy
                     {
                         //Special override as there is a possible race condition in HC, where STATUS4 doesn't give 100%
                         if (singlePacket[0].statusPackets["STATUS"] == 4)
+                        //if(singlePacket[0].statusPackets["STATUS"] == 5) //Uncomment this line, and comment above for upcoming HC > 3.6
                         {
                             singlePacket[0].statusPackets["PROGRESS1"] = singlePacket[0].statusPackets["PROGRESS2"];
                         }
@@ -372,6 +373,7 @@ namespace hashtopussy
 
                     {
                         if (singlePacket[0].statusPackets["STATUS"] >= 4) //We are the last upload task
+                        //if (singlePacket[0].statusPackets["STATUS"] >= 5) //Uncomment this line, and comment above line for upcoming HC > 3.6
                         {
                             Console.WriteLine("Finished processing chunk");
                             singlePacket.Clear();
