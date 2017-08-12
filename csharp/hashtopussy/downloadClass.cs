@@ -42,7 +42,15 @@ namespace hashtopussy
 
             completedFlag = false;
             WebClient webClient;
-            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
+            try
+            {
+                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 |
+                                                                  SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
+            }
+            catch
+            {
+                Console.WriteLine("Skipping TLS settings (consider upgrading to the latest .NET framework for better TLS support");
+            }
 
             using (webClient = new WebClient())
             {
