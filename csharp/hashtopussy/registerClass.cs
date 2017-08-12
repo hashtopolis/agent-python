@@ -88,7 +88,7 @@ public class registerClass
 
     private bool registerAgent(string iVoucher)
     {
-        jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
+        jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
 
         setOS();
 
