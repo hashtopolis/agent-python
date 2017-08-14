@@ -320,7 +320,7 @@ namespace hashtopussy
 
         }
 
-        public string getVersion2()
+        public string getVersion2(ref string[] versionNum)
         {
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDir, hcBin);
@@ -339,6 +339,16 @@ namespace hashtopussy
                 hcGetVersion.Start();
                 versionString = hcGetVersion.StandardOutput.ReadToEnd().TrimEnd();
                 hcGetVersion.WaitForExit();
+
+                Regex regex = new Regex("v(?<version>[^-]*)");
+
+                Match match = regex.Match(versionString);
+
+                if (match.Success)
+                {
+                    versionNum = match.Groups["version"].Value.Split('.');
+
+                }
             }
             catch
             {

@@ -28,6 +28,21 @@ namespace hashtopussy
         public Boolean debugFlag { get; set; }
         public _7zClass sevenZip { get; set; }
         public registerClass client { get; set; }
+        public Boolean legacy { get; set; }
+        private int offset = 0;
+
+        public void setOffset()
+        {
+            if (!legacy)
+            {
+                offset = 1;
+                Console.WriteLine("Using new STATUS codes");
+            }
+            else
+            {
+                Console.WriteLine("Using legacy STATUS codes");
+            }
+        }
 
 
         private List<string> primaryCracked; //Stores the cracked hashes as they come
@@ -247,8 +262,7 @@ namespace hashtopussy
                 {
                     {
                         //Special override as there is a possible race condition in HC, where STATUS4 doesn't give 100%
-                        if (singlePacket[0].statusPackets["STATUS"] == 4)
-                        //if(singlePacket[0].statusPackets["STATUS"] == 5) //Uncomment this line, and comment above for upcoming HC > 3.6
+                        if (singlePacket[0].statusPackets["STATUS"] == 4 + offset)
                         {
                             singlePacket[0].statusPackets["PROGRESS1"] = singlePacket[0].statusPackets["PROGRESS2"];
                         }
@@ -259,7 +273,7 @@ namespace hashtopussy
                         sProps.progress = singlePacket[0].statusPackets["PROGRESS1"];
                         sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
                         sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
-                        sProps.state = singlePacket[0].statusPackets["STATUS"];
+                        sProps.state = singlePacket[0].statusPackets["STATUS"] - offset; //Client-side workaround for old STATUS on server
 
                         if (singlePacket[0].crackedPackets.Count > 200)
                         {
@@ -375,7 +389,7 @@ namespace hashtopussy
 
 
                     {
-                        if (singlePacket[0].statusPackets["STATUS"] >= 4) //We are the last upload task
+                        if (singlePacket[0].statusPackets["STATUS"] >= 4 + offset) //We are the last upload task
                         //if (singlePacket[0].statusPackets["STATUS"] >= 5) //Uncomment this line, and comment above line for upcoming HC > 3.6
                         {
                             Console.WriteLine("Finished processing chunk");
@@ -551,8 +565,26 @@ namespace hashtopussy
                         {
                             hashcatClass hcClass = new hashcatClass {debugFlag = debugFlag};
                             hcClass.setDirs(appPath, client.osID);
-                            string hcVersion = (hcClass.getVersion());
+                            string[] versionInts = { };
+                            string hcVersion = hcClass.getVersion2(ref versionInts);
                             Console.WriteLine("Hashcat version {0} found", hcVersion);
+
+                            if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
+                            {
+                                if (hcVersion.Contains("-"))
+                                {
+                                    legacy = false;
+                                    //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
+                                }
+                            }
+                            else if (Convert.ToInt32(versionInts[0]) >= 3 && Convert.ToInt32(versionInts[1]) >= 6)
+                            {
+                                legacy = false;
+                                //This is a release build above 3.6.0
+                            }
+
+                            setOffset();
+
                         }
                         else
                         {

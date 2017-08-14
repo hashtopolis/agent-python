@@ -137,7 +137,7 @@ namespace hashtopussy
 
             }
 
-            string AppVersion = "0.45.3";
+            string AppVersion = "0.45.8";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
@@ -156,6 +156,7 @@ namespace hashtopussy
             initDirs();
 
             registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode };
+            Boolean legacy = true; //Defaults to legacy STATUS codes
             client.setPath( AppPath);
             if (client.loginAgent())
             {
@@ -185,8 +186,24 @@ namespace hashtopussy
                 {
                     hashcatClass hcClass = new hashcatClass { };
                     hcClass.setDirs(AppPath, client.osID);
-                    string hcVersion = hcClass.getVersion2();
+                    string[] versionInts = {} ;
+                    string hcVersion = hcClass.getVersion2(ref versionInts);
                     Console.WriteLine("Hashcat version {0} found", hcVersion);
+
+                    if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
+                    {
+                        if (hcVersion.Contains("-"))
+                        {
+                            legacy = false;
+                            //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
+                        }
+                    }
+                    else if (Convert.ToInt32(versionInts[0]) >= 3 && Convert.ToInt32(versionInts[1]) >= 6)
+                    {
+                        legacy = false;
+                        //This is a release build above 3.6.0
+                    }
+
                 }
                 else
                 {
@@ -204,9 +221,12 @@ namespace hashtopussy
             {
                 sevenZip = zipper,
                 debugFlag = DebugMode,
-                client = client
-            };
+                client = client,
+                legacy =  legacy
                 
+            };
+            
+            tasks.setOffset(); //Set offset for STATUS changes in hashcat 3.6.0
             tasks.setDirs(AppPath);
             
             int backDown = 5;
