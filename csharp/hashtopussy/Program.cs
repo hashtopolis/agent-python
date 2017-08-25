@@ -107,6 +107,7 @@ namespace hashtopussy
 
             }
 
+            Console.WriteLine("Connecting to server {0}",serverURL);
             return true;
         }
 
@@ -137,7 +138,7 @@ namespace hashtopussy
 
             }
 
-            string AppVersion = "0.45.8";
+            string AppVersion = "0.45.9";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
