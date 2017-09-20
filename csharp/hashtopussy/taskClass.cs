@@ -569,22 +569,37 @@ namespace hashtopussy
                             string hcVersion = hcClass.getVersion2(ref versionInts);
                             Console.WriteLine("Hashcat version {0} found", hcVersion);
 
-                            if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
+
+                            if (hcVersion.Length != 0)
                             {
-                                if (hcVersion.Contains("-"))
+                                if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
+                                {
+                                    if (hcVersion.Contains("-"))
+                                    {
+                                        legacy = false;
+                                        //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
+                                    }
+                                }
+                                else if (Convert.ToInt32(versionInts[0]) == 3)
+                                {
+                                    if (Convert.ToInt32(versionInts[1].Substring(0, 1)) >= 6)
+                                    {
+                                        legacy = false;
+                                        //This is a release build above 3.6.0
+                                    }
+                                }
+                                else if (Convert.ToInt32(versionInts[0]) >= 4)
                                 {
                                     legacy = false;
-                                    //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
+                                    //This is a release build above 4.0.0
                                 }
                             }
-                            else if (Convert.ToInt32(versionInts[0]) >= 3 && Convert.ToInt32(versionInts[1]) >= 6)
+                            else
                             {
+                                //For some reason we couldn't read the version, lets just assume we are on non legacy
                                 legacy = false;
-                                //This is a release build above 3.6.0
                             }
-
                             setOffset();
-
                         }
                         else
                         {

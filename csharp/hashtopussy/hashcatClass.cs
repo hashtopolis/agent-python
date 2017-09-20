@@ -349,6 +349,10 @@ namespace hashtopussy
                     versionNum = match.Groups["version"].Value.Split('.');
 
                 }
+                else
+                {
+                    versionNum = versionString.Split('.');  //Hashcat changed the output after 3.6 to exclude the version string
+                }
             }
             catch
             {
