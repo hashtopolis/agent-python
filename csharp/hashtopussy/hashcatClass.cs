@@ -225,7 +225,7 @@ namespace hashtopussy
 
         }
 
-        public Boolean runBenchmark(int benchMethod, int benchSecs, ref Dictionary<string, double> collection)
+        public Boolean runBenchmark(int benchMethod, int benchSecs, ref Dictionary<string, double> collection,Boolean legacy)
         {
 
             StringBuilder stdOutBuild = new StringBuilder();
@@ -236,7 +236,16 @@ namespace hashtopussy
             {
                 suffixExtra = " --progress-only";
             }
-            string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopussy --weak=0" + suffixExtra;
+            string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopussy ";
+
+            if (legacy) //--weak was removed post HC 3.6, don't issue this command
+            {
+                suffixArgs = suffixArgs + "--weak = 0" + suffixExtra;
+            }
+            else
+            {
+                suffixArgs = suffixArgs + suffixExtra;
+            }
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDir, hcBin);

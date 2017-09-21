@@ -520,7 +520,7 @@ namespace hashtopussy
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
 
-                        hcClass.runBenchmark(benchMethod, benchTime, ref collection);
+                        hcClass.runBenchmark(benchMethod, benchTime, ref collection,legacy);
 
                         benchProps bProps = new benchProps
                         {
