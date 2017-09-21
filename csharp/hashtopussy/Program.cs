@@ -138,7 +138,7 @@ namespace hashtopussy
 
             }
 
-            string AppVersion = "0.46.0";
+            string AppVersion = "0.46.1";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
