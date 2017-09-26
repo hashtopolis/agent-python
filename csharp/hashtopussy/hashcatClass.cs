@@ -240,7 +240,7 @@ namespace hashtopussy
 
             if (legacy) //--weak was removed post HC 3.6, don't issue this command
             {
-                suffixArgs = suffixArgs + "--weak = 0" + suffixExtra;
+                suffixArgs = suffixArgs + "--weak=0" + suffixExtra;
             }
             else
             {
