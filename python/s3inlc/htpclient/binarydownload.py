@@ -1,5 +1,6 @@
 import logging
 import os.path
+import stat
 from time import sleep
 
 from htpclient.config import Config
@@ -8,7 +9,7 @@ from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 
 
-class Binary_Download:
+class BinaryDownload:
     def __init__(self):
         self.config = Config()
 
@@ -31,6 +32,7 @@ class Binary_Download:
                 self.__check_utils()
             else:
                 Download.download(ans['executable'], path)
+                os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     def __check_version(self):
         # TODO: implement

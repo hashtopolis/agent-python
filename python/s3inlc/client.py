@@ -1,6 +1,6 @@
 from time import sleep
 
-from htpclient.binary_download import Binary_Download
+from htpclient.binarydownload import BinaryDownload
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 import logging
@@ -21,7 +21,7 @@ def init():
     # connection initialization
     Initialize().run()
     # download and updates
-    Binary_Download().run()
+    BinaryDownload().run()
 
 
 def loop():

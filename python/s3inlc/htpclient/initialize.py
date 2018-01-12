@@ -1,3 +1,4 @@
+import platform
 from time import sleep
 
 from htpclient.jsonRequest import *
@@ -18,9 +19,13 @@ class Initialize:
         if os.name == 'nt':
             system = 1  # Windows
         elif os.name == 'posix':
-            system = 0  # Linux
+            # Linux or OS X
+            if platform.system() == 'Darwin':
+                system = 2 # OS X
+            else:
+                system = 0 # Linux
         else:
-            system = 2  # OS X
+            system = 0  # Linux
         return system
 
     @staticmethod
@@ -28,9 +33,9 @@ class Initialize:
         if os.name == 'nt':
             ext = '.exe'  # Windows
         elif os.name == 'posix':
-            ext = ''  # Linux
+            ext = ''  # Linux or OS X
         else:
-            ext = ''  # OS X
+            ext = ''
         return ext
 
     def __login(self):
@@ -85,16 +90,18 @@ class Initialize:
             # ask for url
             url = input("Please enter the url to the API of your Hashtopussy installation:\n")
             logging.debug("Setting url to: " + url)
+            self.config.set_value('url', url)
         else:
             return
         req = JsonRequest({'action': 'testConnection'})
         ans = req.execute()
         if ans is None:
             logging.error("Connection test failed!")
+            self.config.set_value('url', '')
             self.__check_url()
         elif ans['response'] != 'SUCCESS':
             logging.error("Connection test failed: " + str(ans))
+            self.config.set_value('url', '')
             self.__check_url()
         else:
-            self.config.set_value('url', url)
             logging.info("Connection test successful!")
