@@ -14,6 +14,8 @@ class JsonRequest:
             if r.status_code != 200:
                 logging.error("Status code from server: " + str(r.status_code))
                 return None
+            if self.config.get_value('debug'):
+                print(r.content)
             return r.json()
         except Exception as e:
             logging.error("Error occurred: " + str(e))

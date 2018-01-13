@@ -21,9 +21,9 @@ class Initialize:
         elif os.name == 'posix':
             # Linux or OS X
             if platform.system() == 'Darwin':
-                system = 2 # OS X
+                system = 2  # OS X
             else:
-                system = 0 # Linux
+                system = 0  # Linux
         else:
             system = 0  # Linux
         return system
@@ -39,7 +39,8 @@ class Initialize:
         return ext
 
     def __login(self):
-        req = JsonRequest({'action': 'login', 'token': self.config.get_value('token')})
+        req = JsonRequest(
+            {'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': 'generic-python_alpha'})
         ans = req.execute()
         if ans is None:
             logging.error("Login failed!")

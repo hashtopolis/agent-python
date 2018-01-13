@@ -5,6 +5,8 @@ from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 import logging
 
+from htpclient.task import Task
+
 CONFIG = None
 
 
@@ -27,7 +29,9 @@ def init():
 def loop():
     # TODO: this loop is running on the agent
     logging.info("Entering loop...")
+    task = Task()
     while True:
+        task.get_task()
         sleep(10)
         # Request Task
         # - Load cracker if needed
