@@ -13,6 +13,7 @@ class Initialize:
         self.__check_token()
         self.__update_information()
         self.__login()
+        self.__build_directories()
 
     @staticmethod
     def get_os():
@@ -106,3 +107,13 @@ class Initialize:
             self.__check_url()
         else:
             logging.info("Connection test successful!")
+
+    @staticmethod
+    def __build_directories():
+        if not os.path.isdir("crackers"):
+            os.mkdir("crackers")
+        if not os.path.isdir("files"):
+            os.mkdir("files")
+        if not os.path.isdir("hashlists"):
+            os.mkdir("hashlists")
+

@@ -11,9 +11,10 @@ class Task:
         self.task = None
         self.config = Config()
 
-    def get_task(self):
+    def load_task(self):
         if self.taskId != 0:
             return
+        self.task = None
         req = JsonRequest({'action': 'getTask', 'token': self.config.get_value('token')})
         ans = req.execute()
         if ans is None:
@@ -26,3 +27,6 @@ class Task:
             self.task = ans
             self.taskId = ans['taskId']
             logging.info("Got task with id: " + str(ans['taskId']))
+
+    def get_task(self):
+        return self.task
