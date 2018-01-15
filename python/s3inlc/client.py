@@ -4,6 +4,7 @@ from time import sleep
 from htpclient.binarydownload import BinaryDownload
 from htpclient.chunk import Chunk
 from htpclient.files import Files
+from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
@@ -33,7 +34,7 @@ def init():
 
 
 def loop():
-    global binaryDownload
+    global binaryDownload, CONFIG
 
     # TODO: this loop is running on the agent
     logging.info("Entering loop...")
@@ -57,16 +58,36 @@ def loop():
             continue
         elif chunkResp == -1:
             # measure keyspace
-            output = subprocess.check_output(["crackers/" + str(task.get_task()['crackerId']) + "/" + binaryDownload.get_version()['executable'], '--keyspace' ] + task.get_task()['attackcmd'].replace("#HL# ", "").split(" "))
+            # TODO: put this somewhere to make it possible to distinguish between crackers and have some specific settings
+            output = subprocess.check_output(["crackers/" + str(task.get_task()['crackerId']) + "/" + binaryDownload.get_version()['executable'], '--keyspace', '--quiet' ] + task.get_task()['attackcmd'].replace(task.get_task()['hashlistAlias'] + " ", "").split(" "))
             output = output.rstrip()
             chunk.send_keyspace(output, task.get_task()['taskId'])
-            sleep(10)
             continue
         elif chunkResp == -2:
             # measure benchmark
-            sleep(10)
-            continue
+            cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+            # benchType, attackCmd, hashlistId, benchmarkTime, hashlistAlias
+            result = cracker.run_benchmark(task.get_task())
+            if result == 0:
+                sleep(10)
+                # some error must have occured on benchmarking
+                continue
+            # send result of benchmark
+            req = JsonRequest({'action':'sendBenchmark', 'token': CONFIG.get_value('token'), 'taskId': task.get_task()['taskId'], 'type': 'run', 'result': result})
+            ans = req.execute()
+            if ans is None:
+                logging.error("Failed to send benchmark!")
+                sleep(5)
+                continue
+            elif ans['response'] != 'SUCCESS':
+                logging.error("Error on sending benchmark: " + str(ans))
+                sleep(5)
+                continue
+            else:
+                logging.info("Server accepted benchmark!")
+                continue
         # run
+        logging.info("Start cracking...")
         sleep(10)
         # Request Task
         # - Load cracker if needed

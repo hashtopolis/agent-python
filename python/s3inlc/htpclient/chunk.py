@@ -25,7 +25,7 @@ class Chunk:
             # test what kind the answer is
             if ans['status'] == 'keyspace_required':
                 return -1
-            elif ans['status'] == 'benchmark_required':
+            elif ans['status'] == 'benchmark':
                 return -2
             else:
                 return 1

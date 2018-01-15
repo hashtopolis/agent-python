@@ -24,6 +24,10 @@ class Task:
             logging.error("Error from server: " + str(ans))
             sleep(5)
         else:
+            if ans['taskId'] is None:
+                logging.info("No task available!")
+                sleep(5)
+                return
             self.task = ans
             self.taskId = ans['taskId']
             logging.info("Got task with id: " + str(ans['taskId']))
