@@ -1,0 +1,4 @@
+
+
+class GenericCracker:
+    pass
