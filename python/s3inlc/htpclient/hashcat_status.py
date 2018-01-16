@@ -39,5 +39,14 @@ class HashcatStatus:
     def get_progress(self):
         return self.progress[0]
 
+    def get_state(self):
+        return self.status + 1
+
+    def get_curku(self):
+        return self.curku
+
     def get_progress_total(self):
         return self.progress[1]
+
+    def get_speed(self):
+        return 1 # TODO calculate correctly

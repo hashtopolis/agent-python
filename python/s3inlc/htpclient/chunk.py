@@ -10,6 +10,9 @@ class Chunk:
         self.config = Config()
         self.chunk = None
 
+    def chunk_data(self):
+        return self.chunk
+
     def get_chunk(self, taskId):
         req = JsonRequest({'action':'getChunk', 'token': self.config.get_value('token'), 'taskId': taskId})
         ans = req.execute()
@@ -28,6 +31,7 @@ class Chunk:
             elif ans['status'] == 'benchmark':
                 return -2
             else:
+                self.chunk = ans
                 return 1
 
     def send_keyspace(self, keyspace, task_id):

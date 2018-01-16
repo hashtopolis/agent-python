@@ -53,18 +53,16 @@ def loop():
         if not hashlist.load_hashlist(task.get_task()['hashlistId']):
             continue
         logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
-        chunkResp = chunk.get_chunk(task.get_task()['taskId'])
-        if chunkResp == 0:
+        chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
+        cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+        if chunk_resp == 0:
             continue
-        elif chunkResp == -1:
+        elif chunk_resp == -1:
             # measure keyspace
-            cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
             cracker.measure_keyspace(task.get_task(), chunk)
             continue
-        elif chunkResp == -2:
+        elif chunk_resp == -2:
             # measure benchmark
-            cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
-            # benchType, attackCmd, hashlistId, benchmarkTime, hashlistAlias
             result = cracker.run_benchmark(task.get_task())
             if result == 0:
                 sleep(10)
@@ -86,6 +84,7 @@ def loop():
                 continue
         # run
         logging.info("Start cracking...")
+        cracker.run_chunk(task.get_task(), chunk.chunk_data())
         sleep(10)
         # Request Task
         # - Load cracker if needed
