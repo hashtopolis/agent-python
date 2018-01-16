@@ -25,6 +25,16 @@ class HashcatCracker:
         output, error = proc.communicate()
         logging.info("started cracking")
 
+    def measure_keyspace(self, task, chunk):
+        output = subprocess.check_output(self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", ""), shell=True, cwd='files')
+        output = output.decode(encoding='utf-8').split("\n")
+        keyspace = "0"
+        for line in output:
+            if len(line) == 0:
+                continue
+            keyspace = line
+        chunk.send_keyspace(int(keyspace), task['taskId'])
+
     def run_benchmark(self, task):
         args = " --machine-readable --quiet --runtime=" + str(task['bench']) + " --restore-disable --potfile-disable --session=hashtopussy "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))

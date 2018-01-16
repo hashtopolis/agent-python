@@ -58,10 +58,8 @@ def loop():
             continue
         elif chunkResp == -1:
             # measure keyspace
-            # TODO: put this somewhere to make it possible to distinguish between crackers and have some specific settings
-            output = subprocess.check_output(["crackers/" + str(task.get_task()['crackerId']) + "/" + binaryDownload.get_version()['executable'], '--keyspace', '--quiet' ] + task.get_task()['attackcmd'].replace(task.get_task()['hashlistAlias'] + " ", "").split(" "))
-            output = output.rstrip()
-            chunk.send_keyspace(output, task.get_task()['taskId'])
+            cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+            cracker.measure_keyspace(task.get_task(), chunk)
             continue
         elif chunkResp == -2:
             # measure benchmark
