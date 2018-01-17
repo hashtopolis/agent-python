@@ -40,7 +40,7 @@ class HashcatStatus:
         return self.progress[0]
 
     def get_state(self):
-        return self.status + 1
+        return self.status - 1
 
     def get_curku(self):
         return self.curku
@@ -49,4 +49,7 @@ class HashcatStatus:
         return self.progress[1]
 
     def get_speed(self):
-        return 1 # TODO calculate correctly
+        totalSpeed = 0
+        for s in self.speed:
+            totalSpeed += int(float(s[0]) * 1000 / s[1])
+        return totalSpeed

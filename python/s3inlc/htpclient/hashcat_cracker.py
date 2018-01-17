@@ -21,6 +21,7 @@ class HashcatCracker:
         args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopussy"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
+        args += " --outfile-check-dir=hashlist_" + str(task['hashlistId'])
         args += " --remove-timer=" + str(task['statustimer'])
         args += " --separator=" + ":"  # TODO what kind of separator we need?
         args += " -s " + str(chunk['skip'])
@@ -34,12 +35,13 @@ class HashcatCracker:
         Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout)).start()
         Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr)).start()
 
-        main_thread = Thread(target=self.run_loop, name='run_loop', args=(proc, chunk))
+        main_thread = Thread(target=self.run_loop, name='run_loop', args=(proc, chunk, task))
         main_thread.start()
         proc.wait()
         logging.info("finished chunk")
 
-    def run_loop(self, proc, chunk):
+    def run_loop(self, proc, chunk, task):
+        cracks = []
         while True:
             try:
                 # Block for 1 second.
@@ -55,22 +57,51 @@ class HashcatCracker:
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
                         # send update to server
-                        cracks = []
-                        # TODO: this is incorrect for others than the first chunk (I think)
-                        relativeProgress = int(status.get_progress()/float(status.get_progress_total())*10000)
+                        chunk_start = int(status.get_progress_total()) / (chunk['skip'] + chunk['length']) * chunk[
+                            'skip']
+                        relative_progress = int((status.get_progress() - chunk_start) / float(
+                            status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
-                        req = JsonRequest({'action': 'sendProgress', 'token': self.config.get_value('token'), 'chunkId': chunk['chunkId'], 'keyspaceProgress': status.get_curku(), 'relativeProgress': relativeProgress, 'speed': speed, 'state': status.get_state(), 'cracks': cracks})
+                        cracks_backup = []
+                        if len(cracks) > 300:
+                            # we split
+                            cnt = 0
+                            new_cracks = []
+                            for crack in cracks:
+                                cnt += 1
+                                if cnt > 300:
+                                    cracks_backup.append(crack)
+                                else:
+                                    new_cracks.append(crack)
+                            cracks = new_cracks
+                        req = JsonRequest({'action': 'sendProgress', 'token': self.config.get_value('token'),
+                                           'chunkId': chunk['chunkId'], 'keyspaceProgress': status.get_curku(),
+                                           'relativeProgress': relative_progress, 'speed': speed,
+                                           'state': status.get_state(), 'cracks': cracks})
+
+                        logging.info("Sending " + str(len(cracks)) + " cracks...")
                         ans = req.execute()
                         if ans is None:
                             logging.error("Failed to send solve!")
                         elif ans['response'] != 'SUCCESS':
                             logging.error("Error from server on solve: " + str(ans))
                         else:
-                            cracks.clear()
-                            logging.info("Update accepted!")
+                            cracks = cracks_backup
+                            zaps = ans['zaps']
+                            if len(zaps) > 0:
+                                logging.info("Writing zaps")
+                                zap_output = '\n'.join(zaps)
+                                f = open("hashlist_" + str(task['hashlistId']), 'a')
+                                f.write(zap_output)
+                                f.close()
+                            logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(
+                                ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
-                        # print("HCOUT: " + str(line))
-                        pass
+                        line = line.decode()
+                        if ":" in line and "Line-length exception" not in line:
+                            cracks.append(line.strip())
+                        else:
+                            logging.warning("HCOUT: " + line)
                 else:
                     print("HCERR: " + str(line))
 
