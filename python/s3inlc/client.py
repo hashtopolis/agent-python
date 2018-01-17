@@ -99,7 +99,6 @@ def loop():
         # run
         logging.info("Start cracking...")
         cracker.run_chunk(task.get_task(), chunk.chunk_data())
-        sleep(10)
         # Request Task
         # - Load cracker if needed
         # - Load Files
