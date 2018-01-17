@@ -2,7 +2,6 @@ import logging
 import subprocess
 from queue import Queue, Empty
 from threading import Thread
-from time import sleep
 
 from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
@@ -34,12 +33,18 @@ class HashcatCracker:
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
 
         logging.info("started cracking")
-        Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout)).start()
-        Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr)).start()
+        out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
+        err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
+        out_thread.start()
+        err_thread.start()
 
         main_thread = Thread(target=self.run_loop, name='run_loop', args=(proc, chunk, task))
         main_thread.start()
+
+        # wait for all threads to finish
         proc.wait()
+        out_thread.join()
+        err_thread.join()
         logging.info("finished chunk")
 
     def run_loop(self, proc, chunk, task):

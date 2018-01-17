@@ -1,4 +1,3 @@
-import subprocess
 from time import sleep
 
 from htpclient.binarydownload import BinaryDownload

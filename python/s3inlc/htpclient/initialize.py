@@ -1,4 +1,5 @@
 import platform
+import uuid
 from time import sleep
 
 from htpclient.jsonRequest import *
@@ -55,10 +56,12 @@ class Initialize:
             logging.info("Login successful!")
 
     def __update_information(self):
-        # TODO: gather system information
+        if len(self.config.get_value('uuid')) == 0:
+            self.config.set_value('uuid', uuid.uuid4())
         req = JsonRequest(
-            {'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': 'enter UID here',
+            {'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': self.config.get_value('uuid'),
              'os': self.get_os(), 'devices': ['mockGPU1', 'mockGPU2']})
+        # TODO: use commands from c# client to read the gpus os dependent
         ans = req.execute()
         if ans is None:
             logging.error("Information update failed!")
@@ -73,7 +76,7 @@ class Initialize:
         if len(self.config.get_value('token')) == 0:
             voucher = input("No token found! Please enter a voucher to register your agent:\n")
             # TODO: read the name of the computer to register
-            name = "generic-python"
+            name = platform.node()
             req = JsonRequest({'action': 'register', 'voucher': voucher, 'name': name})
             ans = req.execute()
             if ans is None:
