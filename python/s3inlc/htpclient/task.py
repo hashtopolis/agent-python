@@ -11,6 +11,10 @@ class Task:
         self.task = None
         self.config = Config()
 
+    def reset_task(self):
+        self.task = None
+        self.taskId = 0
+
     def load_task(self):
         if self.taskId != 0:
             return
