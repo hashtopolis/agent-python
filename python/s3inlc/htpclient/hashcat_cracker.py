@@ -6,6 +6,7 @@ from time import sleep
 
 from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
+from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 
 
@@ -17,7 +18,6 @@ class HashcatCracker:
         self.executable_name = binary_download.get_version()['executable']
 
     def run_chunk(self, task, chunk):
-        # subprocess.check_output(['killall', self.executable_name])  # in case it loops somewhere and starts processes without terminating them
         args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopussy"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -27,9 +27,11 @@ class HashcatCracker:
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        logging.info("CALL: " + self.callPath + args)
-        proc = subprocess.Popen(self.callPath + args, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                cwd='files')
+        full_cmd = self.callPath + args
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        logging.info("CALL: " + full_cmd)
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
 
         logging.info("started cracking")
         Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout)).start()
@@ -104,11 +106,13 @@ class HashcatCracker:
                             logging.warning("HCOUT: " + line)
                 else:
                     print("HCERR: " + str(line))
+                    # TODO: send error and abort cracking
 
     def measure_keyspace(self, task, chunk):
-        output = subprocess.check_output(
-            self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", ""),
-            shell=True, cwd='files')
+        full_cmd = self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "")
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        output = subprocess.check_output(full_cmd, shell=True, cwd='files')
         output = output.decode(encoding='utf-8').split("\n")
         keyspace = "0"
         for line in output:
@@ -121,9 +125,11 @@ class HashcatCracker:
         args = " --machine-readable --quiet --runtime=" + str(
             task['bench']) + " --restore-disable --potfile-disable --session=hashtopussy "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        logging.info("CALL: " + self.callPath + args)
-        proc = subprocess.Popen(self.callPath + args, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                cwd='files')
+        full_cmd = self.callPath + args
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        logging.info("CALL: " + full_cmd)
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
         output, error = proc.communicate()
         logging.info("started benchmark")
         proc.wait()  # wait until done
@@ -153,7 +159,7 @@ class HashcatCracker:
                     last_valid_status = status
             if last_valid_status is None:
                 return 0
-            return last_valid_status.get_progress() / float(last_valid_status.get_progress_total())
+            return (last_valid_status.get_progress() - last_valid_status.get_rejected()) / float(last_valid_status.get_progress_total())
         return 0
 
     def stream_watcher(self, identifier, stream):

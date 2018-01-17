@@ -2,10 +2,14 @@ import requests
 
 import sys
 
+from htpclient.initialize import Initialize
+
 
 class Download:
     @staticmethod
     def download(url, output):
+        if Initialize.get_os() == 1:
+            output = output.replace("/", '\\')
         with open(output, "wb") as file:
             response = requests.get(url, stream=True)
             total_length = response.headers.get('Content-Length')

@@ -49,7 +49,10 @@ class HashcatStatus:
         return self.progress[1]
 
     def get_speed(self):
-        totalSpeed = 0
+        total_speed = 0
         for s in self.speed:
-            totalSpeed += int(float(s[0]) * 1000 / s[1])
-        return totalSpeed
+            total_speed += int(float(s[0]) * 1000 / s[1])
+        return total_speed
+
+    def get_rejected(self):
+        return self.rejected
