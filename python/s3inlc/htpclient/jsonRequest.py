@@ -11,13 +11,13 @@ class JsonRequest:
     def execute(self):
         try:
             if self.config.get_value('debug'):
-                print(self.data)
+                logging.info(self.data)
             r = requests.post(self.config.get_value('url'), json=self.data)
             if r.status_code != 200:
                 logging.error("Status code from server: " + str(r.status_code))
                 return None
             if self.config.get_value('debug'):
-                print(r.content)
+                logging.info(r.content)
             return r.json()
         except Exception as e:
             logging.error("Error occurred: " + str(e))
