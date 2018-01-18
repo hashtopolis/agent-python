@@ -62,6 +62,22 @@ class Initialize:
             {'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': self.config.get_value('uuid'),
              'os': self.get_os(), 'devices': ['mockGPU1', 'mockGPU2']})
         # TODO: use commands from c# client to read the gpus os dependent
+
+        # MAC
+        # system name: scutil --get ComputerName
+        # devices: system_profiler -detaillevel mini
+        # Filter for Chipset Model
+        # Filter for Graphics/Displays
+
+        # LINUX
+        # lscpu
+        # filter Model Name
+        # lspci
+        # filter VGA compatible controller
+
+        # WINDOWS
+        # wmic path win32_VideoController get name
+
         ans = req.execute()
         if ans is None:
             logging.error("Information update failed!")
