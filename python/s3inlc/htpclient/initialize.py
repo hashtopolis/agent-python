@@ -64,7 +64,16 @@ class Initialize:
         # collect devices
         devices = []
         if Initialize.get_os() == 0:  # linux
-            pass
+            output = subprocess.check_output("lscpu | grep 'Model name'", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+                devices.append(line.replace("Model name:", "").strip("\r\n "))
+            output = subprocess.check_output("lspci | grep 'VGA compatible controller'", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+                line = line.split(":")
+                devices.append(line[1].strip())
+
         elif Initialize.get_os() == 1:  # windows
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
@@ -81,7 +90,7 @@ class Initialize:
                 if "Chipset Model" not in line:
                     continue
                 line = line.split(":")
-                devices.append(line[1])
+                devices.append(line[1].strip())
 
         req = JsonRequest(
             {'action': 'updateInformation', 'token': self.config.get_value('token'),
