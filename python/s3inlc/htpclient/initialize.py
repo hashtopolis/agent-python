@@ -63,9 +63,9 @@ class Initialize:
 
         # collect devices
         devices = []
-        if Initialize.get_os() == 0: # linux
+        if Initialize.get_os() == 0:  # linux
             pass
-        elif Initialize.get_os() == 1: # windows
+        elif Initialize.get_os() == 1:  # windows
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
@@ -73,7 +73,7 @@ class Initialize:
                 if line == "Name" or len(line) == 0:
                     continue
                 devices.append(line)
-        else: # OS X
+        else:  # OS X
             output = subprocess.check_output("system_profiler -detaillevel mini", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
@@ -84,7 +84,8 @@ class Initialize:
                 devices.append(line[1])
 
         req = JsonRequest(
-            {'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': self.config.get_value('uuid'),
+            {'action': 'updateInformation', 'token': self.config.get_value('token'),
+             'uid': self.config.get_value('uuid'),
              'os': self.get_os(), 'devices': devices})
 
         # MAC
@@ -156,4 +157,3 @@ class Initialize:
             os.mkdir("files")
         if not os.path.isdir("hashlists"):
             os.mkdir("hashlists")
-
