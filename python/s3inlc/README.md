@@ -1,5 +1,7 @@
 # Hashtopussy Python Agent
 
+This Hashtopussy agent is only compatible with Hashtopussy versions 0.5.0 and higher.
+
 ## Prerequisites
 
 You need python3 installed on your agent system
