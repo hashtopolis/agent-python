@@ -71,8 +71,10 @@ class Initialize:
             output = subprocess.check_output("lspci | grep 'VGA compatible controller'", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
+                if len(line) == 0:
+                    continue
                 line = line.split(":")
-                devices.append(line[1].strip())
+                devices.append(line[2].strip())
 
         elif Initialize.get_os() == 1:  # windows
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
@@ -82,6 +84,7 @@ class Initialize:
                 if line == "Name" or len(line) == 0:
                     continue
                 devices.append(line)
+
         else:  # OS X
             output = subprocess.check_output("system_profiler -detaillevel mini", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
