@@ -4,10 +4,7 @@ Official agents for using the distributed hashcracker [Hashtopussy](https://gith
 
 Currently available agents:
 - C# (working)
-- PHP (incomplete)
-- Java (incomplete)
-- Python (planned)
-
+- Python (working with future version 0.5.0)
 
 ## Protocol Documentation
 
