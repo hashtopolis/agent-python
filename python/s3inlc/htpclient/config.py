@@ -15,6 +15,9 @@ class Config:
             logging.debug("No config file present, create one")
             self.__save()
 
+    def update(self):
+        self.config = json.load(open(self.CONFIG_FILE))
+
     def get_value(self, key):
         if key in self.config:
             return self.config[key]

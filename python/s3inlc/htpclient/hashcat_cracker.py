@@ -118,7 +118,7 @@ class HashcatCracker:
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         output = subprocess.check_output(full_cmd, shell=True, cwd='files')
-        output = output.decode(encoding='utf-8').split("\n")
+        output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
             if len(line) == 0:

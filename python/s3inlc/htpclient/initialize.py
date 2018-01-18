@@ -2,6 +2,8 @@ import platform
 import uuid
 from time import sleep
 
+import subprocess
+
 from htpclient.jsonRequest import *
 
 
@@ -50,18 +52,40 @@ class Initialize:
             self.__login()
         elif ans['response'] != 'SUCCESS':
             logging.error("Error from server: " + str(ans))
-            sleep(5)
+            self.config.set_value('token', '')
             self.__login()
         else:
             logging.info("Login successful!")
 
     def __update_information(self):
         if len(self.config.get_value('uuid')) == 0:
-            self.config.set_value('uuid', uuid.uuid4())
+            self.config.set_value('uuid', str(uuid.uuid4()))
+
+        # collect devices
+        devices = []
+        if Initialize.get_os() == 0: # linux
+            pass
+        elif Initialize.get_os() == 1: # windows
+            output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+                line = line.rstrip("\r\n ")
+                if line == "Name" or len(line) == 0:
+                    continue
+                devices.append(line)
+        else: # OS X
+            output = subprocess.check_output("system_profiler -detaillevel mini", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+                line = line.rstrip("\r\n ")
+                if "Chipset Model" not in line:
+                    continue
+                line = line.split(":")
+                devices.append(line[1])
+
         req = JsonRequest(
             {'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': self.config.get_value('uuid'),
-             'os': self.get_os(), 'devices': ['mockGPU1', 'mockGPU2']})
-        # TODO: use commands from c# client to read the gpus os dependent
+             'os': self.get_os(), 'devices': devices})
 
         # MAC
         # system name: scutil --get ComputerName
@@ -74,9 +98,6 @@ class Initialize:
         # filter Model Name
         # lspci
         # filter VGA compatible controller
-
-        # WINDOWS
-        # wmic path win32_VideoController get name
 
         ans = req.execute()
         if ans is None:

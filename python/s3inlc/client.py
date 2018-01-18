@@ -35,7 +35,6 @@ def init():
 def loop():
     global binaryDownload, CONFIG
 
-    # TODO: this loop is running on the agent
     logging.info("Entering loop...")
     task = Task()
     chunk = Chunk()
@@ -44,6 +43,7 @@ def loop():
     task_change = True
     last_task_id = 0
     while True:
+        CONFIG.update()
         if task.get_task() is not None:
             last_task_id = task.get_task()['taskId']
         task.load_task()
@@ -77,7 +77,7 @@ def loop():
             result = cracker.run_benchmark(task.get_task())
             if result == 0:
                 sleep(10)
-                # some error must have occured on benchmarking
+                # some error must have occurred on benchmarking
                 continue
             # send result of benchmark
             req = JsonRequest(
@@ -95,17 +95,10 @@ def loop():
             else:
                 logging.info("Server accepted benchmark!")
                 continue
-        # run
+
+        # run chunk
         logging.info("Start cracking...")
         cracker.run_chunk(task.get_task(), chunk.chunk_data())
-        # Request Task
-        # - Load cracker if needed
-        # - Load Files
-        # - Load Hashlist
-        # - Request Chunk
-        #   - Do Keyspace
-        #   - Do Benchmark
-        # - As long as there is no error, request more chunks
 
 
 if __name__ == "__main__":
