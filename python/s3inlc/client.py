@@ -102,5 +102,8 @@ def loop():
 
 
 if __name__ == "__main__":
-    init()
-    loop()
+    try:
+        init()
+        loop()
+    except KeyboardInterrupt:
+        logging.info("Exiting...")
