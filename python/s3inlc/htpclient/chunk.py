@@ -14,7 +14,7 @@ class Chunk:
         return self.chunk
 
     def get_chunk(self, taskId):
-        req = JsonRequest({'action':'getChunk', 'token': self.config.get_value('token'), 'taskId': taskId})
+        req = JsonRequest({'action': 'getChunk', 'token': self.config.get_value('token'), 'taskId': taskId})
         ans = req.execute()
         if ans is None:
             logging.error("Failed to get chunk!")
@@ -37,7 +37,7 @@ class Chunk:
                 return 1
 
     def send_keyspace(self, keyspace, task_id):
-        req = JsonRequest({'action':'sendKeyspace', 'token': self.config.get_value('token'), 'taskId': task_id, 'keyspace': int(keyspace)})
+        req = JsonRequest({'action': 'sendKeyspace', 'token': self.config.get_value('token'), 'taskId': task_id, 'keyspace': int(keyspace)})
         ans = req.execute()
         if ans is None:
             logging.error("Failed to send keyspace!")

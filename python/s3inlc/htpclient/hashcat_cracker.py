@@ -64,8 +64,7 @@ class HashcatCracker:
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
                         # send update to server
-                        chunk_start = int(status.get_progress_total()) / (chunk['skip'] + chunk['length']) * chunk[
-                            'skip']
+                        chunk_start = int(status.get_progress_total()) / (chunk['skip'] + chunk['length']) * chunk['skip']
                         relative_progress = int((status.get_progress() - chunk_start) / float(
                             status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
@@ -104,8 +103,7 @@ class HashcatCracker:
                                     f = open("hashlist_" + str(task['hashlistId']), 'a')
                                     f.write(zap_output)
                                     f.close()
-                                logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(
-                                    ans['skipped']) + " Zaps: " + str(len(zaps)))
+                                logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
                         line = line.decode()
                         if ":" in line and "Line-length exception" not in line:
@@ -130,8 +128,7 @@ class HashcatCracker:
         chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
-        args = " --machine-readable --quiet --runtime=" + str(
-            task['bench']) + " --restore-disable --potfile-disable --session=hashtopussy "
+        args = " --machine-readable --quiet --runtime=" + str(task['bench']) + " --restore-disable --potfile-disable --session=hashtopussy "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
@@ -149,9 +146,7 @@ class HashcatCracker:
             for line in error:
                 if len(line) == 0:
                     continue
-                req = JsonRequest(
-                    {'action': 'clientError', 'taskId': task['taskId'], 'token': self.config.get_value('token'),
-                     'message': line})
+                req = JsonRequest({'action': 'clientError', 'taskId': task['taskId'], 'token': self.config.get_value('token'), 'message': line})
                 req.execute()
             return 0
         if len(output) > 0:

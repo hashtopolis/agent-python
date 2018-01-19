@@ -39,8 +39,7 @@ class BinaryDownload:
 
     def check_version(self, crackerId):
         path = "crackers/" + str(crackerId) + "/"
-        req = JsonRequest({'action': 'downloadBinary', 'type': 'cracker', 'token': self.config.get_value('token'),
-                           'binaryVersionId': crackerId})
+        req = JsonRequest({'action': 'downloadBinary', 'type': 'cracker', 'token': self.config.get_value('token'), 'binaryVersionId': crackerId})
         ans = req.execute()
         if ans is None:
             logging.error("Failed to load cracker`!")
@@ -55,8 +54,7 @@ class BinaryDownload:
             if not os.path.isdir(path):
                 # we need to download the 7zip
                 Download.download(ans['url'], "crackers/" + str(crackerId) + ".7z")
-                os.system(
-                    "7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(crackerId) + ".7z")
+                os.system("7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(crackerId) + ".7z")
                 os.unlink("crackers/" + str(crackerId) + ".7z")
                 for name in os.listdir("crackers/temp"):
                     if os.path.isdir("crackers/temp/" + name):
@@ -64,5 +62,4 @@ class BinaryDownload:
                     else:
                         os.mkdir("crackers/" + str(crackerId))
                         os.rename("crackers/temp/" + name, "crackers/" + str(crackerId) + "/")
-
         return True

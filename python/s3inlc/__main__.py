@@ -83,9 +83,7 @@ def loop():
                 # some error must have occurred on benchmarking
                 continue
             # send result of benchmark
-            req = JsonRequest(
-                {'action': 'sendBenchmark', 'token': CONFIG.get_value('token'), 'taskId': task.get_task()['taskId'],
-                 'type': 'run', 'result': result})
+            req = JsonRequest({'action': 'sendBenchmark', 'token': CONFIG.get_value('token'), 'taskId': task.get_task()['taskId'], 'type': 'run', 'result': result})
             ans = req.execute()
             if ans is None:
                 logging.error("Failed to send benchmark!")

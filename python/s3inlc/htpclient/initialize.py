@@ -47,8 +47,7 @@ class Initialize:
         return ext
 
     def __login(self):
-        req = JsonRequest(
-            {'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
+        req = JsonRequest({'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
         ans = req.execute()
         if ans is None:
             logging.error("Login failed!")
@@ -109,11 +108,7 @@ class Initialize:
                 line = line.split(":")
                 devices.append(line[1].strip())
 
-        req = JsonRequest(
-            {'action': 'updateInformation', 'token': self.config.get_value('token'),
-             'uid': self.config.get_value('uuid'),
-             'os': self.get_os(), 'devices': devices})
-
+        req = JsonRequest({'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': self.config.get_value('uuid'), 'os': self.get_os(), 'devices': devices})
         ans = req.execute()
         if ans is None:
             logging.error("Information update failed!")

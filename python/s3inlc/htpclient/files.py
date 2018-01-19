@@ -30,10 +30,8 @@ class Files:
                 sleep(5)
                 return False
             else:
-                Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'],
-                                  "files/" + file)
-                if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile(
-                        "files/" + file.replace(".7z", ".txt")):
+                Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "files/" + file)
+                if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile("files/" + file.replace(".7z", ".txt")):
                     # extract if needed
                     os.system("7zr" + Initialize.get_os_extension() + " x -ofiles/ files/" + file)
         return True
