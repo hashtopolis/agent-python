@@ -69,7 +69,9 @@ class HashcatCracker:
                         relative_progress = int((status.get_progress() - chunk_start) / float(
                             status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
-                        while len(cracks) > 0:
+                        initial = True
+                        while len(cracks) > 0 or initial:
+                            initial = False
                             cracks_backup = []
                             if len(cracks) > 1000:
                                 # we split

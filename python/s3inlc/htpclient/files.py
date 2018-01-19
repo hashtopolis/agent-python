@@ -16,9 +16,10 @@ class Files:
 
     def check_files(self, files, task_id):
         for file in files:
-            if os.path.isfile("files/" + file):
-                continue;
-            req = JsonRequest({'action':'getFile', 'token': self.config.get_value('token'), 'taskId': task_id, 'file':file})
+            if os.path.isfile("files/" + file) or os.path.isfile("files/" + file.replace(".7z", ".txt")):
+                continue
+            req = JsonRequest(
+                {'action': 'getFile', 'token': self.config.get_value('token'), 'taskId': task_id, 'file': file})
             ans = req.execute()
             if ans is None:
                 logging.error("Failed to get file!")
@@ -29,9 +30,10 @@ class Files:
                 sleep(5)
                 return False
             else:
-                Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "files/" + file)
-                if os.path.splitext("files/" + file)[1] == '.7z':
+                Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'],
+                                  "files/" + file)
+                if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile(
+                        "files/" + file.replace(".7z", ".txt")):
                     # extract if needed
                     os.system("7zr" + Initialize.get_os_extension() + " x -ofiles/ files/" + file)
         return True
-
