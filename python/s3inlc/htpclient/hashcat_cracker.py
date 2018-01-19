@@ -69,40 +69,41 @@ class HashcatCracker:
                         relative_progress = int((status.get_progress() - chunk_start) / float(
                             status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
-                        cracks_backup = []
-                        if len(cracks) > 300:
-                            # we split
-                            cnt = 0
-                            new_cracks = []
-                            for crack in cracks:
-                                cnt += 1
-                                if cnt > 300:
-                                    cracks_backup.append(crack)
-                                else:
-                                    new_cracks.append(crack)
-                            cracks = new_cracks
-                        req = JsonRequest({'action': 'sendProgress', 'token': self.config.get_value('token'),
-                                           'chunkId': chunk['chunkId'], 'keyspaceProgress': status.get_curku(),
-                                           'relativeProgress': relative_progress, 'speed': speed,
-                                           'state': status.get_state(), 'cracks': cracks})
+                        while len(cracks) > 0:
+                            cracks_backup = []
+                            if len(cracks) > 1000:
+                                # we split
+                                cnt = 0
+                                new_cracks = []
+                                for crack in cracks:
+                                    cnt += 1
+                                    if cnt > 1000:
+                                        cracks_backup.append(crack)
+                                    else:
+                                        new_cracks.append(crack)
+                                cracks = new_cracks
+                            req = JsonRequest({'action': 'sendProgress', 'token': self.config.get_value('token'),
+                                               'chunkId': chunk['chunkId'], 'keyspaceProgress': status.get_curku(),
+                                               'relativeProgress': relative_progress, 'speed': speed,
+                                               'state': status.get_state(), 'cracks': cracks})
 
-                        logging.info("Sending " + str(len(cracks)) + " cracks...")
-                        ans = req.execute()
-                        if ans is None:
-                            logging.error("Failed to send solve!")
-                        elif ans['response'] != 'SUCCESS':
-                            logging.error("Error from server on solve: " + str(ans))
-                        else:
-                            cracks = cracks_backup
-                            zaps = ans['zaps']
-                            if len(zaps) > 0:
-                                logging.info("Writing zaps")
-                                zap_output = '\n'.join(zaps)
-                                f = open("hashlist_" + str(task['hashlistId']), 'a')
-                                f.write(zap_output)
-                                f.close()
-                            logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(
-                                ans['skipped']) + " Zaps: " + str(len(zaps)))
+                            logging.info("Sending " + str(len(cracks)) + " cracks...")
+                            ans = req.execute()
+                            if ans is None:
+                                logging.error("Failed to send solve!")
+                            elif ans['response'] != 'SUCCESS':
+                                logging.error("Error from server on solve: " + str(ans))
+                            else:
+                                cracks = cracks_backup
+                                zaps = ans['zaps']
+                                if len(zaps) > 0:
+                                    logging.info("Writing zaps")
+                                    zap_output = '\n'.join(zaps)
+                                    f = open("hashlist_" + str(task['hashlistId']), 'a')
+                                    f.write(zap_output)
+                                    f.close()
+                                logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(
+                                    ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
                         line = line.decode()
                         if ":" in line and "Line-length exception" not in line:
