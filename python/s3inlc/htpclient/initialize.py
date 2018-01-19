@@ -4,13 +4,16 @@ from time import sleep
 
 import subprocess
 
-from __main__ import VERSION
 from htpclient.jsonRequest import *
 
 
 class Initialize:
     def __init__(self):
         self.config = Config()
+
+    @staticmethod
+    def get_version():
+        return "s3-python-0.1.0-alpha"
 
     def run(self):
         self.__check_url()
@@ -45,7 +48,7 @@ class Initialize:
 
     def __login(self):
         req = JsonRequest(
-            {'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': VERSION})
+            {'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
         ans = req.execute()
         if ans is None:
             logging.error("Login failed!")
@@ -81,6 +84,13 @@ class Initialize:
                 devices.append(line[2].strip())
 
         elif Initialize.get_os() == 1:  # windows
+            output = subprocess.check_output("wmic cpu get name", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+                line = line.rstrip("\r\n ")
+                if line == "Name" or len(line) == 0:
+                    continue
+                devices.append(line)
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:

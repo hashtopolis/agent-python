@@ -14,8 +14,6 @@ from htpclient.task import Task
 CONFIG = None
 binaryDownload = None
 
-VERSION = "s3-python-0.1.0-alpha"
-
 
 def init():
     global CONFIG, binaryDownload
@@ -26,6 +24,9 @@ def init():
     urllib3_logger.setLevel(logging.ERROR)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.basicConfig(format='[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    logging.info("Starting client '" + Initialize.get_version() + "'...")
+
     CONFIG = Config()
     # connection initialization
     Initialize().run()
