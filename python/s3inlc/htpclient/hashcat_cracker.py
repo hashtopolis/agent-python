@@ -99,7 +99,7 @@ class HashcatCracker:
                                 zaps = ans['zaps']
                                 if len(zaps) > 0:
                                     logging.info("Writing zaps")
-                                    zap_output = '\n'.join(zaps)
+                                    zap_output = '\n'.join(zaps) + '\n'
                                     f = open("hashlist_" + str(task['hashlistId']), 'a')
                                     f.write(zap_output)
                                     f.close()
