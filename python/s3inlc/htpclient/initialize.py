@@ -67,6 +67,8 @@ class Initialize:
             output = subprocess.check_output("lscpu | grep 'Model name'", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
+                if len(line) == 0:
+                    continue
                 devices.append(line.replace("Model name:", "").strip("\r\n "))
             output = subprocess.check_output("lspci | grep 'VGA compatible controller'", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
