@@ -14,6 +14,8 @@ from htpclient.task import Task
 CONFIG = None
 binaryDownload = None
 
+VERSION = "s3-python-0.1.0-alpha"
+
 
 def init():
     global CONFIG, binaryDownload

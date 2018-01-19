@@ -4,6 +4,7 @@ from time import sleep
 
 import subprocess
 
+from __main__ import VERSION
 from htpclient.jsonRequest import *
 
 
@@ -44,7 +45,7 @@ class Initialize:
 
     def __login(self):
         req = JsonRequest(
-            {'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': 'generic-python_alpha'})
+            {'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': VERSION})
         ans = req.execute()
         if ans is None:
             logging.error("Login failed!")
@@ -102,18 +103,6 @@ class Initialize:
             {'action': 'updateInformation', 'token': self.config.get_value('token'),
              'uid': self.config.get_value('uuid'),
              'os': self.get_os(), 'devices': devices})
-
-        # MAC
-        # system name: scutil --get ComputerName
-        # devices: system_profiler -detaillevel mini
-        # Filter for Chipset Model
-        # Filter for Graphics/Displays
-
-        # LINUX
-        # lscpu
-        # filter Model Name
-        # lspci
-        # filter VGA compatible controller
 
         ans = req.execute()
         if ans is None:
