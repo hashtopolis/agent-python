@@ -62,6 +62,7 @@ class Initialize:
             self.config.set_value('uuid', str(uuid.uuid4()))
 
         # collect devices
+        logging.info("Collecting agent data...")
         devices = []
         if Initialize.get_os() == 0:  # linux
             output = subprocess.check_output("lscpu | grep 'Model name'", shell=True)
