@@ -4,7 +4,10 @@ This Hashtopussy agent is only compatible with Hashtopussy versions 0.5.0 and hi
 
 ## Prerequisites
 
-You need python3 installed on your agent system
+You need python3 installed on your agent system. 
+Following python packages are required:
+
+* requests
 
 ## Manual
 
@@ -15,6 +18,8 @@ wget/curl.
 
 To run the agent you simply need to call `python3 hashtopussy.zip`. There are no command line options accepted, all 
 settings/configurations are done via the config file, described in the following section.
+
+Please not that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
 
 ### Config
 
