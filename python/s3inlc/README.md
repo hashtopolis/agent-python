@@ -30,6 +30,7 @@ TODO
 The list contains all Hashcat version with which the client was tested and is able to work with (other versions might work):
 
 * 4.0.1
+* 4.0.0
 
 ## Generic Crackers
 
