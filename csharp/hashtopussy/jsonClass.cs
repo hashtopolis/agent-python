@@ -74,7 +74,7 @@ public class jsonClass
         }
 
 
-        return "NULL";
+        return null;
     }
 
     //Returns json string array to arraylist

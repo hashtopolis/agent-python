@@ -14,10 +14,11 @@ namespace hashtopussy
 
         public class hcUpdateProper
         {
-            public string action = "download";
+            public string action = "downloadBinary";
             public string type = "hashcat";
             public string token = "";
             public int force { set; get; }
+            
         }
 
         public Boolean debugFlag { get; set; }

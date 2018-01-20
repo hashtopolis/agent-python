@@ -16,7 +16,7 @@ namespace hashtopussy
 
     public class testProp
     {
-        public string action = "test";
+        public string action = "testConnection";
     }
 
 
@@ -143,16 +143,7 @@ namespace hashtopussy
 
             initConnect();
 
-            updateClass updater = new updateClass
-            {
-                htpVersion = AppVersion,
-                parentPath = AppPath,
-                arguments = args,
-                connectURL = serverURL,
-                debugFlag = DebugMode
-                
-            };
-            updater.runUpdate();
+
 
             initDirs();
 
@@ -164,6 +155,17 @@ namespace hashtopussy
                 Console.WriteLine("Logged in to server");
             }
 
+            updateClass updater = new updateClass
+            {
+                htpVersion = AppVersion,
+                parentPath = AppPath,
+                arguments = args,
+                connectURL = serverURL,
+                debugFlag = DebugMode,
+                tokenID = client.tokenID
+
+            };
+            updater.runUpdate();
             //Run code to self-update
 
             _7zClass zipper = new _7zClass

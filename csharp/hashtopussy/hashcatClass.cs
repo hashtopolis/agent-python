@@ -255,6 +255,7 @@ namespace hashtopussy
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
+            
 
             if (debugFlag)
             {
@@ -282,7 +283,7 @@ namespace hashtopussy
             {
                 hcProcBenchmark.Start();
                 hcProcBenchmark.BeginErrorReadLine();
-
+                
                 while (!hcProcBenchmark.HasExited)
                 {
                     while (!hcProcBenchmark.StandardOutput.EndOfStream)
@@ -292,7 +293,7 @@ namespace hashtopussy
                         stdOutBuild.AppendLine(stdOut);
                         if (stdOut.Contains("STATUS\t") && benchMethod !=2)
                         {
-                            
+            
                             {
                                 parseStatus1(stdOut, ref collection);
                             }
@@ -307,6 +308,15 @@ namespace hashtopussy
             finally
             {
                 hcProcBenchmark.Close();
+            }
+
+            if (stdOutBuild.ToString().Contains("Parsing Hashes: 0/")) //Can read from stderr for no hashes loaded, but this also works.
+            {
+                return false;
+            }
+            else
+            {
+                Console.WriteLine(stdOutBuild.ToString());
             }
 
             if (benchMethod == 2)

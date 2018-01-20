@@ -69,28 +69,28 @@ namespace hashtopussy
         {
             public string action { get; set; }
             public string token { get; set; }
-            public int task { get; set; }
+            public int taskId { get; set; }
             public string file { get; set; }
         }
 
 
         private class chunkProps
         {
-            public string action = "chunks";
+            public string action = "getChunk";
             public string token { get; set; }
             public int taskId { get; set; }
         }
 
         private class hashlistProps
         {
-            public string action = "hashes";
+            public string action = "getHashlist";
             public string token { get; set; }
-            public int hashlist { get; set; }
+            public int hashlistId { get; set; }
         }
 
         private class keyspaceProps
         {
-            public string action = "keyspace";
+            public string action = "sendKeyspace";
             public string token { get; set; }
             public int taskId { get; set; }
             public long keyspace { get; set; }
@@ -98,7 +98,7 @@ namespace hashtopussy
 
         private class benchProps
         {
-            public string action = "bench";
+            public string action = "sendBenchmark";
             public string token { get; set; }
             public int taskId { get; set; }
             public string type { get; set; }
@@ -107,19 +107,19 @@ namespace hashtopussy
 
         private class errorProps
         {
-            public string action = "error";
+            public string action = "clientError";
             public string token { get; set; }
-            public int task { get; set; }
+            public int taskId { get; set; }
             public string message { get; set; }
         }
 
         private class solveProps
         {
-            public string action = "solve";
+            public string action = "sendProgress";
             public string token { get; set; }
-            public long chunk { get; set; }
+            public long chunkId { get; set; }
             public double keyspaceProgress { get; set; }
-            public double progress { get; set; }
+            public double relativeprogress { get; set; }
             public double total { get; set; }
             public double speed { get; set; }
             public double state { get; set; }
@@ -136,12 +136,20 @@ namespace hashtopussy
             hashlistProps hProps = new hashlistProps
             {
                 token = client.tokenID,
-                hashlist = inTask
+                hashlistId = inTask
             };
             jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = client.connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString,300); //300 second timeout
 
+            if (jsC.isJsonSuccess(ret))
+            {
+               
+                getURLtoFile(jsC.getRetVar(ret, "url"), actualHLpath);
+            }
+             
+            
+            /*
             //Check if is json string, a nasty workaround copies from the javaclient to detect whether the return string is json vs hl. Should probably use a proper detector
             if (ret[0] != '{' && ret[ret.Length - 1] != '}')
             {
@@ -164,6 +172,7 @@ namespace hashtopussy
                 }
                 
             }
+            */
 
             return true;
         }
@@ -226,7 +235,6 @@ namespace hashtopussy
             List<Packets> singlePacket  = new List<Packets> { };
             int sleepTime = 2500;
             long ulQueue = 0;
-            long lastOfileSize = 0;
             hcClass.debugFlag = debugFlag;
 
             string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
@@ -268,9 +276,9 @@ namespace hashtopussy
                         }
 
                         sProps.token = client.tokenID;
-                        sProps.chunk = chunkNo;
+                        sProps.chunkId = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
-                        sProps.progress = singlePacket[0].statusPackets["PROGRESS1"];
+                        sProps.relativeprogress = singlePacket[0].statusPackets["PROGRESS1"];
                         sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
                         sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
                         sProps.state = singlePacket[0].statusPackets["STATUS"] - offset; //Client-side workaround for old STATUS on server
@@ -424,7 +432,7 @@ namespace hashtopussy
             Console.WriteLine("Getting chunk...");
              chunkProps cProps = new chunkProps
             {
-                action = "chunk",
+                action = "getChunk",
                 token = client.tokenID,
                 taskId = inTask
             };
@@ -487,7 +495,7 @@ namespace hashtopussy
                             errorProps eProps = new errorProps
                             {
                                 token = client.tokenID,
-                                task = taskID,
+                                taskId = taskID,
                                 message = "Invalid keyspace, keyspace probably too small for this hashtype"
                             };
                             jsonString = jsC.toJson(eProps);
@@ -520,7 +528,21 @@ namespace hashtopussy
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
 
-                        hcClass.runBenchmark(benchMethod, benchTime, ref collection,legacy);
+                        if(!hcClass.runBenchmark(benchMethod, benchTime, ref collection, legacy))
+                        {
+                            Console.WriteLine("Benchmark error, perhaps hashlist is empty");
+                            errorProps eProps = new errorProps
+                            {
+                                token = client.tokenID,
+                                taskId = taskID,
+                                message = "Client received an invalid hashlist for benchmark"
+                            };
+                            jsonString = jsC.toJson(eProps);
+                            ret = jsC.jsonSend(jsonString);
+
+                            return 0;
+
+                        }
 
                         benchProps bProps = new benchProps
                         {
@@ -558,8 +580,8 @@ namespace hashtopussy
                         }
                         return 3;
 
-                    case "hashcat_update":
-                        Console.WriteLine("A new version of hashcat was found, updating...");
+                    case "cracker_update":
+                        Console.WriteLine("A new version of cracker was found, updating...");
                         hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip };
                         if (hcUpdater.updateHashcat())
                         {
@@ -616,9 +638,9 @@ namespace hashtopussy
         {
             FileProps get = new FileProps
             {
-                action = "file",
+                action = "getFile",
                 token = client.tokenID,
-                task = taskID,
+                taskId = taskID,
                 file = fileName
             };
 
@@ -643,6 +665,24 @@ namespace hashtopussy
             return false;
         }
 
+        private Boolean getURLtoFile(string url, string dst)
+        {
+            {
+                downloadClass dlHdl = new downloadClass();
+                string dlFrom = Path.Combine(prefixServerdl, url);
+                string dlTo = Path.Combine(filepath, dst);
+                dlHdl.DownloadFile(dlFrom, dlTo);
+                Console.WriteLine("Finished downloading file");
+                //Check if file exists. check if return success
+                if (File.Exists(dlTo))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         private Int64 fileSize(string filePath)
         {
@@ -657,7 +697,7 @@ namespace hashtopussy
             Console.WriteLine("Getting task");
             Task get = new Task
             {
-                action = "task",
+                action = "getTask",
                 token = client.tokenID
             };
 
@@ -665,16 +705,14 @@ namespace hashtopussy
             string jsonString = jsC.toJson(get);
             string   ret = jsC.jsonSend(jsonString);
 
-
-
             if (jsC.isJsonSuccess(ret))
             {
-                if (jsC.getRetVar(ret, "task") != "NONE")
+                if (jsC.getRetVar(ret, "taskId") != null)
                 {
-                    taskID = Int32.Parse(jsC.getRetVar(ret, "task"));
+                    taskID = Int32.Parse(jsC.getRetVar(ret, "taskId"));
                     attackcmd = (jsC.getRetVar(ret, "attackcmd"));
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
-                    hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
+                    hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlistId"));
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
 
                     Console.WriteLine("Server has assigned client with Task:{0} and Hashlist:{1}",taskID,hashlistID);
