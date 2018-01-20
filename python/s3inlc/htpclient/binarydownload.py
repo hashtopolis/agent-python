@@ -60,6 +60,6 @@ class BinaryDownload:
                     if os.path.isdir("crackers/temp/" + name):
                         os.rename("crackers/temp/" + name, "crackers/" + str(crackerId))
                     else:
-                        os.mkdir("crackers/" + str(crackerId))
-                        os.rename("crackers/temp/" + name, "crackers/" + str(crackerId) + "/")
+                        os.rename("crackers/temp", "crackers/" + str(crackerId))
+                        break
         return True

@@ -3,6 +3,7 @@ from time import sleep
 from htpclient.binarydownload import BinaryDownload
 from htpclient.chunk import Chunk
 from htpclient.files import Files
+from htpclient.generic_cracker import GenericCracker
 from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
 from htpclient.initialize import Initialize
@@ -64,10 +65,14 @@ def loop():
             continue
         if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
             continue
+        if task_change:
+            if binaryDownload.get_version()['name'].lower() == 'hashcat':
+                cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+            else:
+                cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
         task_change = False
         logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
         chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
-        cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
         if chunk_resp == 0:
             task.reset_task()
             continue
