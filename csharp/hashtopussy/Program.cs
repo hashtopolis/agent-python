@@ -180,61 +180,7 @@ namespace hashtopussy
             {
                 Console.WriteLine("Failed to initialize 7zip, proceeding without. \n The client may not be able to extract compressed files");
             }
-            else //We have 7zip, lets check for HC update since that is zipped
-            {
 
-                hashcatUpdateClass hcUpdater = new hashcatUpdateClass {debugFlag = DebugMode, client = client, AppPath = AppPath,sevenZip = zipper};
-
-                if (hcUpdater.updateHashcat())
-                {
-                    hashcatClass hcClass = new hashcatClass { };
-                    hcClass.setDirs(AppPath, client.osID);
-                    string[] versionInts = {} ;
-                    string hcVersion = hcClass.getVersion2(ref versionInts);
-                    Console.WriteLine("Hashcat version {0} found", hcVersion);
-
-                    if (hcVersion.Length != 0)
-                    {
-                        if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
-                        {
-                            if (hcVersion.Contains("-"))
-                            {
-                                legacy = false;
-                                //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
-                            }
-                        }
-                        else if (Convert.ToInt32(versionInts[0]) == 3)
-                        {
-                            if (Convert.ToInt32(versionInts[1].Substring(0, 1)) >= 6)
-                            {
-                                legacy = false;
-                                //This is a release build above 3.6.0
-                            }
-                        }
-                        else if (Convert.ToInt32(versionInts[0]) >= 4)
-                        {
-                            legacy = false;
-                            //This is a release build above 4.0.0
-                        }
-                    }
-                    else
-                    {
-                        //For some reason we couldn't read the version, lets just assume we are on non legacy
-                        legacy = false;
-                    }
-
-                }
-                else
-                {
-                    Console.WriteLine("Could not locate hashcat binary");
-                    Console.WriteLine("You can manually download and extract hashcat");
-                    Console.WriteLine("Client will now terminate");
-                    {
-                        Environment.Exit(0);
-                    }
-                }
-
-            }
 
             taskClass tasks = new taskClass
             {

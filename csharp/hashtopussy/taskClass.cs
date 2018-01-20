@@ -580,54 +580,6 @@ namespace hashtopussy
                         }
                         return 3;
 
-                    case "cracker_update":
-                        Console.WriteLine("A new version of cracker was found, updating...");
-                        hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip };
-                        if (hcUpdater.updateHashcat())
-                        {
-                            hashcatClass hcClass = new hashcatClass {debugFlag = debugFlag};
-                            hcClass.setDirs(appPath, client.osID);
-                            string[] versionInts = { };
-                            string hcVersion = hcClass.getVersion2(ref versionInts);
-                            Console.WriteLine("Hashcat version {0} found", hcVersion);
-
-
-                            if (hcVersion.Length != 0)
-                            {
-                                if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
-                                {
-                                    if (hcVersion.Contains("-"))
-                                    {
-                                        legacy = false;
-                                        //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
-                                    }
-                                }
-                                else if (Convert.ToInt32(versionInts[0]) == 3)
-                                {
-                                    if (Convert.ToInt32(versionInts[1].Substring(0, 1)) >= 6)
-                                    {
-                                        legacy = false;
-                                        //This is a release build above 3.6.0
-                                    }
-                                }
-                                else if (Convert.ToInt32(versionInts[0]) >= 4)
-                                {
-                                    legacy = false;
-                                    //This is a release build above 4.0.0
-                                }
-                            }
-                            else
-                            {
-                                //For some reason we couldn't read the version, lets just assume we are on non legacy
-                                legacy = false;
-                            }
-                            setOffset();
-                        }
-                        else
-                        {
-                            Console.WriteLine("Update failed");
-                        }
-                        return 4;
                     }    
 
             }
