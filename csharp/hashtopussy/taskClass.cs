@@ -15,7 +15,7 @@ namespace hashtopussy
         private string cmdpars;
         private Boolean stipPath;
         private string actualHLpath;
-        private int benchTime, hashlistID, taskID, statusTimer, benchMethod;
+        private int benchTime, hashlistID, taskID, statusTimer, benchMethod, crackerId;
         private ArrayList files;
         private string hashlistAlias = "#HL#";
 
@@ -714,8 +714,9 @@ namespace hashtopussy
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
                     hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlistId"));
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
+                    crackerId = Int32.Parse(jsC.getRetVar(ret, "crackerId"));
 
-                    Console.WriteLine("Server has assigned client with Task:{0} and Hashlist:{1}",taskID,hashlistID);
+                    Console.WriteLine("Server has assigned client with Task:{0}, Cracker:{3} and Hashlist:{1}",taskID,hashlistID,crackerId);
                     if (jsC.getRetVar(ret, "benchType") == "run")
                     {
                         benchMethod = 1;
