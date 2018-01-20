@@ -108,3 +108,4 @@ if __name__ == "__main__":
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
+        exit()
