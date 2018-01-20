@@ -33,4 +33,4 @@ The list contains all Hashcat version with which the client was tested and is ab
 
 ## Generic Crackers
 
-This client is able to run generic Hashtopussy cracker binaries which fulfill the minimal functionality requirements, described [here](https://github.com/s3inlc/hashtopussy/tree/master/doc/README.md). An example implementation can be found [here](https://github.com/s3inlc/hashtopussy-cracker-generic)
+This client is able to run generic Hashtopussy cracker binaries which fulfill the minimal functionality requirements, described [here](https://github.com/s3inlc/hashtopussy/tree/master/doc/README.md). An example implementation can be found [here](https://github.com/s3inlc/hashtopussy-generic-cracker)
