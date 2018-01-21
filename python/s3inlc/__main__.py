@@ -20,7 +20,11 @@ def init():
     global CONFIG, binaryDownload
 
     # TODO: fix logging style
-    logging.basicConfig(filename='client.log', level=logging.DEBUG)
+    CONFIG = Config()
+    if CONFIG.get_value('debug'):
+        logging.basicConfig(filename='client.log', level=logging.DEBUG)
+    else:
+        logging.basicConfig(filename='client.log', level=logging.INFO)
     urllib3_logger = logging.getLogger('urllib3')
     urllib3_logger.setLevel(logging.ERROR)
     logging.getLogger().addHandler(logging.StreamHandler())
@@ -28,7 +32,6 @@ def init():
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
-    CONFIG = Config()
     # connection initialization
     Initialize().run()
     # download and updates
@@ -39,7 +42,7 @@ def init():
 def loop():
     global binaryDownload, CONFIG
 
-    logging.info("Entering loop...")
+    logging.debug("Entering loop...")
     task = Task()
     chunk = Chunk()
     files = Files()
@@ -66,12 +69,12 @@ def loop():
         if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
             continue
         if task_change:
+            logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
             if binaryDownload.get_version()['name'].lower() == 'hashcat':
                 cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
             else:
                 cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
         task_change = False
-        logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
         chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
         if chunk_resp == 0:
             task.reset_task()
@@ -82,6 +85,7 @@ def loop():
             continue
         elif chunk_resp == -2:
             # measure benchmark
+            logging.info("Benchmark task...")
             result = cracker.run_benchmark(task.get_task())
             if result == 0:
                 sleep(10)
@@ -103,7 +107,7 @@ def loop():
                 continue
 
         # run chunk
-        logging.info("Start cracking...")
+        logging.info("Start chunk...")
         cracker.run_chunk(task.get_task(), chunk.chunk_data())
 
 

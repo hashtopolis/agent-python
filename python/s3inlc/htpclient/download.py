@@ -23,6 +23,6 @@ class Download:
                     dl += len(data)
                     file.write(data)
                     done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                    sys.stdout.write("\rDownloading: [%s%s]" % ('=' * done, ' ' * (50 - done)))
                     sys.stdout.flush()
         print('')

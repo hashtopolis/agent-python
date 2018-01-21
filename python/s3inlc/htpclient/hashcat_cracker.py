@@ -29,10 +29,10 @@ class HashcatCracker:
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        logging.info("CALL: " + full_cmd)
+        logging.debug("CALL: " + full_cmd)
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
 
-        logging.info("started cracking")
+        logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
         err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
         out_thread.start()
@@ -88,7 +88,7 @@ class HashcatCracker:
                                                'relativeProgress': relative_progress, 'speed': speed,
                                                'state': status.get_state(), 'cracks': cracks})
 
-                            logging.info("Sending " + str(len(cracks)) + " cracks...")
+                            logging.debug("Sending " + str(len(cracks)) + " cracks...")
                             ans = req.execute()
                             if ans is None:
                                 logging.error("Failed to send solve!")
@@ -98,20 +98,21 @@ class HashcatCracker:
                                 cracks = cracks_backup
                                 zaps = ans['zaps']
                                 if len(zaps) > 0:
-                                    logging.info("Writing zaps")
+                                    logging.debug("Writing zaps")
                                     zap_output = '\n'.join(zaps) + '\n'
                                     f = open("hashlist_" + str(task['hashlistId']), 'a')
                                     f.write(zap_output)
                                     f.close()
-                                logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
+                                logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Cracks: " + str(len(cracks)) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
                         line = line.decode()
                         if ":" in line and "Line-length exception" not in line:
                             cracks.append(line.strip())
                         else:
-                            logging.warning("HCOUT: " + line)
+                            pass
+                            # logging.warning("HCOUT: " + line.strip())
                 else:
-                    print("HCERR: " + str(line))
+                    logging.error("HCERR: " + str(line).strip())
                     # TODO: send error and abort cracking
 
     def measure_keyspace(self, task, chunk):
@@ -133,10 +134,10 @@ class HashcatCracker:
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        logging.info("CALL: " + full_cmd)
+        logging.debug("CALL: " + full_cmd)
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
         output, error = proc.communicate()
-        logging.info("started benchmark")
+        logging.debug("started benchmark")
         proc.wait()  # wait until done
         if len(error) > 0:
             # TODO: strip here the ANSI color stuff from the errors
@@ -156,7 +157,7 @@ class HashcatCracker:
             for line in output:
                 if len(line) == 0:
                     continue
-                logging.info("HCSTAT: " + line)
+                logging.debug("HCSTAT: " + line.strip())
                 status = HashcatStatus(line)
                 if status.is_valid():
                     last_valid_status = status

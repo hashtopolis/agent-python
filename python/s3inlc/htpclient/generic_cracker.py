@@ -24,10 +24,10 @@ class GenericCracker:
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        logging.info("CALL: " + full_cmd)
+        logging.debug("CALL: " + full_cmd)
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
 
-        logging.info("started cracking")
+        logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
         err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
         out_thread.start()
@@ -81,7 +81,7 @@ class GenericCracker:
                                                'relativeProgress': progress, 'speed': speed,
                                                'state': (4 if progress == 10000 else 2), 'cracks': cracks})
 
-                            logging.info("Sending " + str(len(cracks)) + " cracks...")
+                            logging.debug("Sending " + str(len(cracks)) + " cracks...")
                             ans = req.execute()
                             if ans is None:
                                 logging.error("Failed to send solve!")
@@ -89,15 +89,15 @@ class GenericCracker:
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
                                 cracks = cracks_backup
-                                logging.info("Update accepted. Cracks: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']))
+                                logging.info("Progress: " + str(progress/100) + "% Cracks: " + str(len(cracks)) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']))
                     else:
                         line = line.decode()
                         if ":" in line:
                             cracks.append(line.strip())
                         else:
-                            logging.warning("OUT: " + line)
+                            logging.warning("OUT: " + line.strip())
                 else:
-                    print("ERROR: " + str(line))
+                    print("ERROR: " + str(line).strip())
                     # TODO: send error and abort cracking
 
     def measure_keyspace(self, task, chunk):
@@ -122,7 +122,7 @@ class GenericCracker:
         full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        logging.info("CALL: " + full_cmd)
+        logging.debug("CALL: " + full_cmd)
         output = subprocess.check_output(full_cmd, shell=True, cwd='files')
         if len(output) > 0:
             output = output.replace(b"\r\n", b"\n").decode('utf-8')

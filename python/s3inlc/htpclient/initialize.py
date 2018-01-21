@@ -122,7 +122,6 @@ class Initialize:
     def __check_token(self):
         if len(self.config.get_value('token')) == 0:
             voucher = input("No token found! Please enter a voucher to register your agent:\n")
-            # TODO: read the name of the computer to register
             name = platform.node()
             req = JsonRequest({'action': 'register', 'voucher': voucher, 'name': name})
             ans = req.execute()
@@ -156,7 +155,7 @@ class Initialize:
             self.config.set_value('url', '')
             self.__check_url()
         else:
-            logging.info("Connection test successful!")
+            logging.debug("Connection test successful!")
 
     @staticmethod
     def __build_directories():
