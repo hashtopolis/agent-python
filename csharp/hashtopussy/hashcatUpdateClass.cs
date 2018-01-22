@@ -85,10 +85,15 @@ namespace hashtopussy
                         Process.Start("chmod", "+x \"" + binLocation + "\"");
                     }
 
-                    client.crackerPath = binLocation;
 
                     //May need to inplement legacy checks if cracker is hashcat
                 }
+                else
+                {
+                    Console.WriteLine("Client already exists, skipping download");
+                }
+                client.crackerBinary = jsonUpd.getRetVar(ret, "executable");
+                client.crackerPath = Path.Combine(AppPath, crackerName, binaryVersionId.ToString());
 
             }
 
