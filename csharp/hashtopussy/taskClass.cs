@@ -746,7 +746,7 @@ namespace hashtopussy
                     hcClass.hcDirectory = client.crackerPath;
                     hcClass.hcBinary = client.crackerBinary;
 
-
+                
                     gotChunk = getChunk(taskID);
 
                     while (gotChunk != 0)
