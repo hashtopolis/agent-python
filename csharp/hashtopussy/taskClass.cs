@@ -668,7 +668,7 @@ namespace hashtopussy
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
                     crackerId = Int32.Parse(jsC.getRetVar(ret, "crackerId"));
 
-                    Console.WriteLine("Server has assigned client with Task:{0}, Cracker:{3} and Hashlist:{1}",taskID,hashlistID,crackerId);
+                    Console.WriteLine("Server has assigned client with Task:{0}, Cracker:{2} and Hashlist:{1}",taskID,hashlistID,crackerId);
                     if (jsC.getRetVar(ret, "benchType") == "run")
                     {
                         benchMethod = 1;
@@ -740,8 +740,11 @@ namespace hashtopussy
 
                     //Check if we have the correct cracker if not we download
 
-                    hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip,  };
+                    hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip, binaryVersionId = Int32.Parse(jsC.getRetVar(ret, "crackerId"))};
+             
                     hcUpdater.updateCracker();
+
+
 
                     gotChunk = getChunk(taskID);
 
