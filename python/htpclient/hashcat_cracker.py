@@ -64,7 +64,7 @@ class HashcatCracker:
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
                         # send update to server
-                        chunk_start = int(status.get_progress_total()) / (chunk['skip'] + chunk['length']) * chunk['skip']
+                        chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         relative_progress = int((status.get_progress() - chunk_start) / float(
                             status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
@@ -95,15 +95,16 @@ class HashcatCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
+                                cracks_count = len(cracks)
                                 cracks = cracks_backup
                                 zaps = ans['zaps']
                                 if len(zaps) > 0:
                                     logging.debug("Writing zaps")
                                     zap_output = '\n'.join(zaps) + '\n'
                                     f = open("hashlist_" + str(task['hashlistId']), 'a')
-                                    f.write(zap_output)
+                                    f.write(zap_output.encode())
                                     f.close()
-                                logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Cracks: " + str(len(cracks)) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
+                                logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
                         line = line.decode()
                         if ":" in line and "Line-length exception" not in line:
