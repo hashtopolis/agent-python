@@ -12,6 +12,8 @@ public class registerClass
     public int osID { get; set; }
     public string connectURL { get; set; }
     public Boolean debugFlag { set; get; }
+    public string crackerPath { set; get; }
+    public string crackerBinary { set; get; }
 
     //Suppress P/Invoke warning my using NativeMethods
     internal static class NativeMethods
