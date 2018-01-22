@@ -26,8 +26,8 @@ namespace hashtopussy
         public string AppPath { get; set; }
         public _7zClass sevenZip { get; set; }
         public registerClass client { get; set; }
-        public int binaryVersionId = 0;
-        
+        public int binaryVersionId { get; set; }
+
 
         public bool updateCracker()
         {
@@ -56,27 +56,40 @@ namespace hashtopussy
                         dlClass.DownloadFile(jsonUpd.getRetVar(ret, "url"), Path.Combine(AppPath, "crackerClient.7z"));
                     }
 
-                    sevenZip.xtract(Path.Combine(AppPath, "crackerClient.7z"), Path.Combine(AppPath, "crackerClient"));
-
-                    if (Directory.Exists(Path.Combine(AppPath, crackerName)))
+                    if (Directory.Exists(Path.Combine(AppPath, "tmp")))
                     {
-                        Directory.Delete(Path.Combine(AppPath, crackerName), true);
+                        Directory.Delete(Path.Combine(AppPath, "tmp"), true);
                     }
-                    Directory.Move(Path.Combine(AppPath, "crackerClient", jsonUpd.getRetVar(ret, "rootdir")), fullSubDir);
-                    Directory.Delete(Path.Combine(AppPath, "crackerClient"));
 
+                    sevenZip.xtract(Path.Combine(AppPath, "crackerClient.7z"), Path.Combine(AppPath, "tmp"));
 
+                    //check if files present
+
+                    string[] files = Directory.GetFiles(Path.Combine(AppPath, "tmp"));
+                    if (files.Length != 0)
+                    {
+                        Directory.Move(Path.Combine(AppPath, "tmp"), fullSubDir);
+                    }
+                    else
+                    {
+                        string[] dirs = Directory.GetDirectories(Path.Combine(AppPath, "tmp"));
+                        Directory.Move(dirs[0], fullSubDir);
+                    }
+
+                    Directory.Delete(Path.Combine(AppPath, "tmp"));
                     string binLocation = Path.Combine(fullSubDir, jsonUpd.getRetVar(ret, "executable"));
 
                     if (client.osID != 1) //Chmod for non windows
                     {
-                        Console.WriteLine("Applying execution permissions to 7zr binary");
+                        Console.WriteLine("Applying execution permissions to cracker binary");
                         Process.Start("chmod", "+x \"" + binLocation + "\"");
                     }
 
+                    client.crackerPath = binLocation;
+
+                    //May need to inplement legacy checks if cracker is hashcat
                 }
 
-                
             }
 
 
