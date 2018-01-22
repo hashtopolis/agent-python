@@ -119,8 +119,8 @@ namespace hashtopussy
             public string token { get; set; }
             public long chunkId { get; set; }
             public double keyspaceProgress { get; set; }
-            public double relativeprogress { get; set; }
-            public double total { get; set; }
+            public double relativeProgress { get; set; }
+            //public double total { get; set; }
             public double speed { get; set; }
             public double state { get; set; }
             public List<string> cracks { get; set; }
@@ -278,8 +278,8 @@ namespace hashtopussy
                         sProps.token = client.tokenID;
                         sProps.chunkId = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
-                        sProps.relativeprogress = singlePacket[0].statusPackets["PROGRESS1"];
-                        sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
+                        sProps.relativeProgress = singlePacket[0].statusPackets["PROGRESS1"];
+                        //sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
                         sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
                         sProps.state = singlePacket[0].statusPackets["STATUS"] - offset; //Client-side workaround for old STATUS on server
 
@@ -463,13 +463,13 @@ namespace hashtopussy
 
                         hcClass.setArgs(attackcmdMod); 
 
-                        chunkNo = Convert.ToInt64(jsC.getRetVar(ret, "chunk"));
+                        chunkNo = Convert.ToInt64(jsC.getRetVar(ret, "chunkId"));
                         skip = Convert.ToInt64(jsC.getRetVar(ret, "skip"));
                         length = Convert.ToInt64(jsC.getRetVar(ret, "length"));
 
                         List<Packets> uploadPackets = new List<Packets>();
 
-                        hcClass.setDirs(appPath,client.osID);
+                        hcClass.setDirs(appPath);
                         hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString(),debugFlag); 
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
@@ -481,7 +481,7 @@ namespace hashtopussy
                         return 1;
 
                     case "keyspace_required":
-                        hcClass.setDirs(appPath,client.osID);
+                        hcClass.setDirs(appPath);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, ""); //Remove out the #HL#
                         hcClass.setArgs(attackcmdMod);
@@ -521,7 +521,7 @@ namespace hashtopussy
                         return 0;
 
                     case "benchmark":
-                        hcClass.setDirs(appPath, client.osID);
+                        hcClass.setDirs(appPath);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\""); //Add the path to Hashlist
                         hcClass.setArgs(attackcmdMod);
@@ -743,7 +743,8 @@ namespace hashtopussy
                     hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip, binaryVersionId = Int32.Parse(jsC.getRetVar(ret, "crackerId"))};
              
                     hcUpdater.updateCracker();
-
+                    hcClass.hcDirectory = client.crackerPath;
+                    hcClass.hcBinary = client.crackerBinary;
 
 
                     gotChunk = getChunk(taskID);
