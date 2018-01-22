@@ -21,6 +21,8 @@ namespace hashtopussy
         private string hcDir = "hashcat";
         private string hcBin = "hashcat64.exe";
         private string separator = "";
+        public string hcDirectory { get; set; }
+        public string hcBinary { get; set; }
 
         private string hcArgs = "";
  
@@ -66,24 +68,14 @@ namespace hashtopussy
             hcArgs = args;
         }
 
-        public void setDirs(string fpath, int osID)
+        public void setDirs(string fpath)
         {
-            hcDir = Path.Combine(fpath, "hashcat");
+            hcDir = Path.Combine(fpath, hcDirectory);
             workingDir = Path.Combine(fpath, "tasks").TrimEnd();
             filesDir = Path.Combine(fpath, "files"," ").TrimEnd();
 
-            if (osID == 0)
-            {
-                hcBin = "hashcat64.bin";
-            }
-            else if(osID == 2)
-            {
-                hcBin = "hashcat";
-            }
-            else
-            {
-                hcBin = "hashcat64.exe";
-            }
+            hcBin = hcBinary;
+
         }
 
         public void runUpdate()
@@ -248,7 +240,7 @@ namespace hashtopussy
             }
 
             ProcessStartInfo pInfo = new ProcessStartInfo();
-            pInfo.FileName = Path.Combine(hcDir, hcBin);
+            pInfo.FileName = Path.Combine(hcDirectory, hcBinary);
             
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
@@ -443,7 +435,7 @@ namespace hashtopussy
             string stdOutSingle = "";
             string suffixArgs = " --session=hashtopussy --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
-            pInfo.FileName =  Path.Combine(hcDir, hcBin);
+            pInfo.FileName =  Path.Combine(hcDirectory, hcBinary);
             pInfo.WorkingDirectory = filesDir;
 
 
