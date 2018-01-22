@@ -148,7 +148,7 @@ namespace hashtopussy
             initDirs();
 
             registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode };
-            Boolean legacy = true; //Defaults to legacy STATUS codes
+            Boolean legacy = false; //Defaults to legacy STATUS codes
             client.setPath( AppPath);
             if (client.loginAgent())
             {
