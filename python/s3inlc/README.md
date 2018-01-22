@@ -23,7 +23,26 @@ Please not that the client does not correctly recognize the OS when you are runn
 
 ### Config
 
-TODO
+When you run the client for the first time it will ask automatically for all the requirement settings and then saves it automatically to a config file called `config.json`. This could for example look like this:
+
+```
+{
+  "url": "https://coray.org/htp-test/src/api/server.php", 
+  "token": "7RNDqtnPxm", 
+  "uuid": "49dcd31c-3637-4f2a-8df1-b545202df5b3"
+}
+```
+
+Optional you can manually set the `debug` property to display more information on the console and the log.
+
+```
+{
+  "url": "https://coray.org/htp-test/src/api/server.php", 
+  "token": "7RNDqtnPxm",
+  "debug": true,
+  "uuid": "49dcd31c-3637-4f2a-8df1-b545202df5b3"
+}
+```
 
 ## Hashcat Compatibility
 
