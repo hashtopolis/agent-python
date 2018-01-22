@@ -737,6 +737,12 @@ namespace hashtopussy
                         Console.WriteLine("Hashlist is 0 bytes");
                         return false;
                     }
+
+                    //Check if we have the correct cracker if not we download
+
+                    hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip,  };
+                    hcUpdater.updateCracker();
+
                     gotChunk = getChunk(taskID);
 
                     while (gotChunk != 0)
