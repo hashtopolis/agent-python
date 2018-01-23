@@ -96,7 +96,8 @@ namespace hashtopussy
 
             }
 
-            if (File.Exists(client.crackerPath))
+      
+            if (File.Exists(Path.Combine(client.crackerPath, client.crackerBinary)))
             {
                 return true;
             }
