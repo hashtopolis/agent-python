@@ -1,3 +1,4 @@
+import string
 import logging
 import subprocess
 from queue import Queue, Empty
@@ -105,8 +106,11 @@ class HashcatCracker:
                                     f.close()
                                 logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Cracks: " + str(len(cracks)) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
+                        # hacky solution to exclude warnings from hashcat
+                        if str(line[0]) not in string.printable:
+                            continue
                         line = line.decode()
-                        if ":" in line and "Line-length exception" not in line:
+                        if ":" in line:
                             cracks.append(line.strip())
                         else:
                             pass
