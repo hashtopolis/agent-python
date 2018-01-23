@@ -24,27 +24,19 @@ class Initialize:
 
     @staticmethod
     def get_os():
-        if os.name == 'nt':
-            system = 1  # Windows
-        elif os.name == 'posix':
-            # Linux or OS X
-            if platform.system() == 'Darwin':
-                system = 2  # OS X
-            else:
-                system = 0  # Linux
-        else:
-            system = 0  # Linux
-        return system
+        osdict = {"Linux":   0,
+                  "Windows": 1,
+                  "Darwin":  2}
+        os = platform.system()
+        return osdict[os]
 
     @staticmethod
     def get_os_extension():
-        if os.name == 'nt':
-            ext = '.exe'  # Windows
-        elif os.name == 'posix':
-            ext = ''  # Linux or OS X
-        else:
-            ext = ''
-        return ext
+        extdict = {0: "",     # Linux
+                   1: ".exe", # Windows
+                   2: ""}     # Mac OS
+        os = Initialize.get_os()
+        return extdict[os]
 
     def __login(self):
         req = JsonRequest({'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
