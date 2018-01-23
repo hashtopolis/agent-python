@@ -85,7 +85,6 @@ namespace hashtopussy
                         Process.Start("chmod", "+x \"" + binLocation + "\"");
                     }
 
-
                     //May need to inplement legacy checks if cracker is hashcat
                 }
                 else
@@ -97,8 +96,15 @@ namespace hashtopussy
 
             }
 
-
-            return true;
+            if (File.Exists(client.crackerPath))
+            {
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Could not locate cracker, perhaps manually delete cracker " + binaryVersionId.ToString());
+                return false;
+            }
         }
 
 

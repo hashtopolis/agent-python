@@ -746,12 +746,25 @@ namespace hashtopussy
                     //Check if we have the correct cracker if not we download
 
                     hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip, binaryVersionId = Int32.Parse(jsC.getRetVar(ret, "crackerId"))};
-             
-                    hcUpdater.updateCracker();
+                    
+                    //If the cracker did not successfully initliaze then throw error and report
+                    if (!hcUpdater.updateCracker())
+                    {
+                        errorProps eProps = new errorProps
+                        {
+                            token = client.tokenID,
+                            taskId = taskID,
+                            message = "Client could not locate cracker"
+                        };
+                        jsonString = jsC.toJson(eProps);
+                        ret = jsC.jsonSend(jsonString);
+                        return false;
+                    }
+
+                    //The client may change per task, we need to update these after the update
                     hcClass.hcDirectory = client.crackerPath;
                     hcClass.hcBinary = client.crackerBinary;
 
-                
                     gotChunk = getChunk(taskID);
 
                     while (gotChunk != 0)
