@@ -505,10 +505,25 @@ namespace hashtopussy
                 
                 if (stdOut.Contains(separator)) //Is a hit
                 {
-                    lock (crackedLock)
+
+                    if (stdOut.StartsWith("Hashfile"))
                     {
-                        hashlist.Add(stdOut);
+                        if (!stdOut.Contains("Line-length exception"))
+                        {
+                            lock (crackedLock)
+                            {
+                                hashlist.Add(stdOut);
+                            }
+                        }
                     }
+                    else
+                    {
+                        lock (crackedLock)
+                        {
+                            hashlist.Add(stdOut);
+                        }
+                    }
+
                     
                 }
                 else //Is a status output
