@@ -278,7 +278,13 @@ namespace hashtopussy
                         sProps.token = client.tokenID;
                         sProps.chunkId = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
-                        sProps.relativeProgress = singlePacket[0].statusPackets["PROGRESS1"];
+
+
+                        chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
+                        chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart), 4) * 10000;
+
+                        sProps.relativeProgress = chunkPercent;
+
                         //sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
                         sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
                         sProps.state = singlePacket[0].statusPackets["STATUS"] - offset; //Client-side workaround for old STATUS on server
@@ -345,9 +351,8 @@ namespace hashtopussy
                             Console.WriteLine("Server has instructed the client terminate the task via stop");
                         }
 
-                        chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
-                        chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
 
+                        chunkPercent = chunkPercent / 100; //We already calculated with * 10000 earlier
 
                         receivedZaps = jsC.getRetList(ret, "zaps"); //Check whether the server sent out hashes to zap
                         if (receivedZaps.Count > 0)
