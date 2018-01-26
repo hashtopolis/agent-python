@@ -108,6 +108,11 @@ public class registerClass
         else if (osID == 0) //Linux
         {
             ProcessStartInfo pinfo = new ProcessStartInfo();
+            pinfo = new ProcessStartInfo();
+            pinfo.FileName = "uname";
+            pinfo.Arguments = "-n";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardOutput = true;
             Process uname = new Process();
             uname.StartInfo = pinfo;
             uname.Start();
