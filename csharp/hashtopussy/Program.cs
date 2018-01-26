@@ -59,20 +59,24 @@ namespace hashtopussy
 
         public static bool loadURL()
         {
-            if (File.Exists(urlPath))
+            if (serverURL == "")
             {
-                serverURL = File.ReadAllText(urlPath);
-                if (serverURL == "")
+                if (File.Exists(urlPath))
                 {
-                    File.Delete(urlPath);
+                    serverURL = File.ReadAllText(urlPath);
+                    if (serverURL == "")
+                    {
+                        File.Delete(urlPath);
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
             }
-            else
-            {
-                return false;
-            }
             return true;
+
         }
 
 
@@ -128,26 +132,32 @@ namespace hashtopussy
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i] == "debug")
-                {
-                    DebugMode = true;
-                    break;
-                }
+            string tokenSwitch = "";
 
+            foreach (string arg in args)
+            {
+                switch (arg.Substring(0, 2))
+                {
+               
+                    case "/t":
+                        tokenSwitch = arg.Substring(3);
+                        break;
+                    case "/u":
+                        serverURL = arg.Substring(3);
+                        break;
+                    case "/d":
+                        DebugMode = true;
+                        break;
+                }
             }
 
             string AppVersion = "0.50.0";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
-
-
-
             initDirs();
 
-            registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode };
+            registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode,tokenID = tokenSwitch};
             Boolean legacy = false; //Defaults to legacy STATUS codes
             client.setPath( AppPath);
             if (client.loginAgent())
