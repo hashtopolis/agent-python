@@ -392,20 +392,25 @@ public class registerClass
 
     public bool loadToken()
     {
-        if (File.Exists(tokenPath))
+
+        if (tokenID == "")
         {
-            tokenID = File.ReadAllText(tokenPath);
-            if (tokenID == "")
+            if (File.Exists(tokenPath))
             {
-                File.Delete(tokenPath);
+                tokenID = File.ReadAllText(tokenPath);
+                if (tokenID == "")
+                {
+                    File.Delete(tokenPath);
+                    return false;
+                }
+            }
+            else
+            {
                 return false;
             }
+            setOS();
         }
-        else
-        {
-            return false;
-        }
-        setOS();
+
         return true;
     }
 
