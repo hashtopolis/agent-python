@@ -29,4 +29,4 @@ class Config:
 
     def __save(self):
         with open(self.CONFIG_FILE, 'w') as f:
-            json.dump(self.config, f, ensure_ascii=False)
+            json.dump(self.config, f, indent=2, ensure_ascii=False)

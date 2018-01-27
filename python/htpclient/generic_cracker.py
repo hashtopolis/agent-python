@@ -88,8 +88,12 @@ class GenericCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
+                                if len(ans['zaps']) > 0:
+                                    with open("files/zap", "wb") as file: # need to check if we are in the main dir here
+                                        file.write('\n'.join(ans['zaps']).encode())
+                                        file.close()
                                 cracks = cracks_backup
-                                logging.info("Progress: " + str(progress/100) + "% Cracks: " + str(len(cracks)) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']))
+                                logging.info("Progress: " + str(progress/100) + "% Cracks: " + str(len(cracks)) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(ans['zaps'])))
                     else:
                         line = line.decode()
                         if ":" in line:

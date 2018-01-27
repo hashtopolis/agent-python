@@ -4,6 +4,8 @@ from time import sleep
 
 import subprocess
 
+from htpclient.dicts import *
+from htpclient.helpers import *
 from htpclient.jsonRequest import *
 
 
@@ -24,19 +26,17 @@ class Initialize:
 
     @staticmethod
     def get_os():
-        osdict = {"Linux":   0,
-                  "Windows": 1,
-                  "Darwin":  2}
         os = platform.system()
-        return osdict[os]
+        try:
+            return dict_os[os]
+        except:
+            logging.debug("OS: %s" % os)
+            logErrorAndExit("It seems your operating system is not supported.")
 
     @staticmethod
     def get_os_extension():
-        extdict = {0: "",     # Linux
-                   1: ".exe", # Windows
-                   2: ""}     # Mac OS
         os = Initialize.get_os()
-        return extdict[os]
+        return dict_ext[os]
 
     def __login(self):
         req = JsonRequest({'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
@@ -113,7 +113,7 @@ class Initialize:
 
     def __check_token(self):
         if len(self.config.get_value('token')) == 0:
-            voucher = input("No token found! Please enter a voucher to register your agent:\n")
+            voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
             name = platform.node()
             req = JsonRequest({'action': 'register', 'voucher': voucher, 'name': name})
             ans = req.execute()
@@ -131,7 +131,7 @@ class Initialize:
     def __check_url(self):
         if len(self.config.get_value('url')) == 0:
             # ask for url
-            url = input("Please enter the url to the API of your Hashtopussy installation:\n")
+            url = input("Please enter the url to the API of your Hashtopussy installation:\n").strip()
             logging.debug("Setting url to: " + url)
             self.config.set_value('url', url)
         else:
