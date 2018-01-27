@@ -8,6 +8,7 @@ from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
+from htpclient.dicts import *
 import logging
 
 from htpclient.task import Task
@@ -92,7 +93,11 @@ def loop():
                 # some error must have occurred on benchmarking
                 continue
             # send result of benchmark
-            req = JsonRequest({'action': 'sendBenchmark', 'token': CONFIG.get_value('token'), 'taskId': task.get_task()['taskId'], 'type': 'run', 'result': result})
+            query = dict_sendBenchmark.copy()
+            query['token']  = CONFIG.get_value('token')
+            query['taskId'] = task.get_task()['taskId']
+            query['result'] = result
+            req = JsonRequest(query)
             ans = req.execute()
             if ans is None:
                 logging.error("Failed to send benchmark!")

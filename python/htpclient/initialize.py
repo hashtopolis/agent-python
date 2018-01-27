@@ -4,6 +4,7 @@ from time import sleep
 
 import subprocess
 
+from htpclient.dicts import *
 from htpclient.helpers import *
 from htpclient.jsonRequest import *
 
@@ -25,23 +26,17 @@ class Initialize:
 
     @staticmethod
     def get_os():
-        osdict = {"Linux":   0,
-                  "Windows": 1,
-                  "Darwin":  2}
         os = platform.system()
         try:
-            return osdict[os]
+            return dict_os[os]
         except:
             logging.debug("OS: %s" % os)
             logErrorAndExit("It seems your operating system is not supported.")
 
     @staticmethod
     def get_os_extension():
-        extdict = {0: "",     # Linux
-                   1: ".exe", # Windows
-                   2: ""}     # Mac OS
         os = Initialize.get_os()
-        return extdict[os]
+        return dict_ext[os]
 
     def __login(self):
         req = JsonRequest({'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
