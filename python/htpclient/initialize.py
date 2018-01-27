@@ -113,7 +113,11 @@ class Initialize:
 
     def __check_token(self):
         if len(self.config.get_value('token')) == 0:
-            voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
+            if len(self.config.get_value('voucher')) > 0:
+                # voucher is set in config and can be used to autoregister
+                voucher = self.config.get_value('voucher')
+            else:
+                voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
             name = platform.node()
             req = JsonRequest({'action': 'register', 'voucher': voucher, 'name': name})
             ans = req.execute()
@@ -125,6 +129,7 @@ class Initialize:
                 self.__check_token()
             else:
                 token = ans['token']
+                self.config.set_value('voucher', '')
                 self.config.set_value('token', token)
                 logging.info("Successfully registered!")
 
