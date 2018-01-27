@@ -118,7 +118,7 @@ class Initialize:
 
     def __check_token(self):
         if len(self.config.get_value('token')) == 0:
-            voucher = input("No token found! Please enter a voucher to register your agent:\n")
+            voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
             name = platform.node()
             req = JsonRequest({'action': 'register', 'voucher': voucher, 'name': name})
             ans = req.execute()
@@ -136,7 +136,7 @@ class Initialize:
     def __check_url(self):
         if len(self.config.get_value('url')) == 0:
             # ask for url
-            url = input("Please enter the url to the API of your Hashtopussy installation:\n")
+            url = input("Please enter the url to the API of your Hashtopussy installation:\n").strip()
             logging.debug("Setting url to: " + url)
             self.config.set_value('url', url)
         else:
