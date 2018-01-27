@@ -4,6 +4,7 @@ from time import sleep
 
 import subprocess
 
+from htpclient.helpers import *
 from htpclient.jsonRequest import *
 
 
@@ -28,7 +29,11 @@ class Initialize:
                   "Windows": 1,
                   "Darwin":  2}
         os = platform.system()
-        return osdict[os]
+        try:
+            return osdict[os]
+        except:
+            logging.debug("OS: %s" % os)
+            logErrorAndExit("It seems your operating system is not supported.")
 
     @staticmethod
     def get_os_extension():
