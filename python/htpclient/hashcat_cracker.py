@@ -76,7 +76,7 @@ class HashcatCracker:
                         speed = status.get_speed()
                         initial = True
                         while len(cracks) > 0 or initial:
-                            self.lock.aquire()
+                            self.lock.acquire()
                             initial = False
                             cracks_backup = []
                             if len(cracks) > 1000:
@@ -126,7 +126,7 @@ class HashcatCracker:
                             continue
                         line = line.decode()
                         if ":" in line:
-                            self.lock.aquire()
+                            self.lock.acquire()
                             cracks.append(line.strip())
                             self.lock.release()
                         else:
