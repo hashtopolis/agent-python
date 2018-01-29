@@ -11,7 +11,7 @@ namespace hashtopussy
 
         public class dlProps
         {
-            public string action = "download";
+            public string action = "downloadBinary";
             public string type = "7zr";
             public string token { get; set; }
         }

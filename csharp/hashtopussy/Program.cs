@@ -16,7 +16,7 @@ namespace hashtopussy
 
     public class testProp
     {
-        public string action = "test";
+        public string action = "testConnection";
     }
 
 
@@ -59,20 +59,24 @@ namespace hashtopussy
 
         public static bool loadURL()
         {
-            if (File.Exists(urlPath))
+            if (serverURL == "")
             {
-                serverURL = File.ReadAllText(urlPath);
-                if (serverURL == "")
+                if (File.Exists(urlPath))
                 {
-                    File.Delete(urlPath);
+                    serverURL = File.ReadAllText(urlPath);
+                    if (serverURL == "")
+                    {
+                        File.Delete(urlPath);
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
             }
-            else
-            {
-                return false;
-            }
             return true;
+
         }
 
 
@@ -128,20 +132,38 @@ namespace hashtopussy
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i] == "debug")
-                {
-                    DebugMode = true;
-                    break;
-                }
+            string tokenSwitch = "";
 
+            foreach (string arg in args)
+            {
+                switch (arg.Substring(0, 2))
+                {
+               
+                    case "/t":
+                        tokenSwitch = arg.Substring(3);
+                        break;
+                    case "/u":
+                        serverURL = arg.Substring(3);
+                        break;
+                    case "/d":
+                        DebugMode = true;
+                        break;
+                }
             }
 
-            string AppVersion = "0.46.2";
+            string AppVersion = "0.50.2";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
+            initDirs();
+
+            registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode,tokenID = tokenSwitch};
+            Boolean legacy = false; //Defaults to legacy STATUS codes
+            client.setPath( AppPath);
+            if (client.loginAgent())
+            {
+                Console.WriteLine("Logged in to server");
+            }
 
             updateClass updater = new updateClass
             {
@@ -149,21 +171,11 @@ namespace hashtopussy
                 parentPath = AppPath,
                 arguments = args,
                 connectURL = serverURL,
-                debugFlag = DebugMode
-                
+                debugFlag = DebugMode,
+                tokenID = client.tokenID
+
             };
             updater.runUpdate();
-
-            initDirs();
-
-            registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode };
-            Boolean legacy = true; //Defaults to legacy STATUS codes
-            client.setPath( AppPath);
-            if (client.loginAgent())
-            {
-                Console.WriteLine("Logged in to server");
-            }
-
             //Run code to self-update
 
             _7zClass zipper = new _7zClass
@@ -178,61 +190,7 @@ namespace hashtopussy
             {
                 Console.WriteLine("Failed to initialize 7zip, proceeding without. \n The client may not be able to extract compressed files");
             }
-            else //We have 7zip, lets check for HC update since that is zipped
-            {
 
-                hashcatUpdateClass hcUpdater = new hashcatUpdateClass {debugFlag = DebugMode, client = client, AppPath = AppPath,sevenZip = zipper};
-
-                if (hcUpdater.updateHashcat())
-                {
-                    hashcatClass hcClass = new hashcatClass { };
-                    hcClass.setDirs(AppPath, client.osID);
-                    string[] versionInts = {} ;
-                    string hcVersion = hcClass.getVersion2(ref versionInts);
-                    Console.WriteLine("Hashcat version {0} found", hcVersion);
-
-                    if (hcVersion.Length != 0)
-                    {
-                        if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
-                        {
-                            if (hcVersion.Contains("-"))
-                            {
-                                legacy = false;
-                                //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
-                            }
-                        }
-                        else if (Convert.ToInt32(versionInts[0]) == 3)
-                        {
-                            if (Convert.ToInt32(versionInts[1].Substring(0, 1)) >= 6)
-                            {
-                                legacy = false;
-                                //This is a release build above 3.6.0
-                            }
-                        }
-                        else if (Convert.ToInt32(versionInts[0]) >= 4)
-                        {
-                            legacy = false;
-                            //This is a release build above 4.0.0
-                        }
-                    }
-                    else
-                    {
-                        //For some reason we couldn't read the version, lets just assume we are on non legacy
-                        legacy = false;
-                    }
-
-                }
-                else
-                {
-                    Console.WriteLine("Could not locate hashcat binary");
-                    Console.WriteLine("You can manually download and extract hashcat");
-                    Console.WriteLine("Client will now terminate");
-                    {
-                        Environment.Exit(0);
-                    }
-                }
-
-            }
 
             taskClass tasks = new taskClass
             {
