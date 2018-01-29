@@ -33,3 +33,4 @@ class Download:
                     sys.stdout.write("\rDownloading: [%s%s]" % ('=' * done, ' ' * (50 - done)))
                     sys.stdout.flush()
         sys.stdout.write("\n")
+        return True
