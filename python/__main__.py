@@ -93,8 +93,7 @@ def loop():
                 # some error must have occurred on benchmarking
                 continue
             # send result of benchmark
-            query = dict_sendBenchmark.copy()
-            query['token']  = CONFIG.get_value('token')
+            query = copyAndSetToken(dict_sendBenchmark, CONFIG.get_value('token'))
             query['taskId'] = task.get_task()['taskId']
             query['result'] = result
             req = JsonRequest(query)

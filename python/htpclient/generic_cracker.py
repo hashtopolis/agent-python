@@ -7,6 +7,7 @@ from htpclient.config import Config
 from htpclient.generic_status import GenericStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
+from htpclient.dicts import *
 
 
 class GenericCracker:
@@ -76,10 +77,15 @@ class GenericCracker:
                                     else:
                                         new_cracks.append(crack)
                                 cracks = new_cracks
-                            req = JsonRequest({'action': 'sendProgress', 'token': self.config.get_value('token'),
-                                               'chunkId': chunk['chunkId'], 'keyspaceProgress': chunk['skip'],
-                                               'relativeProgress': progress, 'speed': speed,
-                                               'state': (4 if progress == 10000 else 2), 'cracks': cracks})
+
+                            query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
+                            query['chunkId'] = chunk['chunkId']
+                            query['keyspaceProgress'] = chunk['skip']
+                            query['relativeProgress'] = progress
+                            query['speed'] = speed
+                            query['state'] = (4 if progress == 10000 else 2)
+                            query['cracks'] = cracks
+                            req = JsonRequest(query)
 
                             logging.debug("Sending " + str(len(cracks)) + " cracks...")
                             ans = req.execute()
@@ -139,12 +145,18 @@ class GenericCracker:
                 if status.is_valid():
                     last_valid_status = status
             if last_valid_status is None:
-                req = JsonRequest({'action': 'clientError', 'taskId': task['taskId'], 'token': self.config.get_value('token'), 'message': "Generic benchmark failed!"})
+                query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
+                query['taskId'] = task['taskId']
+                query['message'] = "Generic benchmark failed!"
+                req = JsonRequest(query)
                 req.execute()
                 return 0
             return float(last_valid_status.get_progress()) / 10000
         else:
-            req = JsonRequest({'action': 'clientError', 'taskId': task['taskId'], 'token': self.config.get_value('token'), 'message': "Generic benchmark gave no output!"})
+            query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
+            query['taskId'] = task['taskId']
+            query['message'] = "Generic benchmark gave no output!"
+            req = JsonRequest(query)
             req.execute()
         return 0
 

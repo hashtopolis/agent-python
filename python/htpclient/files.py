@@ -7,6 +7,7 @@ from htpclient.config import Config
 from htpclient.download import Download
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
+from htpclient.dicts import *
 
 
 class Files:
@@ -18,8 +19,10 @@ class Files:
         for file in files:
             if os.path.isfile("files/" + file) or os.path.isfile("files/" + file.replace(".7z", ".txt")):
                 continue
-            req = JsonRequest(
-                {'action': 'getFile', 'token': self.config.get_value('token'), 'taskId': task_id, 'file': file})
+            query = copyAndSetToken(ditc_getFile, self.config.get_value('token'))
+            query['taskId'] = task_id
+            query['file'] = file
+            req = JsonRequest(query)
             ans = req.execute()
             if ans is None:
                 logging.error("Failed to get file!")

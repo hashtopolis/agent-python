@@ -8,6 +8,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
+from htpclient.dicts import *
 
 
 class HashcatCracker:
@@ -84,10 +85,14 @@ class HashcatCracker:
                                     else:
                                         new_cracks.append(crack)
                                 cracks = new_cracks
-                            req = JsonRequest({'action': 'sendProgress', 'token': self.config.get_value('token'),
-                                               'chunkId': chunk['chunkId'], 'keyspaceProgress': status.get_curku(),
-                                               'relativeProgress': relative_progress, 'speed': speed,
-                                               'state': status.get_state(), 'cracks': cracks})
+                            query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
+                            query['chunkId'] = chunk['chunkId']
+                            query['keyspaceProgress'] = status.get_curku()
+                            query['relativeProgress'] = relative_progress
+                            query['speed'] = speed
+                            query['state'] = status.get_state()
+                            query['cracks'] = cracks
+                            req = JsonRequest(query)
 
                             logging.debug("Sending " + str(len(cracks)) + " cracks...")
                             ans = req.execute()
@@ -151,7 +156,10 @@ class HashcatCracker:
             for line in error:
                 if len(line) == 0:
                     continue
-                req = JsonRequest({'action': 'clientError', 'taskId': task['taskId'], 'token': self.config.get_value('token'), 'message': line})
+                query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
+                query['taskId'] = task['taskId']
+                query['message'] = line
+                req = JsonRequest(query)
                 req.execute()
             return 0
         if len(output) > 0:

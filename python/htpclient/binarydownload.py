@@ -7,6 +7,7 @@ from htpclient.config import Config
 from htpclient.download import Download
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
+from htpclient.dicts import *
 
 
 class BinaryDownload:
@@ -23,7 +24,9 @@ class BinaryDownload:
     def __check_utils(self):
         path = '7zr' + Initialize.get_os_extension()
         if not os.path.isfile(path):
-            req = JsonRequest({'action': 'downloadBinary', 'type': '7zr', 'token': self.config.get_value('token')})
+            query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
+            query['type'] = '7zr'
+            req = JsonRequest(query)
             ans = req.execute()
             if ans is None:
                 logging.error("Failed to get 7zr!")
@@ -39,7 +42,10 @@ class BinaryDownload:
 
     def check_version(self, crackerId):
         path = "crackers/" + str(crackerId) + "/"
-        req = JsonRequest({'action': 'downloadBinary', 'type': 'cracker', 'token': self.config.get_value('token'), 'binaryVersionId': crackerId})
+        query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
+        query['type'] = 'cracker'
+        query['binaryVersionId'] = crackerId
+        req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
             logging.error("Failed to load cracker`!")

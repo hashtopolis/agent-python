@@ -39,7 +39,9 @@ class Initialize:
         return dict_ext[os]
 
     def __login(self):
-        req = JsonRequest({'action': 'login', 'token': self.config.get_value('token'), 'clientSignature': self.get_version()})
+        query = copyAndSetToken(dict_login, self.config.get_value('token'))
+        query['clientSignature'] = self.get_version()
+        req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
             logging.error("Login failed!")
@@ -100,7 +102,11 @@ class Initialize:
                 line = line.split(":")
                 devices.append(line[1].strip())
 
-        req = JsonRequest({'action': 'updateInformation', 'token': self.config.get_value('token'), 'uid': self.config.get_value('uuid'), 'os': self.get_os(), 'devices': devices})
+        query = copyAndSetToken(dict_updateInformation, self.config.get_value('token'))
+        query['uid'] = self.config.get_value('uuid')
+        query['os']  = self.get_os()
+        query['devices'] =  devices
+        req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
             logging.error("Information update failed!")
@@ -115,7 +121,10 @@ class Initialize:
         if len(self.config.get_value('token')) == 0:
             voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
             name = platform.node()
-            req = JsonRequest({'action': 'register', 'voucher': voucher, 'name': name})
+            query = dict_register.copy()
+            query['voucher'] = voucher
+            query['name'] = name
+            req = JsonRequest(query)
             ans = req.execute()
             if ans is None:
                 logging.error("Request failed!")
@@ -136,7 +145,8 @@ class Initialize:
             self.config.set_value('url', url)
         else:
             return
-        req = JsonRequest({'action': 'testConnection'})
+        query = dict_testConnection.copy()
+        req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
             logging.error("Connection test failed!")

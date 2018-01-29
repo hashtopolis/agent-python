@@ -4,6 +4,7 @@ from time import sleep
 from htpclient.config import Config
 from htpclient.download import Download
 from htpclient.jsonRequest import JsonRequest
+from htpclient.dicts import *
 
 
 class Hashlist:
@@ -12,7 +13,9 @@ class Hashlist:
         self.chunk = None
 
     def load_hashlist(self, hashlist_id):
-        req = JsonRequest({'action':'getHashlist', 'token': self.config.get_value('token'), 'hashlistId': hashlist_id})
+        query = copyAndSetToken(dict_getHashlist, self.config.get_value('token'))
+        query['hashlistId'] = hashlist_id
+        req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
             logging.error("Failed to get hashlist!")

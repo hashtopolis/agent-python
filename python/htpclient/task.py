@@ -3,6 +3,7 @@ from time import sleep
 
 from htpclient.config import Config
 from htpclient.jsonRequest import JsonRequest
+from htpclient.dicts import *
 
 
 class Task:
@@ -19,7 +20,8 @@ class Task:
         if self.taskId != 0:
             return
         self.task = None
-        req = JsonRequest({'action': 'getTask', 'token': self.config.get_value('token')})
+        query = copyAndSetToken(dict_getTask, self.config.get_value('token'))
+        req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
             logging.error("Failed to get task!")
