@@ -96,6 +96,7 @@ class HashcatCracker:
                                 logging.error("Failed to send solve!")
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
+                                proc.kill()
                             else:
                                 cracks_count = len(cracks)
                                 cracks = cracks_backup
