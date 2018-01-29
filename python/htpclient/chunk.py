@@ -40,7 +40,7 @@ class Chunk:
 
     def send_keyspace(self, keyspace, task_id):
         query = copyAndSetToken(dict_sendKeyspace, self.config.get_value('token'))
-        query['taskId'] = taskId
+        query['taskId'] = task_id
         query['keyspace'] = int(keyspace)
         req = JsonRequest(query)
         ans = req.execute()
