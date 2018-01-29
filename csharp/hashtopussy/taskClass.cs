@@ -15,7 +15,7 @@ namespace hashtopussy
         private string cmdpars;
         private Boolean stipPath;
         private string actualHLpath;
-        private int benchTime, hashlistID, taskID, statusTimer, benchMethod;
+        private int benchTime, hashlistID, taskID, statusTimer, benchMethod, crackerId;
         private ArrayList files;
         private string hashlistAlias = "#HL#";
 
@@ -69,28 +69,28 @@ namespace hashtopussy
         {
             public string action { get; set; }
             public string token { get; set; }
-            public int task { get; set; }
+            public int taskId { get; set; }
             public string file { get; set; }
         }
 
 
         private class chunkProps
         {
-            public string action = "chunks";
+            public string action = "getChunk";
             public string token { get; set; }
             public int taskId { get; set; }
         }
 
         private class hashlistProps
         {
-            public string action = "hashes";
+            public string action = "getHashlist";
             public string token { get; set; }
-            public int hashlist { get; set; }
+            public int hashlistId { get; set; }
         }
 
         private class keyspaceProps
         {
-            public string action = "keyspace";
+            public string action = "sendKeyspace";
             public string token { get; set; }
             public int taskId { get; set; }
             public long keyspace { get; set; }
@@ -98,7 +98,7 @@ namespace hashtopussy
 
         private class benchProps
         {
-            public string action = "bench";
+            public string action = "sendBenchmark";
             public string token { get; set; }
             public int taskId { get; set; }
             public string type { get; set; }
@@ -107,20 +107,20 @@ namespace hashtopussy
 
         private class errorProps
         {
-            public string action = "error";
+            public string action = "clientError";
             public string token { get; set; }
-            public int task { get; set; }
+            public int taskId { get; set; }
             public string message { get; set; }
         }
 
         private class solveProps
         {
-            public string action = "solve";
+            public string action = "sendProgress";
             public string token { get; set; }
-            public long chunk { get; set; }
+            public long chunkId { get; set; }
             public double keyspaceProgress { get; set; }
-            public double progress { get; set; }
-            public double total { get; set; }
+            public double relativeProgress { get; set; }
+            //public double total { get; set; }
             public double speed { get; set; }
             public double state { get; set; }
             public List<string> cracks { get; set; }
@@ -136,12 +136,20 @@ namespace hashtopussy
             hashlistProps hProps = new hashlistProps
             {
                 token = client.tokenID,
-                hashlist = inTask
+                hashlistId = inTask
             };
             jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = client.connectURL };
             string jsonString = jsC.toJson(hProps);
             string ret = jsC.jsonSend(jsonString,300); //300 second timeout
 
+            if (jsC.isJsonSuccess(ret))
+            {
+               
+                getURLtoFile(jsC.getRetVar(ret, "url"), actualHLpath);
+            }
+             
+            
+            /*
             //Check if is json string, a nasty workaround copies from the javaclient to detect whether the return string is json vs hl. Should probably use a proper detector
             if (ret[0] != '{' && ret[ret.Length - 1] != '}')
             {
@@ -164,6 +172,7 @@ namespace hashtopussy
                 }
                 
             }
+            */
 
             return true;
         }
@@ -226,7 +235,6 @@ namespace hashtopussy
             List<Packets> singlePacket  = new List<Packets> { };
             int sleepTime = 2500;
             long ulQueue = 0;
-            long lastOfileSize = 0;
             hcClass.debugFlag = debugFlag;
 
             string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
@@ -268,10 +276,16 @@ namespace hashtopussy
                         }
 
                         sProps.token = client.tokenID;
-                        sProps.chunk = chunkNo;
+                        sProps.chunkId = chunkNo;
                         sProps.keyspaceProgress = singlePacket[0].statusPackets["CURKU"];
-                        sProps.progress = singlePacket[0].statusPackets["PROGRESS1"];
-                        sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
+
+
+                        chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
+                        chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart), 4) * 10000;
+
+                        sProps.relativeProgress = chunkPercent;
+
+                        //sProps.total = singlePacket[0].statusPackets["PROGRESS2"];
                         sProps.speed = singlePacket[0].statusPackets["SPEED_TOTAL"];
                         sProps.state = singlePacket[0].statusPackets["STATUS"] - offset; //Client-side workaround for old STATUS on server
 
@@ -337,9 +351,8 @@ namespace hashtopussy
                             Console.WriteLine("Server has instructed the client terminate the task via stop");
                         }
 
-                        chunkStart = Math.Floor(singlePacket[0].statusPackets["PROGRESS2"]) / (skip + length) * skip;
-                        chunkPercent = Math.Round((Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS1"]) - chunkStart) / Convert.ToDouble(singlePacket[0].statusPackets["PROGRESS2"] - chunkStart) ,4)* 100;
 
+                        chunkPercent = chunkPercent / 100; //We already calculated with * 10000 earlier
 
                         receivedZaps = jsC.getRetList(ret, "zaps"); //Check whether the server sent out hashes to zap
                         if (receivedZaps.Count > 0)
@@ -424,7 +437,7 @@ namespace hashtopussy
             Console.WriteLine("Getting chunk...");
              chunkProps cProps = new chunkProps
             {
-                action = "chunk",
+                action = "getChunk",
                 token = client.tokenID,
                 taskId = inTask
             };
@@ -455,13 +468,13 @@ namespace hashtopussy
 
                         hcClass.setArgs(attackcmdMod); 
 
-                        chunkNo = Convert.ToInt64(jsC.getRetVar(ret, "chunk"));
+                        chunkNo = Convert.ToInt64(jsC.getRetVar(ret, "chunkId"));
                         skip = Convert.ToInt64(jsC.getRetVar(ret, "skip"));
                         length = Convert.ToInt64(jsC.getRetVar(ret, "length"));
 
                         List<Packets> uploadPackets = new List<Packets>();
 
-                        hcClass.setDirs(appPath,client.osID);
+                        hcClass.setDirs(appPath);
                         hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString(),debugFlag); 
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
@@ -473,7 +486,7 @@ namespace hashtopussy
                         return 1;
 
                     case "keyspace_required":
-                        hcClass.setDirs(appPath,client.osID);
+                        hcClass.setDirs(appPath);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, ""); //Remove out the #HL#
                         hcClass.setArgs(attackcmdMod);
@@ -487,7 +500,7 @@ namespace hashtopussy
                             errorProps eProps = new errorProps
                             {
                                 token = client.tokenID,
-                                task = taskID,
+                                taskId = taskID,
                                 message = "Invalid keyspace, keyspace probably too small for this hashtype"
                             };
                             jsonString = jsC.toJson(eProps);
@@ -513,14 +526,28 @@ namespace hashtopussy
                         return 0;
 
                     case "benchmark":
-                        hcClass.setDirs(appPath, client.osID);
+                        hcClass.setDirs(appPath);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\""); //Add the path to Hashlist
                         hcClass.setArgs(attackcmdMod);
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
 
-                        hcClass.runBenchmark(benchMethod, benchTime, ref collection,legacy);
+                        if(!hcClass.runBenchmark(benchMethod, benchTime, ref collection, legacy))
+                        {
+                            Console.WriteLine("Benchmark error, perhaps hashlist is empty");
+                            errorProps eProps = new errorProps
+                            {
+                                token = client.tokenID,
+                                taskId = taskID,
+                                message = "Client received an invalid hashlist for benchmark"
+                            };
+                            jsonString = jsC.toJson(eProps);
+                            ret = jsC.jsonSend(jsonString);
+
+                            return 0;
+
+                        }
 
                         benchProps bProps = new benchProps
                         {
@@ -558,54 +585,6 @@ namespace hashtopussy
                         }
                         return 3;
 
-                    case "hashcat_update":
-                        Console.WriteLine("A new version of hashcat was found, updating...");
-                        hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip };
-                        if (hcUpdater.updateHashcat())
-                        {
-                            hashcatClass hcClass = new hashcatClass {debugFlag = debugFlag};
-                            hcClass.setDirs(appPath, client.osID);
-                            string[] versionInts = { };
-                            string hcVersion = hcClass.getVersion2(ref versionInts);
-                            Console.WriteLine("Hashcat version {0} found", hcVersion);
-
-
-                            if (hcVersion.Length != 0)
-                            {
-                                if (Convert.ToInt32(versionInts[0]) == 3 && Convert.ToInt32(versionInts[1]) == 6)
-                                {
-                                    if (hcVersion.Contains("-"))
-                                    {
-                                        legacy = false;
-                                        //This is most likely a beta/custom build with commits ahead of 3.6.0 release branch
-                                    }
-                                }
-                                else if (Convert.ToInt32(versionInts[0]) == 3)
-                                {
-                                    if (Convert.ToInt32(versionInts[1].Substring(0, 1)) >= 6)
-                                    {
-                                        legacy = false;
-                                        //This is a release build above 3.6.0
-                                    }
-                                }
-                                else if (Convert.ToInt32(versionInts[0]) >= 4)
-                                {
-                                    legacy = false;
-                                    //This is a release build above 4.0.0
-                                }
-                            }
-                            else
-                            {
-                                //For some reason we couldn't read the version, lets just assume we are on non legacy
-                                legacy = false;
-                            }
-                            setOffset();
-                        }
-                        else
-                        {
-                            Console.WriteLine("Update failed");
-                        }
-                        return 4;
                     }    
 
             }
@@ -616,9 +595,9 @@ namespace hashtopussy
         {
             FileProps get = new FileProps
             {
-                action = "file",
+                action = "getFile",
                 token = client.tokenID,
-                task = taskID,
+                taskId = taskID,
                 file = fileName
             };
 
@@ -643,6 +622,24 @@ namespace hashtopussy
             return false;
         }
 
+        private Boolean getURLtoFile(string url, string dst)
+        {
+            {
+                downloadClass dlHdl = new downloadClass();
+                string dlFrom = Path.Combine(prefixServerdl, url);
+                string dlTo = Path.Combine(filepath, dst);
+                dlHdl.DownloadFile(dlFrom, dlTo);
+                Console.WriteLine("Finished downloading file");
+                //Check if file exists. check if return success
+                if (File.Exists(dlTo))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         private Int64 fileSize(string filePath)
         {
@@ -657,7 +654,7 @@ namespace hashtopussy
             Console.WriteLine("Getting task");
             Task get = new Task
             {
-                action = "task",
+                action = "getTask",
                 token = client.tokenID
             };
 
@@ -665,19 +662,18 @@ namespace hashtopussy
             string jsonString = jsC.toJson(get);
             string   ret = jsC.jsonSend(jsonString);
 
-
-
             if (jsC.isJsonSuccess(ret))
             {
-                if (jsC.getRetVar(ret, "task") != "NONE")
+                if (jsC.getRetVar(ret, "taskId") != null)
                 {
-                    taskID = Int32.Parse(jsC.getRetVar(ret, "task"));
+                    taskID = Int32.Parse(jsC.getRetVar(ret, "taskId"));
                     attackcmd = (jsC.getRetVar(ret, "attackcmd"));
                     cmdpars = (jsC.getRetVar(ret, "cmdpars"));
-                    hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlist"));
+                    hashlistID = Int32.Parse(jsC.getRetVar(ret, "hashlistId"));
                     benchTime = Int32.Parse(jsC.getRetVar(ret, "bench"));
+                    crackerId = Int32.Parse(jsC.getRetVar(ret, "crackerId"));
 
-                    Console.WriteLine("Server has assigned client with Task:{0} and Hashlist:{1}",taskID,hashlistID);
+                    Console.WriteLine("Server has assigned client with Task:{0}, Cracker:{2} and Hashlist:{1}",taskID,hashlistID,crackerId);
                     if (jsC.getRetVar(ret, "benchType") == "run")
                     {
                         benchMethod = 1;
@@ -746,6 +742,29 @@ namespace hashtopussy
                         Console.WriteLine("Hashlist is 0 bytes");
                         return false;
                     }
+
+                    //Check if we have the correct cracker if not we download
+
+                    hashcatUpdateClass hcUpdater = new hashcatUpdateClass { debugFlag = debugFlag, client = client, AppPath = appPath, sevenZip = sevenZip, binaryVersionId = Int32.Parse(jsC.getRetVar(ret, "crackerId"))};
+                    
+                    //If the cracker did not successfully initliaze then throw error and report
+                    if (!hcUpdater.updateCracker())
+                    {
+                        errorProps eProps = new errorProps
+                        {
+                            token = client.tokenID,
+                            taskId = taskID,
+                            message = "Client could not locate cracker"
+                        };
+                        jsonString = jsC.toJson(eProps);
+                        ret = jsC.jsonSend(jsonString);
+                        return false;
+                    }
+
+                    //The client may change per task, we need to update these after the update
+                    hcClass.hcDirectory = client.crackerPath;
+                    hcClass.hcBinary = client.crackerBinary;
+
                     gotChunk = getChunk(taskID);
 
                     while (gotChunk != 0)

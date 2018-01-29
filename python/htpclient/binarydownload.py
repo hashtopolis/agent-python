@@ -59,13 +59,19 @@ class BinaryDownload:
             self.last_version = ans
             if not os.path.isdir(path):
                 # we need to download the 7zip
-                Download.download(ans['url'], "crackers/" + str(crackerId) + ".7z")
-                os.system("7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(crackerId) + ".7z")
-                os.unlink("crackers/" + str(crackerId) + ".7z")
+                if not Download.download(ans['url'], "crackers/" + str(cracker_id) + ".7z"):
+                    logging.error("Download of cracker binary failed!")
+                    sleep(5)
+                    return False
+                if Initialize.get_os() == 1:
+                    os.system("7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(cracker_id) + ".7z")
+                else:
+                    os.system("./7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(cracker_id) + ".7z")
+                os.unlink("crackers/" + str(cracker_id) + ".7z")
                 for name in os.listdir("crackers/temp"):
                     if os.path.isdir("crackers/temp/" + name):
-                        os.rename("crackers/temp/" + name, "crackers/" + str(crackerId))
+                        os.rename("crackers/temp/" + name, "crackers/" + str(cracker_id))
                     else:
-                        os.rename("crackers/temp", "crackers/" + str(crackerId))
+                        os.rename("crackers/temp", "crackers/" + str(cracker_id))
                         break
         return True

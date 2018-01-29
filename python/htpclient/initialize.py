@@ -68,7 +68,11 @@ class Initialize:
                 if len(line) == 0:
                     continue
                 devices.append(line.replace("Model name:", "").strip("\r\n "))
-            output = subprocess.check_output("lspci | grep 'VGA compatible controller'", shell=True)
+            try:
+                output = subprocess.check_output("lspci | grep 'VGA compatible controller'", shell=True)
+            except subprocess.CalledProcessError:
+                # we silently ignore this case on machines where lspci is not present or architecture has no pci bus
+                output = b""
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
                 if len(line) == 0:
@@ -119,7 +123,11 @@ class Initialize:
 
     def __check_token(self):
         if len(self.config.get_value('token')) == 0:
-            voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
+            if len(self.config.get_value('voucher')) > 0:
+                # voucher is set in config and can be used to autoregister
+                voucher = self.config.get_value('voucher')
+            else:
+                voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
             name = platform.node()
             query = dict_register.copy()
             query['voucher'] = voucher
@@ -134,6 +142,7 @@ class Initialize:
                 self.__check_token()
             else:
                 token = ans['token']
+                self.config.set_value('voucher', '')
                 self.config.set_value('token', token)
                 logging.info("Successfully registered!")
 

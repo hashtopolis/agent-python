@@ -10,6 +10,13 @@ class Download:
     def download(url, output):
         if Initialize.get_os() == 1:
             output = output.replace("/", '\\')
+
+        # Check header
+        head = requests.head(url)
+        # not sure if we only should allow 200, but then it's present for sure
+        if head.status_code != 200:
+            return False
+
         with open(output, "wb") as file:
             response = requests.get(url, stream=True)
             total_length = response.headers.get('Content-Length')
@@ -25,4 +32,5 @@ class Download:
                     done = int(50 * dl / total_length)
                     sys.stdout.write("\rDownloading: [%s%s]" % ('=' * done, ' ' * (50 - done)))
                     sys.stdout.flush()
-        print('')
+        sys.stdout.write("\n")
+        return True

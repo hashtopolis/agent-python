@@ -63,6 +63,7 @@ def loop():
                 task_change = True
         if not binaryDownload.check_version(task.get_task()['crackerId']):
             task_change = True
+            task.reset_task()
             continue
         if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
             task_change = True

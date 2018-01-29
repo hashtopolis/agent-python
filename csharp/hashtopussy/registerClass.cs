@@ -12,6 +12,8 @@ public class registerClass
     public int osID { get; set; }
     public string connectURL { get; set; }
     public Boolean debugFlag { set; get; }
+    public string crackerPath { set; get; }
+    public string crackerBinary { set; get; }
 
     //Suppress P/Invoke warning my using NativeMethods
     internal static class NativeMethods
@@ -81,23 +83,111 @@ public class registerClass
         public string action { get; set; }
         public string voucher { get; set; }
         public string name { get; set; }
+    }
+
+    private class UpdateClient
+    {
+        public string action { get; set; }
+        public string token { get; set; }
         public string uid { get; set; }
         public int os { get; set; }
-        public IList<string> gpus { get; set; }
+        public IList<string> devices { get; set; }
     }
+
 
     private bool registerAgent(string iVoucher)
     {
         jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
+        string machineName = "default";
+        setOS();
+
+        if (osID == 1) //Windows
+        {
+            machineName = System.Environment.MachineName;
+        }
+        else if (osID == 0) //Linux
+        {
+            ProcessStartInfo pinfo = new ProcessStartInfo();
+            pinfo = new ProcessStartInfo();
+            pinfo.FileName = "uname";
+            pinfo.Arguments = "-n";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardOutput = true;
+            Process uname = new Process();
+            uname.StartInfo = pinfo;
+            uname.Start();
+            while (!uname.HasExited)
+            {
+                while (!uname.StandardOutput.EndOfStream)
+                {
+                    string stdOut = uname.StandardOutput.ReadLine();
+                    machineName = stdOut;
+                }
+            }
+        }
+        else if (osID == 2) //Mac
+        {
+            //Get Machine Name (Mac)
+            ProcessStartInfo pinfo = new ProcessStartInfo();
+            pinfo.FileName = "scutil";
+            pinfo.Arguments = " --get ComputerName";
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardError = true;
+            pinfo.RedirectStandardOutput = true;
+
+            Process getMachineName = new Process();
+            getMachineName.StartInfo = pinfo;
+            getMachineName.Start();
+            while (!getMachineName.HasExited)
+            {
+                while (!getMachineName.StandardOutput.EndOfStream)
+                {
+                    string stdOut = getMachineName.StandardOutput.ReadLine();
+                    machineName = stdOut;
+                }
+            }
+            
+        }
+
+        Register regist = new Register
+        {
+            action = "register",
+            voucher = iVoucher,
+            name = machineName,
+        };
+
+        string jsonString = jsC.toJson(regist);
+        string ret = jsC.jsonSend(jsonString);
+
+        String guid = Guid.NewGuid().ToString(); //Generate GUID
+
+        if (jsC.isJsonSuccess(ret))
+        {
+            tokenID = jsC.getRetVar(ret, "token");
+            File.WriteAllText(tokenPath, tokenID);
+
+            updateAgentInformation();
+
+            return true;
+        }
+        return false;
+
+    }
+
+
+
+    private bool updateAgentInformation()
+    {
+        Console.WriteLine("Sending server client information");
+        jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
 
         setOS();
 
-        string machineName = "default";
 
-        List<string> gpuList;
+        List<string> deviceList;
         string CPUModel = "";
 
-        gpuList = new List<string> { };
+        deviceList = new List<string> { };
 
         if (osID == 1)
         {
@@ -106,17 +196,16 @@ public class registerClass
             //Get Devices (Windows)
             foreach (ManagementObject mo in searcher.Get())
             {
-                gpuList.Add(mo.Properties["Description"].Value.ToString().Trim());
+                deviceList.Add(mo.Properties["Description"].Value.ToString().Trim());
             }
 
             //Get CPU (Windows)
             searcher = new ManagementObjectSearcher("SELECT Name from Win32_Processor"); //Prep object to query windows CPUs
             foreach (ManagementObject mo in searcher.Get())
             {
-                gpuList.Add(mo.Properties["Name"].Value.ToString());
+                deviceList.Add(mo.Properties["Name"].Value.ToString().Trim());
             }
-            //Get Machine Name (Windows)
-            machineName = System.Environment.MachineName;
+
         }
         else if(osID ==  0)
         {
@@ -138,7 +227,7 @@ public class registerClass
                     int pozi = stdOut.IndexOf(searchString);
                     if (pozi != -1)
                     {
-                        gpuList.Add(stdOut.Substring(pozi + searchString.Length));
+                        deviceList.Add(stdOut.Substring(pozi + searchString.Length));
                     }
                 }
             }
@@ -158,25 +247,8 @@ public class registerClass
                     int pos = stdOut.IndexOf(searchString);
                     if (pos != -1)
                     {
-                        gpuList.Add(stdOut.Substring(pos + searchString.Length));
+                        deviceList.Add(stdOut.Substring(pos + searchString.Length));
                     }
-                }
-            }
-            //Get Machine Name (Linux)
-            pinfo = new ProcessStartInfo();
-            pinfo.FileName = "uname";
-            pinfo.Arguments = "-n";
-            pinfo.UseShellExecute = false;
-            pinfo.RedirectStandardOutput = true;
-            Process uname = new Process();
-            uname.StartInfo = pinfo;
-            uname.Start();
-            while (!uname.HasExited)
-            {
-                while (!uname.StandardOutput.EndOfStream)
-                {
-                    string stdOut = uname.StandardOutput.ReadLine();
-                    machineName = stdOut;
                 }
             }
         }
@@ -190,17 +262,6 @@ public class registerClass
             pinfo.RedirectStandardError = true;
             pinfo.RedirectStandardOutput = true;
 
-            Process getMachineName = new Process();
-            getMachineName.StartInfo = pinfo;
-            getMachineName.Start();
-            while (!getMachineName.HasExited)
-            {
-                while (!getMachineName.StandardOutput.EndOfStream)
-                {
-                    string stdOut = getMachineName.StandardOutput.ReadLine();
-                    machineName = stdOut;
-                }
-            }
 
             //Get Devices (Mac)
             pinfo.FileName = "system_profiler";
@@ -236,7 +297,7 @@ public class registerClass
                         if (searchID == "Chipset Model: ")
                         {
 
-                            gpuList.Add(stdOut.Substring(pos + searchID.Length));
+                            deviceList.Add(stdOut.Substring(pos + searchID.Length));
 
                         }
                         else if (searchID == "Processor Name: ")
@@ -247,7 +308,7 @@ public class registerClass
                         else if (searchID == "Processor Speed: ")
                         {
                             CPUModel = CPUModel + " @ " + stdOut.Substring(pos + searchID.Length);
-                            gpuList.Add(CPUModel);
+                            deviceList.Add(CPUModel);
                             break; 
                         }
                     }
@@ -266,23 +327,20 @@ public class registerClass
 
         String guid = Guid.NewGuid().ToString(); //Generate GUID
 
-        Register regist = new Register
-            {
-                action = "register",
-                voucher = iVoucher,
-                name = machineName,
+        UpdateClient update = new UpdateClient
+        {
+                action = "updateInformation",
+                token = tokenID,
                 uid = guid,
-                os = osID, 
-                gpus = gpuList
-            };
+                os = osID,
+                devices = deviceList
+        };
 
-            string jsonString = jsC.toJson(regist);
+            string jsonString = jsC.toJson(update);
             string ret = jsC.jsonSend(jsonString);
 
             if (jsC.isJsonSuccess(ret))
             {
-                tokenID = jsC.getRetVar(ret,"token");
-                File.WriteAllText(tokenPath, tokenID);
                 return true;
             }
             return false;
@@ -309,6 +367,7 @@ public class registerClass
             var arrayKey = new Dictionary<string, string>
                {
                    { "action", "login" },
+                   { "clientSignature", "generic-csharp"},
                    { "token",tokenID},
             };
             
@@ -317,6 +376,8 @@ public class registerClass
 
             if (jsC.isJsonSuccess(ret))
             {
+
+                updateAgentInformation();
                 return true;
             }
             else
@@ -336,20 +397,25 @@ public class registerClass
 
     public bool loadToken()
     {
-        if (File.Exists(tokenPath))
+
+        if (tokenID == "")
         {
-            tokenID = File.ReadAllText(tokenPath);
-            if (tokenID == "")
+            if (File.Exists(tokenPath))
             {
-                File.Delete(tokenPath);
+                tokenID = File.ReadAllText(tokenPath);
+                if (tokenID == "")
+                {
+                    File.Delete(tokenPath);
+                    return false;
+                }
+            }
+            else
+            {
                 return false;
             }
+            setOS();
         }
-        else
-        {
-            return false;
-        }
-        setOS();
+
         return true;
     }
 

@@ -19,18 +19,19 @@ namespace hashtopussy
         public string[] arguments { set; get; }
         public string connectURL { get; set; }
         public Boolean debugFlag { set; get; }
-
+        public string tokenID { get; set; }
 
         private string launcherProcName = "HTPLauncherUpd.exe";
 
 
         private class updProps
         {
-            public string action = "update";
+            public string action = "checkClientVersion";
             public string version { get; set; }
             public string type = "csharp";
+            public string token  { get; set; }
 
-        }
+    }
 
         public void setParent(string strParentProc)
         {
@@ -92,7 +93,8 @@ namespace hashtopussy
                 Console.WriteLine("Checking for client updates");
                 updProps uProps = new updProps
                 {
-                    version = htpVersion
+                    version = htpVersion,
+                    token = tokenID
                 };
 
                 jsonClass jsC = new jsonClass { debugFlag = debugFlag, connectURL = connectURL };
@@ -130,6 +132,11 @@ namespace hashtopussy
                         Spawn.Start();
                         Environment.Exit(0);
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Exiting agnet");
+                    Environment.Exit(0);
                 }
 
                 
