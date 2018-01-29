@@ -25,7 +25,7 @@ class HashcatCracker:
         args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopussy"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
-        args += " --outfile-check-dir=hashlist_" + str(task['hashlistId'])
+        args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
         args += " --remove-timer=" + str(task['statustimer'])
         args += " --separator=" + ":"  # TODO what kind of separator we need?
         args += " -s " + str(chunk['skip'])
