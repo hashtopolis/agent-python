@@ -4,10 +4,12 @@ import subprocess
 from queue import Queue, Empty
 from threading import Thread
 
+import time
+
 from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
-from htpclient.jsonRequest import JsonRequest
+from htpclient.jsonRequest import JsonRequest, os
 from htpclient.helpers import printSpeed
 
 
@@ -96,7 +98,7 @@ class HashcatCracker:
                                 logging.error("Failed to send solve!")
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
-                                proc.kill()
+                                proc.kill() # TODO kill process
                             else:
                                 cracks_count = len(cracks)
                                 cracks = cracks_backup
@@ -104,7 +106,9 @@ class HashcatCracker:
                                 if len(zaps) > 0:
                                     logging.debug("Writing zaps")
                                     zap_output = '\n'.join(zaps) + '\n'
-                                    f = open("hashlist_" + str(task['hashlistId']), 'a')
+                                    if not os.path.isdir("hashlist_" + str(task['hashlistId'])):
+                                        os.mkdir("hashlist_" + str(task['hashlistId']))
+                                    f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Speed: " + printSpeed(speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
