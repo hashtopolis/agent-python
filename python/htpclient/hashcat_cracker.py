@@ -8,6 +8,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
+from htpclient.helpers import printSpeed
 
 
 class HashcatCracker:
@@ -103,9 +104,9 @@ class HashcatCracker:
                                     logging.debug("Writing zaps")
                                     zap_output = '\n'.join(zaps) + '\n'
                                     f = open("hashlist_" + str(task['hashlistId']), 'a')
-                                    f.write(zap_output.encode())
+                                    f.write(zap_output)
                                     f.close()
-                                logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
+                                logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Speed: " + printSpeed(speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                     else:
                         # hacky solution to exclude warnings from hashcat
                         if str(line[0]) not in string.printable:
