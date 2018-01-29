@@ -2,7 +2,7 @@ import string
 import logging
 import subprocess
 from queue import Queue, Empty
-from threading import Thread
+from threading import Thread, Lock
 
 import time
 
@@ -20,6 +20,7 @@ class HashcatCracker:
         self.io_q = Queue()
         self.callPath = "../crackers/" + str(cracker_id) + "/" + binary_download.get_version()['executable']
         self.executable_name = binary_download.get_version()['executable']
+        self.lock = Lock()
 
     def run_chunk(self, task, chunk):
         args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopussy"
@@ -75,6 +76,7 @@ class HashcatCracker:
                         speed = status.get_speed()
                         initial = True
                         while len(cracks) > 0 or initial:
+                            self.lock.aquire()
                             initial = False
                             cracks_backup = []
                             if len(cracks) > 1000:
@@ -117,13 +119,16 @@ class HashcatCracker:
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str("{:6.2f}".format(relative_progress/100)) + "% Speed: " + printSpeed(speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
+                            self.lock.release()
                     else:
                         # hacky solution to exclude warnings from hashcat
                         if str(line[0]) not in string.printable:
                             continue
                         line = line.decode()
                         if ":" in line:
+                            self.lock.aquire()
                             cracks.append(line.strip())
+                            self.lock.release()
                         else:
                             pass
                             # logging.warning("HCOUT: " + line.strip())
