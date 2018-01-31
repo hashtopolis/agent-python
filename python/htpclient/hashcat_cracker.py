@@ -10,7 +10,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed
+from htpclient.helpers import printSpeed, send_error
 from htpclient.dicts import *
 
 
@@ -151,7 +151,12 @@ class HashcatCracker:
         full_cmd = self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "")
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+        try:
+            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+        except subprocess.CalledProcessError:
+            logging.error("Error during keyspace measure")
+            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            return
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
