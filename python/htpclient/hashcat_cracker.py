@@ -40,6 +40,9 @@ class HashcatCracker:
         # clear old found file
         if os.path.exists("hashlists/" + str(task['hashlistId']) + ".out"):
             os.remove("hashlists/" + str(task['hashlistId']) + ".out")
+        # create zap folder
+        if not os.path.exists("hashlist_" + str(task['hashlistId'])):
+            os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
 
@@ -57,9 +60,10 @@ class HashcatCracker:
 
         # wait for all threads to finish
         proc.wait()
+        crk_thread.join()
         out_thread.join()
         err_thread.join()
-        crk_thread.join()
+        main_thread.join()
         logging.info("finished chunk")
 
     def run_loop(self, proc, chunk, task):
@@ -85,6 +89,8 @@ class HashcatCracker:
                             status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
                         initial = True
+                        if status.get_state() == 5:
+                            time.sleep(1)  # we wait for a second so all output is loaded from file
                         while len(self.cracks) > 0 or initial:
                             self.lock.acquire()
                             initial = False
@@ -123,8 +129,6 @@ class HashcatCracker:
                                 if len(zaps) > 0:
                                     logging.debug("Writing zaps")
                                     zap_output = '\n'.join(zaps) + '\n'
-                                    if not os.path.isdir("hashlist_" + str(task['hashlistId'])):
-                                        os.mkdir("hashlist_" + str(task['hashlistId']))
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()
@@ -214,15 +218,18 @@ class HashcatCracker:
             if proc.poll() is not None:
                 return
         file = open(file_path)
+        end_count = 0
         while 1:
             where = file.tell()
             line = file.readline()
             if not line:
                 if proc.poll() is None:
-                    time.sleep(1)
+                    time.sleep(0.05)
                     file.seek(where)
                 else:
-                    break
+                    end_count += 1
+                    if end_count > 2:
+                        break
             else:
                 self.lock.acquire()
                 self.cracks.append(line.strip())
