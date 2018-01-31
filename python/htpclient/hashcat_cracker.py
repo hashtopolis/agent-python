@@ -227,7 +227,7 @@ class HashcatCracker:
                     file.seek(where)
                 else:
                     end_count += 1
-                    if end_count > 2:
+                    if end_count > 20:
                         break
             else:
                 self.lock.acquire()
