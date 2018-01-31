@@ -40,11 +40,11 @@ class BinaryDownload:
                 Download.download(ans['executable'], path)
                 os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
-    def check_version(self, crackerId):
-        path = "crackers/" + str(crackerId) + "/"
+    def check_version(self, cracker_id):
+        path = "crackers/" + str(cracker_id) + "/"
         query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'cracker'
-        query['binaryVersionId'] = crackerId
+        query['binaryVersionId'] = cracker_id
         req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
