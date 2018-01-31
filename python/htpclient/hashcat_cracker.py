@@ -30,7 +30,6 @@ class HashcatCracker:
         args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         args += " --remove-timer=" + str(task['statustimer'])
-        args += " --separator=" + ":"  # TODO what kind of separator we need?
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
