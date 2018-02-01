@@ -121,6 +121,10 @@ class HashcatCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                                 proc.kill()  # TODO kill process
+                            elif ans['agent'] == 'stop':
+                                # server set agent to stop
+                                logging.info("Received stop order from server!")
+                                proc.kill()
                             else:
                                 cracks_count = len(self.cracks)
                                 self.cracks = cracks_backup
