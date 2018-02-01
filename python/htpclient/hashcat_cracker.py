@@ -170,6 +170,8 @@ class HashcatCracker:
         chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
+        # TODO: Distinguish between speed and runtime benchmark
+
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
         args += " --restore-disable --potfile-disable --session=hashtopussy "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
