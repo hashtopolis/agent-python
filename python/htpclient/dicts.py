@@ -26,7 +26,7 @@ dict_sendBenchmark = MappingProxyType(
     {'action': 'sendBenchmark',
      'token':  '',
      'taskId': '',
-     'type':   'run',
+     'type':   '',
      'result': ''})
 
 dict_downloadBinary = MappingProxyType(

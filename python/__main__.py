@@ -97,6 +97,7 @@ def loop():
             query = copyAndSetToken(dict_sendBenchmark, CONFIG.get_value('token'))
             query['taskId'] = task.get_task()['taskId']
             query['result'] = result
+            query['type'] = task.get_task()['benchType']
             req = JsonRequest(query)
             ans = req.execute()
             if ans is None:

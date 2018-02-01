@@ -121,7 +121,7 @@ class HashcatCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                                 proc.kill()  # TODO kill process
-                            elif ans['agent'] == 'stop':
+                            elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
                                 proc.kill()
@@ -170,7 +170,9 @@ class HashcatCracker:
         chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
-        # TODO: Distinguish between speed and runtime benchmark
+        if task['benchType'] == 'speed':
+            # do a speed benchmark
+            return self.run_speed_benchmark(task)
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
         args += " --restore-disable --potfile-disable --session=hashtopussy "
@@ -221,6 +223,33 @@ class HashcatCracker:
 
         if not stream.closed:
             stream.close()
+
+    def run_speed_benchmark(self, task):
+        args = " --machine-readable --quiet --progress-only"
+        args += " --restore-disable --potfile-disable --session=hashtopussy "
+        args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        full_cmd = self.callPath + args
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        try:
+            logging.debug("CALL: " + full_cmd)
+            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+        except subprocess.CalledProcessError as e:
+            logging.error("Error during keyspace measure, return code: " + str(e.returncode))
+            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            return 0
+        output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+        sum = [0, 0]
+        for line in output:
+            if len(line) == 0:
+                continue
+            line = line.split(":")
+            if len(line) != 3:
+                continue
+            sum[0] += int(line[1])
+            sum[1] += float(line[2])
+        return str(sum[0]) + ":" + str(sum[1])
 
     def output_watcher(self, file_path, proc):
         while not os.path.exists(file_path):
