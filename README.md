@@ -3,8 +3,8 @@
 Official agents for using the distributed hashcracker [Hashtopussy](https://github.com/s3inlc/hashtopussy).
 
 Currently available agents:
-- C# (working)
-- Python (working with future version 0.5.0)
+- [C#](csharp) (working)
+- [Python](python) (working with future version 0.5.0)
 
 ## Protocol Documentation
 
