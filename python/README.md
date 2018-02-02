@@ -19,7 +19,7 @@ wget/curl.
 To run the agent you simply need to call `python3 hashtopussy.zip`. There are no command line options accepted, all 
 settings/configurations are done via the config file, described in the following section.
 
-Please not that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
+Please note that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
 
 ### Config
 
@@ -46,7 +46,7 @@ Optional you can manually set the `debug` property to display more information o
 
 ## Hashcat Compatibility
 
-The list contains all Hashcat version with which the client was tested and is able to work with (other versions might work):
+The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
 * 4.0.1
 * 4.0.0
