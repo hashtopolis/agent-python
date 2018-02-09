@@ -50,10 +50,9 @@ namespace hashtopussy
             }
         }
 
-        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, string passSeparator,Boolean debugging)
+        public void setPassthrough(ref List<Packets> refPacketlist, ref object objpacketLock, Boolean debugging)
         {
             passedPackets = refPacketlist;
-            separator = passSeparator;
             packetLock = objpacketLock;
 
             crackedLock = new object();
@@ -560,7 +559,7 @@ namespace hashtopussy
 
 
 
-        public Boolean startAttack(long chunk, long taskID, long skip, long size, string separator, long interval, string taskPath)
+        public Boolean startAttack(long chunk, long taskID, long skip, long size, long interval, string taskPath)
         {
 
             string oPath = Path.Combine(taskPath, taskID + "_" + chunk + ".txt"); // Path to write th -o file
@@ -572,7 +571,7 @@ namespace hashtopussy
             ProcessStartInfo pInfo = new ProcessStartInfo();
 
             pInfo.FileName = Path.Combine(hcDir, hcBin);
-            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval + " --separator=" + separator + " -s " + skip + " -l " + size;
+            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval +  " -s " + skip + " -l " + size;
             pInfo.WorkingDirectory = filesDir;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;

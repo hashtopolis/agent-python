@@ -93,7 +93,6 @@ namespace hashtopussy
                 }
                 client.crackerBinary = jsonUpd.getRetVar(ret, "executable");
                 client.crackerPath = Path.Combine(AppPath, crackerName, binaryVersionId.ToString());
-
             }
 
       

@@ -20,8 +20,7 @@ namespace hashtopussy
         private string hashlistAlias = "#HL#";
 
         private string prefixServerdl = "";
-        public static char separator = ':';
-
+    
         private long chunkNo, skip, length;
         private string filepath, hashpath, appPath, zapPath, tasksPath;
 
@@ -475,12 +474,12 @@ namespace hashtopussy
                         List<Packets> uploadPackets = new List<Packets>();
 
                         hcClass.setDirs(appPath);
-                        hcClass.setPassthrough(ref uploadPackets, ref packetLock, separator.ToString(),debugFlag); 
+                        hcClass.setPassthrough(ref uploadPackets, ref packetLock, debugFlag); 
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
 
-                        hcClass.startAttack(chunkNo, taskID, skip, length, separator.ToString(), statusTimer, tasksPath); //Start the hashcat binary
+                        hcClass.startAttack(chunkNo, taskID, skip, length, statusTimer, tasksPath); //Start the hashcat binary
                         thread.Join();
                       
                         return 1;
