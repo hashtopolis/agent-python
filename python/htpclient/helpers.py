@@ -19,9 +19,9 @@ def printSpeed(speed):
          3: "G",
          4: "T"})
     exponent = 0
-    while speed > 1024:
+    while speed > 1000:
         exponent += 1
-        speed = float(speed) / 1024
+        speed = float(speed) / 1000
     return str("{:6.2f}".format(speed)) + prefixes[exponent] + "H/s"
 
 
