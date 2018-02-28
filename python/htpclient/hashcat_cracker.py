@@ -27,7 +27,7 @@ class HashcatCracker:
         self.last_update = 0
 
     def run_chunk(self, task, chunk):
-        args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopussy"
+        args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
@@ -194,7 +194,7 @@ class HashcatCracker:
             return self.run_speed_benchmark(task)
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
-        args += " --restore-disable --potfile-disable --session=hashtopussy "
+        args += " --restore-disable --potfile-disable --session=hashtopolis "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
@@ -245,7 +245,7 @@ class HashcatCracker:
 
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
-        args += " --restore-disable --potfile-disable --session=hashtopussy "
+        args += " --restore-disable --potfile-disable --session=hashtopolis "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
