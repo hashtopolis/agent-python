@@ -24,12 +24,13 @@ def init():
     logfile  = 'client.log'
     loglevel = logging.INFO
 
+    logging.getLogger("requests").setLevel(logging.WARNING)
+
     CONFIG = Config()
     if CONFIG.get_value('debug'):
         loglevel = logging.DEBUG
+        logging.getLogger("requests").setLevel(logging.DEBUG)
     logging.basicConfig(filename=logfile, level=loglevel, format=logformat, datefmt=dateformat)
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.ERROR)
     logging.getLogger().addHandler(logging.StreamHandler())
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
