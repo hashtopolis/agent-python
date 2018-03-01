@@ -19,7 +19,7 @@ binaryDownload = None
 
 def init():
     global CONFIG, binaryDownload
-    logformat  = '[%(asctime)s] %(message)s'
+    logformat  = '[%(asctime)s] [%(levelname)-5s] %(message)s'
     dateformat = '%d.%m.%Y %H:%M:%S'
     logfile  = 'client.log'
     loglevel = logging.INFO
