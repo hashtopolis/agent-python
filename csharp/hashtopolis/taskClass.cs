@@ -235,7 +235,10 @@ namespace hashtopolis
             int sleepTime = 2500;
             long ulQueue = 0;
             hcClass.debugFlag = debugFlag;
+            Boolean firstRun = true;
+            
 
+            
             string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
 
             while (run)
@@ -259,7 +262,29 @@ namespace hashtopolis
                     }
                 }
 
+                if (firstRun == true) //This is a work around to send a server a dummy stat to prevent timeouts on the initial start
+                {
+                    sProps.token = client.tokenID;
+                    sProps.chunkId = chunkNo;
+                    sProps.keyspaceProgress = skip;
 
+
+                    sProps.relativeProgress = 0;
+
+                    sProps.speed = 0;
+                    sProps.state = 3; //Can't find the status code list lets try 3
+
+                    jsonString = jsC.toJson(sProps);
+                    ret = jsC.jsonSend(jsonString);
+
+                    if (!jsC.isJsonSuccess(ret)) //If we received error, eg task was removed just break
+                    {
+                        break;
+                    }
+                    firstRun = false;
+
+
+                }
                 if (singlePacket.Count == 0)
                 {
                     continue;
