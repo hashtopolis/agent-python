@@ -4,7 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace hashtopussy
+namespace hashtopolis
 {
     class taskClass
     {

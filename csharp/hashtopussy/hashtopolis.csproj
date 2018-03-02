@@ -7,8 +7,8 @@
     <ProjectGuid>{199AD37B-3000-4CC0-992C-87738F84C768}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>hashtopussy</RootNamespace>
-    <AssemblyName>hashtopussy</AssemblyName>
+    <RootNamespace>hashtopolis</RootNamespace>
+    <AssemblyName>hashtopolis</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -4,7 +4,7 @@ using System.Threading;
 using System.IO;
 
 
-namespace hashtopussy
+namespace hashtopolis
 {
 
 
@@ -58,7 +58,7 @@ namespace hashtopussy
                 //Looks like user isn't using custom name, use the default one
                 if (string.IsNullOrEmpty(parentProc))
                 {
-                    parentProc = "hashtopussy.exe";
+                    parentProc = "hashtopolis.exe";
                 }
 
                 waitForProcess(parentProc);

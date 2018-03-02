@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace hashtopussy
+namespace hashtopolis
 {
     class hashcatClass : IDisposable
     {
@@ -227,7 +227,7 @@ namespace hashtopussy
             {
                 suffixExtra = " --progress-only";
             }
-            string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopussy ";
+            string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopolis ";
 
             if (legacy) //--weak was removed post HC 3.6, don't issue this command
             {
@@ -432,7 +432,7 @@ namespace hashtopussy
             Console.WriteLine("Server has requested the client measure the keyspace for this task");
 
             string stdOutSingle = "";
-            string suffixArgs = " --session=hashtopussy --keyspace --quiet";
+            string suffixArgs = " --session=hashtopolis --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName =  Path.Combine(hcDirectory, hcBinary);
             pInfo.WorkingDirectory = filesDir;
@@ -571,7 +571,7 @@ namespace hashtopussy
             ProcessStartInfo pInfo = new ProcessStartInfo();
 
             pInfo.FileName = Path.Combine(hcDir, hcBin);
-            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopussy --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval +  " -s " + skip + " -l " + size;
+            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopolis --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval +  " -s " + skip + " -l " + size;
             pInfo.WorkingDirectory = filesDir;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;

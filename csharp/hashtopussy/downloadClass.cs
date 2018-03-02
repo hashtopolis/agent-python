@@ -5,7 +5,7 @@ using System.Threading;
 using System.IO;
 using System.ComponentModel;
 
-namespace hashtopussy
+namespace hashtopolis
 {
     class downloadClass
     {

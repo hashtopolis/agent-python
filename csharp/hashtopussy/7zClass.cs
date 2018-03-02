@@ -3,7 +3,7 @@ using System.IO;
 using System.Diagnostics;
 
 
-namespace hashtopussy
+namespace hashtopolis
 {
 
     class _7zClass
