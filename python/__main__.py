@@ -19,17 +19,19 @@ binaryDownload = None
 
 def init():
     global CONFIG, binaryDownload
+    logformat  = '[%(asctime)s] [%(levelname)-5s] %(message)s'
+    dateformat = '%d.%m.%Y %H:%M:%S'
+    logfile  = 'client.log'
+    loglevel = logging.INFO
 
-    # TODO: fix logging style
+    logging.getLogger("requests").setLevel(logging.WARNING)
+
     CONFIG = Config()
     if CONFIG.get_value('debug'):
-        logging.basicConfig(filename='client.log', level=logging.DEBUG)
-    else:
-        logging.basicConfig(filename='client.log', level=logging.INFO)
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.ERROR)
+        loglevel = logging.DEBUG
+        logging.getLogger("requests").setLevel(logging.DEBUG)
+    logging.basicConfig(filename=logfile, level=loglevel, format=logformat, datefmt=dateformat)
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.basicConfig(format='[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 

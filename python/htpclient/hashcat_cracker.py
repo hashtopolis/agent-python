@@ -1,3 +1,4 @@
+import signal
 import string
 import logging
 import subprocess
@@ -22,9 +23,11 @@ class HashcatCracker:
         self.executable_name = binary_download.get_version()['executable']
         self.lock = Lock()
         self.cracks = []
+        self.first_status = False
+        self.last_update = 0
 
     def run_chunk(self, task, chunk):
-        args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopussy"
+        args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
@@ -53,6 +56,8 @@ class HashcatCracker:
         out_thread.start()
         err_thread.start()
         crk_thread.start()
+        self.first_status = False
+        self.last_update = time.time()
 
         main_thread = Thread(target=self.run_loop, name='run_loop', args=(proc, chunk, task))
         main_thread.start()
@@ -70,6 +75,19 @@ class HashcatCracker:
         while True:
             try:
                 # Block for 1 second.
+                if not self.first_status and self.last_update < time.time() - 5:
+                    # send update
+                    query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
+                    query['chunkId'] = chunk['chunkId']
+                    query['keyspaceProgress'] = chunk['skip']
+                    query['relativeProgress'] = 0
+                    query['speed'] = 0
+                    query['state'] = 2
+                    query['cracks'] = []
+                    req = JsonRequest(query)
+                    logging.info("Sending keepalive progress to avoid timeout...")
+                    req.execute()
+                    self.last_update = time.time()
                 item = self.io_q.get(True, 1)
             except Empty:
                 # No output in either streams for a second. Are we done?
@@ -81,6 +99,7 @@ class HashcatCracker:
                 if identifier == 'OUT':
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
+                        self.first_status = True
                         # send update to server
                         chunk_start = int(
                             status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
@@ -120,11 +139,11 @@ class HashcatCracker:
                                 logging.error("Failed to send solve!")
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
-                                proc.kill()  # TODO kill process
+                                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
-                                proc.kill()
+                                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
                             else:
                                 cracks_count = len(self.cracks)
                                 self.cracks = cracks_backup
@@ -175,7 +194,7 @@ class HashcatCracker:
             return self.run_speed_benchmark(task)
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
-        args += " --restore-disable --potfile-disable --session=hashtopussy "
+        args += " --restore-disable --potfile-disable --session=hashtopolis "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
@@ -226,7 +245,7 @@ class HashcatCracker:
 
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
-        args += " --restore-disable --potfile-disable --session=hashtopussy "
+        args += " --restore-disable --potfile-disable --session=hashtopolis "
         args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args

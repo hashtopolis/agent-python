@@ -15,7 +15,7 @@ class Initialize:
 
     @staticmethod
     def get_version():
-        return "s3-python-0.1.0-alpha"
+        return "s3-python-0.1.1"
 
     def run(self):
         self.__check_url()
@@ -149,7 +149,7 @@ class Initialize:
     def __check_url(self):
         if len(self.config.get_value('url')) == 0:
             # ask for url
-            url = input("Please enter the url to the API of your Hashtopussy installation:\n").strip()
+            url = input("Please enter the url to the API of your Hashtopolis installation:\n").strip()
             logging.debug("Setting url to: " + url)
             self.config.set_value('url', url)
         else:

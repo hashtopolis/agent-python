@@ -1,6 +1,6 @@
-# Hashtopussy Python Agent
+# Hashtopolis Python Agent
 
-This Hashtopussy agent is only compatible with Hashtopussy versions 0.5.0 and higher.
+This Hashtopolis agent is only compatible with Hashtopolis versions 0.5.0 and higher.
 
 ## Prerequisites
 
@@ -11,12 +11,12 @@ Following python packages are required:
 
 ## Manual
 
-You can either download the agent from the Hashtopussy new agent page or you can use the url shown there to download the agent with 
+You can either download the agent from the Hashtopolis new agent page or you can use the url shown there to download the agent with 
 wget/curl.
 
 ### Run
 
-To run the agent you simply need to call `python3 hashtopussy.zip`. There are no command line options accepted, all 
+To run the agent you simply need to call `python3 hashtopolis.zip`. There are no command line options accepted, all 
 settings/configurations are done via the config file, described in the following section.
 
 Please note that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
@@ -53,4 +53,4 @@ The list contains all Hashcat versions with which the client was tested and is a
 
 ## Generic Crackers
 
-This client is able to run generic Hashtopussy cracker binaries which fulfill the minimal functionality requirements, described [here](https://github.com/s3inlc/hashtopussy/tree/master/doc/README.md). An example implementation can be found [here](https://github.com/s3inlc/hashtopussy-generic-cracker)
+This client is able to run generic Hashtopolis cracker binaries which fulfill the minimal functionality requirements, described [here](https://github.com/s3inlc/hashtopolis/tree/master/doc/README.md). An example implementation can be found [here](https://github.com/s3inlc/hashtopolis-generic-cracker)
