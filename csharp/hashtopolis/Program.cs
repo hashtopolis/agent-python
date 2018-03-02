@@ -139,13 +139,13 @@ namespace hashtopolis
                 switch (arg.Substring(0, 2))
                 {
                
-                    case "/t":
+                    case "-t":
                         tokenSwitch = arg.Substring(3);
                         break;
-                    case "/u":
+                    case "-u":
                         serverURL = arg.Substring(3);
                         break;
-                    case "/d":
+                    case "-d":
                         DebugMode = true;
                         break;
                 }
