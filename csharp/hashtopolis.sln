@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hashtopolis", "hashtopussy\hashtopolis.csproj", "{199AD37B-3000-4CC0-992C-87738F84C768}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hashtopolis", "hashtopolis\hashtopolis.csproj", "{199AD37B-3000-4CC0-992C-87738F84C768}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
