@@ -36,4 +36,5 @@ def send_error(error, token, task_id):
     query = copyAndSetToken(dict_clientError, token)
     query['message'] = error
     query['taskId'] = task_id
-    JsonRequest(query)
+    req = JsonRequest(query)
+    req.execute()

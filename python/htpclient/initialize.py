@@ -15,7 +15,7 @@ class Initialize:
 
     @staticmethod
     def get_version():
-        return "s3-python-0.1.1"
+        return "s3-python-0.1.2"
 
     def run(self):
         self.__check_url()
