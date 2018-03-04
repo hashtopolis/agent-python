@@ -20,7 +20,6 @@ namespace hashtopolis
         private string filesDir = "";
         private string hcDir = "hashcat";
         private string hcBin = "hashcat64.exe";
-        private string separator = "";
         public string hcDirectory { get; set; }
         public string hcBinary { get; set; }
 
@@ -502,17 +501,14 @@ namespace hashtopolis
             if (!string.IsNullOrEmpty(stdOut))
             {
                 
-                if (stdOut.Contains(separator)) //Is a hit
+        
+                if (stdOut.StartsWith("Hashfile"))
                 {
-
-                    if (stdOut.StartsWith("Hashfile"))
+                    if (!stdOut.Contains("Line-length exception"))
                     {
-                        if (!stdOut.Contains("Line-length exception"))
+                        lock (crackedLock)
                         {
-                            lock (crackedLock)
-                            {
-                                hashlist.Add(stdOut);
-                            }
+                            hashlist.Add(stdOut);
                         }
                     }
                     else
@@ -522,9 +518,8 @@ namespace hashtopolis
                             hashlist.Add(stdOut);
                         }
                     }
-
-                    
                 }
+
                 else //Is a status output
                 {
 
@@ -571,7 +566,7 @@ namespace hashtopolis
             ProcessStartInfo pInfo = new ProcessStartInfo();
 
             pInfo.FileName = Path.Combine(hcDir, hcBin);
-            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopolis --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval +  " -s " + skip + " -l " + size;
+            pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopolis --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval  + " -s " + skip + " -l " + size;
             pInfo.WorkingDirectory = filesDir;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
