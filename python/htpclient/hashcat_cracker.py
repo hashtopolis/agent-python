@@ -19,10 +19,10 @@ class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
         self.io_q = Queue()
-        self.callPath = "../crackers/" + str(cracker_id) + "/" + binary_download.get_version()['executable']
         self.executable_name = binary_download.get_version()['executable']
         k = self.executable_name.rfind(".")
         self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
+        self.callPath = "../crackers/" + str(cracker_id) + "/" + self.executable_name
         self.lock = Lock()
         self.cracks = []
         self.first_status = False

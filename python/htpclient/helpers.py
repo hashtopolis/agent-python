@@ -27,7 +27,9 @@ def printSpeed(speed):
 
 
 def get_bit():
-    return struct.calcsize('P') * 8 == 64
+    if struct.calcsize('P') * 8 == 64:
+        return "64"
+    return "32"
 
 
 def send_error(error, token, task_id):
