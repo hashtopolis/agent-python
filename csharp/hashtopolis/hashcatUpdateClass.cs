@@ -96,7 +96,7 @@ namespace hashtopolis
             }
 
       
-            if (File.Exists(Path.Combine(client.crackerPath, client.crackerBinary)))
+            if (Directory.Exists(client.crackerPath))
             {
                 return true;
             }
