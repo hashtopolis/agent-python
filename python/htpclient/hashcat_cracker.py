@@ -11,7 +11,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed, send_error
+from htpclient.helpers import printSpeed, send_error, get_bit
 from htpclient.dicts import *
 
 
@@ -21,6 +21,8 @@ class HashcatCracker:
         self.io_q = Queue()
         self.callPath = "../crackers/" + str(cracker_id) + "/" + binary_download.get_version()['executable']
         self.executable_name = binary_download.get_version()['executable']
+        k = self.executable_name.rfind(".")
+        self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
         self.lock = Lock()
         self.cracks = []
         self.first_status = False

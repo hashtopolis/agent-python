@@ -1,6 +1,7 @@
 import sys
 import logging
 from types import MappingProxyType
+import struct
 
 from htpclient.dicts import copyAndSetToken, dict_clientError
 from htpclient.jsonRequest import JsonRequest
@@ -23,6 +24,10 @@ def printSpeed(speed):
         exponent += 1
         speed = float(speed) / 1000
     return str("{:6.2f}".format(speed)) + prefixes[exponent] + "H/s"
+
+
+def get_bit():
+    return struct.calcsize('P') * 8 == 64
 
 
 def send_error(error, token, task_id):
