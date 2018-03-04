@@ -31,7 +31,7 @@ class Initialize:
             return dict_os[os]
         except:
             logging.debug("OS: %s" % os)
-            logErrorAndExit("It seems your operating system is not supported.")
+            log_error_and_exit("It seems your operating system is not supported.")
 
     @staticmethod
     def get_os_extension():
@@ -108,8 +108,8 @@ class Initialize:
 
         query = copyAndSetToken(dict_updateInformation, self.config.get_value('token'))
         query['uid'] = self.config.get_value('uuid')
-        query['os']  = self.get_os()
-        query['devices'] =  devices
+        query['os'] = self.get_os()
+        query['devices'] = devices
         req = JsonRequest(query)
         ans = req.execute()
         if ans is None:

@@ -7,12 +7,12 @@ from htpclient.dicts import copyAndSetToken, dict_clientError
 from htpclient.jsonRequest import JsonRequest
 
 
-def logErrorAndExit(message):
+def log_error_and_exit(message):
     logging.error(message)
     sys.exit(1)
 
 
-def printSpeed(speed):
+def print_speed(speed):
     prefixes = MappingProxyType(
         {0: "",
          1: "k",

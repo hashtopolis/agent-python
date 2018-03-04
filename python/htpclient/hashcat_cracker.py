@@ -11,7 +11,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed, send_error, get_bit
+from htpclient.helpers import print_speed, send_error, get_bit
 from htpclient.dicts import *
 
 
@@ -157,7 +157,7 @@ class HashcatCracker:
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str(
-                                    "{:6.2f}".format(relative_progress / 100)) + "% Speed: " + printSpeed(
+                                    "{:6.2f}".format(relative_progress / 100)) + "% Speed: " + print_speed(
                                     speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(
                                     ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                             self.lock.release()
