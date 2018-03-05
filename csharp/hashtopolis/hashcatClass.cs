@@ -166,9 +166,6 @@ namespace hashtopolis
                         collection.Add("PROGRESS_REJ", Math.Round((collection["PROGRESS1"]-collection["REJECTED"]) / collection["PROGRESS2"], 15)); //Total progress value
                         i += 1;
                         break;
-                    default:
-                        i += 1;
-                        break;
                     
                 }
                 i += 1;
