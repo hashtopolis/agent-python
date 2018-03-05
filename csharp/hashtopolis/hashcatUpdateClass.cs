@@ -92,7 +92,7 @@ namespace hashtopolis
                     Console.WriteLine("Client already exists, skipping download");
                 }
                 client.crackerBinary = jsonUpd.getRetVar(ret, "executable");
-                client.crackerPath = Path.Combine(AppPath, crackerName, binaryVersionId.ToString());
+                client.crackerPath = Path.Combine(AppPath, crackerName.ToLower(), binaryVersionId.ToString());
             }
 
       
