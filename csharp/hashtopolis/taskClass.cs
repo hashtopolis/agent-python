@@ -582,15 +582,8 @@ namespace hashtopolis
                         if (benchMethod == 1) //Old benchmark method using actual run
                         {
                             bProps.type = "run";
-                            if (collection.ContainsKey("PROGRESS_REJ"))
-                            {
-                                bProps.result = collection["PROGRESS_REJ"].ToString("0." + new string('#', 100));
-                            }
-                            else
-                            {
-                                bProps.result = collection["PROGRESS_DIV"].ToString("0." + new string('#', 100));
+                            bProps.result = collection["PROGRESS_REJ"].ToString("0." + new string('#', 100));
 
-                            }
                         }
                         else //New benchmark method using --speed param
                         {
