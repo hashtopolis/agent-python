@@ -167,8 +167,9 @@ class HashcatCracker:
                             pass
                             # logging.warning("HCOUT: " + line.strip())
                 else:
-                    logging.error("HCERR: " + str(line).strip())
-                    # TODO: send error and abort cracking
+                    logging.error("HC error: " + str(line).strip())
+                    msg = str(line).strip()
+                    send_error(msg, self.config.get_value('token'), task['taskId'])
 
     def measure_keyspace(self, task, chunk):
         full_cmd = self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "")
