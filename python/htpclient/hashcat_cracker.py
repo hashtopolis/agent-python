@@ -222,7 +222,7 @@ class HashcatCracker:
                 query['message'] = line
                 req = JsonRequest(query)
                 req.execute()
-            return 0
+            # return 0  it might not be ideal to return here.  In case of errors still try to read the benchmark.
         if len(output) > 0:
             output = output.replace(b"\r\n", b"\n").decode('utf-8')
             output = output.split('\n')
