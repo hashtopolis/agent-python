@@ -36,5 +36,8 @@ class Files:
                 Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "files/" + file)
                 if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile("files/" + file.replace(".7z", ".txt")):
                     # extract if needed
-                    os.system("7zr" + Initialize.get_os_extension() + " x -ofiles/ files/" + file)
+                    if Initialize.get_os() != 1:
+                        os.system("./7zr" + Initialize.get_os_extension() + " x -ofiles/ files/" + file)
+                    else:
+                        os.system("7zr" + Initialize.get_os_extension() + " x -ofiles/ files/" + file)
         return True
