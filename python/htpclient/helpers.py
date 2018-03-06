@@ -2,6 +2,8 @@ import sys
 import logging
 from types import MappingProxyType
 
+import os
+
 from htpclient.dicts import copyAndSetToken, dict_clientError
 from htpclient.jsonRequest import JsonRequest
 
@@ -30,3 +32,16 @@ def send_error(error, token, task_id):
     query['message'] = error
     query['taskId'] = task_id
     JsonRequest(query)
+
+
+def update_files(command):
+    split = command.split(" ")
+    ret = []
+    for part in split:
+        # test if file exists
+        path = "files/" + part
+        if os.path.exists(path):
+            ret.append("../" + path)
+        else:
+            ret.append(part)
+    return " ".join(ret)

@@ -11,7 +11,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed, send_error
+from htpclient.helpers import printSpeed, send_error, update_files
 from htpclient.dicts import *
 
 
@@ -35,7 +35,7 @@ class HashcatCracker:
         args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -46,14 +46,12 @@ class HashcatCracker:
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files',
-                                preexec_fn=os.setsid)
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files', preexec_fn=os.setsid)
 
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
         err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
-        crk_thread = Thread(target=self.output_watcher, name='crack-watcher',
-                            args=("hashlists/" + str(task['hashlistId']) + ".out", proc))
+        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=("hashlists/" + str(task['hashlistId']) + ".out", proc))
         out_thread.start()
         err_thread.start()
         crk_thread.start()
@@ -102,10 +100,8 @@ class HashcatCracker:
                     if status.is_valid():
                         self.first_status = True
                         # send update to server
-                        chunk_start = int(
-                            status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
-                        relative_progress = int((status.get_progress() - chunk_start) / float(
-                            status.get_progress_total() - chunk_start) * 10000)
+                        chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
+                        relative_progress = int((status.get_progress() - chunk_start) / float(status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
                         initial = True
                         if status.get_state() == 5:
@@ -179,7 +175,7 @@ class HashcatCracker:
                     send_error(msg, self.config.get_value('token'), task['taskId'])
 
     def measure_keyspace(self, task, chunk):
-        full_cmd = self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "")
+        full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "")
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
@@ -203,7 +199,7 @@ class HashcatCracker:
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
@@ -240,8 +236,7 @@ class HashcatCracker:
                     last_valid_status = status
             if last_valid_status is None:
                 return 0
-            return (last_valid_status.get_progress() - last_valid_status.get_rejected()) / float(
-                last_valid_status.get_progress_total())
+            return (last_valid_status.get_progress() - last_valid_status.get_rejected()) / float(last_valid_status.get_progress_total())
         return 0
 
     def stream_watcher(self, identifier, stream):
@@ -254,7 +249,7 @@ class HashcatCracker:
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
         args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
