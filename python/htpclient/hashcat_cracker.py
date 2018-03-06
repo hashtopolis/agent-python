@@ -11,7 +11,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed, send_error, update_files
+from htpclient.helpers import printSpeed, send_error, update_files, kill_hashcat
 from htpclient.dicts import *
 
 
@@ -48,7 +48,10 @@ class HashcatCracker:
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
+        if Initialize.get_os() != 1:
+            proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
+        else:
+            proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
 
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
@@ -139,14 +142,14 @@ class HashcatCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                                 try:
-                                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                    kill_hashcat(proc.pid)
                                 except ProcessLookupError:
                                     pass
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
                                 try:
-                                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                    kill_hashcat(proc.pid)
                                 except ProcessLookupError:
                                     pass
                             else:

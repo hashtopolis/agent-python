@@ -1,3 +1,4 @@
+import signal
 import sys
 import logging
 from types import MappingProxyType
@@ -5,6 +6,7 @@ from types import MappingProxyType
 import os
 
 from htpclient.dicts import copyAndSetToken, dict_clientError
+from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 
 
@@ -25,6 +27,13 @@ def printSpeed(speed):
         exponent += 1
         speed = float(speed) / 1000
     return str("{:6.2f}".format(speed)) + prefixes[exponent] + "H/s"
+
+
+def kill_hashcat(pid):
+    if Initialize.get_os() != 1:
+        os.killpg(os.getpgid(pid), signal.SIGTERM)
+    else:
+        os.subprocess.check_output("TASKKILL /F /PID {pid} /T".format(pid=pid))
 
 
 def send_error(error, token, task_id):
