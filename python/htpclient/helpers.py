@@ -43,7 +43,7 @@ def update_files(command):
             continue
         path = "files/" + part
         if os.path.exists(path):
-            ret.append("../" + path)
+            ret.append("../../" + path)
         else:
             ret.append(part)
     return " ".join(ret)
