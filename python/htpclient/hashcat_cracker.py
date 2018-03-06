@@ -1,4 +1,3 @@
-import signal
 import string
 import logging
 import subprocess
