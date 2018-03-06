@@ -19,8 +19,8 @@ class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
         self.io_q = Queue()
-        self.callPath = "../crackers/" + str(cracker_id) + "/" + binary_download.get_version()['executable']
-        self.executable_name = binary_download.get_version()['executable']
+        self.cracker_path = "../crackers/" + str(cracker_id) + "/"
+        self.callPath = binary_download.get_version()['executable']
         self.lock = Lock()
         self.cracks = []
         self.first_status = False
@@ -31,11 +31,11 @@ class HashcatCracker:
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
-        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -46,7 +46,7 @@ class HashcatCracker:
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files', preexec_fn=os.setsid)
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
 
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
@@ -199,13 +199,13 @@ class HashcatCracker:
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
         output, error = proc.communicate()
         logging.debug("started benchmark")
         proc.wait()  # wait until done
@@ -249,14 +249,14 @@ class HashcatCracker:
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
             logging.debug("CALL: " + full_cmd)
-            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+            output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measure, return code: " + str(e.returncode))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
