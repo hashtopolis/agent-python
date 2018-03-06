@@ -39,6 +39,8 @@ def update_files(command):
     ret = []
     for part in split:
         # test if file exists
+        if len(part) == 0:
+            continue
         path = "files/" + part
         if os.path.exists(path):
             ret.append("../" + path)
