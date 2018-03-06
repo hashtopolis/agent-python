@@ -48,7 +48,8 @@ class HashcatCracker:
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files',
+                                preexec_fn=os.setsid)
 
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
@@ -141,11 +142,17 @@ class HashcatCracker:
                                 logging.error("Failed to send solve!")
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
-                                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                try:
+                                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                except ProcessLookupError:
+                                    pass
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
-                                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                try:
+                                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                except ProcessLookupError:
+                                    pass
                             else:
                                 cracks_count = len(self.cracks)
                                 self.cracks = cracks_backup
@@ -169,8 +176,9 @@ class HashcatCracker:
                             pass
                             # logging.warning("HCOUT: " + line.strip())
                 else:
-                    logging.error("HCERR: " + str(line).strip())
-                    # TODO: send error and abort cracking
+                    logging.error("HC error: " + str(line).strip())
+                    msg = str(line).strip()
+                    send_error(msg, self.config.get_value('token'), task['taskId'])
 
     def measure_keyspace(self, task, chunk):
         full_cmd = self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "")

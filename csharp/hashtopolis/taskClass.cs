@@ -268,12 +268,13 @@ namespace hashtopolis
                     sProps.chunkId = chunkNo;
                     sProps.keyspaceProgress = skip;
 
-
                     sProps.relativeProgress = 0;
 
                     sProps.speed = 0;
                     sProps.state = 3; //Can't find the status code list lets try 3
-
+   
+                    sProps.cracks = new List<string>();
+                    
                     jsonString = jsC.toJson(sProps);
                     ret = jsC.jsonSend(jsonString);
 
@@ -282,9 +283,8 @@ namespace hashtopolis
                         break;
                     }
                     firstRun = false;
-
-
                 }
+
                 if (singlePacket.Count == 0)
                 {
                     continue;
@@ -582,15 +582,8 @@ namespace hashtopolis
                         if (benchMethod == 1) //Old benchmark method using actual run
                         {
                             bProps.type = "run";
-                            if (collection.ContainsKey("PROGRESS_REJ"))
-                            {
-                                bProps.result = collection["PROGRESS_REJ"].ToString("0." + new string('#', 100));
-                            }
-                            else
-                            {
-                                bProps.result = collection["PROGRESS_DIV"].ToString("0." + new string('#', 100));
+                            bProps.result = collection["PROGRESS_REJ"].ToString("0." + new string('#', 100));
 
-                            }
                         }
                         else //New benchmark method using --speed param
                         {
