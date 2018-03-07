@@ -1,6 +1,10 @@
+import signal
 import sys
 import logging
 from types import MappingProxyType
+
+import os
+import subprocess
 
 from htpclient.dicts import copyAndSetToken, dict_clientError
 from htpclient.jsonRequest import JsonRequest
@@ -25,8 +29,30 @@ def printSpeed(speed):
     return str("{:6.2f}".format(speed)) + prefixes[exponent] + "H/s"
 
 
+def kill_hashcat(pid, get_os):
+    if get_os != 1:
+        os.killpg(os.getpgid(pid), signal.SIGTERM)
+    else:
+        subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=pid))
+
+
 def send_error(error, token, task_id):
     query = copyAndSetToken(dict_clientError, token)
     query['message'] = error
     query['taskId'] = task_id
     JsonRequest(query)
+
+
+def update_files(command):
+    split = command.split(" ")
+    ret = []
+    for part in split:
+        # test if file exists
+        if len(part) == 0:
+            continue
+        path = "files/" + part
+        if os.path.exists(path):
+            ret.append("../../" + path)
+        else:
+            ret.append(part)
+    return " ".join(ret)
