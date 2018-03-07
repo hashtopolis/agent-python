@@ -516,7 +516,11 @@ namespace hashtopolis
                         hcClass.setArgs(attackcmdMod);
                         long calcKeyspace = 0;
 
-                        hcClass.runKeyspace(ref calcKeyspace);
+                        if (!hcClass.runKeyspace(ref calcKeyspace))
+                        {
+                            Console.WriteLine("Keyspace measuring was unsuccessful, check all files are present");
+                            return 0;
+                        }
 
 
                         if (calcKeyspace == 0)
@@ -595,7 +599,7 @@ namespace hashtopolis
                         }
                         catch
                         {
-                            Console.WriteLine("Benchmark was unsuccessful, check all files for cracker is present");
+                            Console.WriteLine("Benchmark was unsuccessful, check all files are present");
                             return 0;
                         }
 
