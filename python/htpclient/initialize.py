@@ -2,8 +2,6 @@ import platform
 import uuid
 from time import sleep
 
-import subprocess
-
 from htpclient.dicts import *
 from htpclient.helpers import *
 from htpclient.jsonRequest import *

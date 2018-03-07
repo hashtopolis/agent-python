@@ -10,7 +10,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed, send_error, update_files, kill_hashcat, get_bit
+from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed
 from htpclient.dicts import *
 
 
