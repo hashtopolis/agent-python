@@ -437,6 +437,13 @@ namespace hashtopolis
             string suffixArgs = " --session=hashtopolis --keyspace --quiet";
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName =  Path.Combine(hcDirectory, hcBinary);
+
+            if (!File.Exists(pInfo.FileName))
+            {
+                Console.WriteLine("Could not locate " + pInfo.FileName);
+                return false;
+            }
+
             pInfo.WorkingDirectory = filesDir;
 
 
@@ -569,6 +576,13 @@ namespace hashtopolis
             ProcessStartInfo pInfo = new ProcessStartInfo();
 
             pInfo.FileName = Path.Combine(hcDir, hcBin);
+
+            if (!File.Exists(pInfo.FileName))
+            {
+                Console.WriteLine("Could not locate " + pInfo.FileName);
+                return false;
+            }
+
             pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopolis --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval  + " -s " + skip + " -l " + size;
             pInfo.WorkingDirectory = filesDir;
             pInfo.UseShellExecute = false;
