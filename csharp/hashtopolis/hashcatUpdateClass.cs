@@ -95,9 +95,14 @@ namespace hashtopolis
 
 
                 if (client.is64Bit)
-                    client.crackerBinary.Replace(".", "64.");
+                {
+                    client.crackerBinary = client.crackerBinary.Replace(".", "64.");
+                }
                 else
-                    client.crackerBinary.Replace(".", "32.");
+                {
+                    client.crackerBinary = client.crackerBinary.Replace(".", "32.");
+                }
+                    
 
 
                 client.crackerPath = Path.Combine(AppPath, crackerName.ToLower(), binaryVersionId.ToString());
