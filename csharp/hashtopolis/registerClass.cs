@@ -106,7 +106,7 @@ public class registerClass
             }
             osID = 1;
         }
-        Console.WriteLine(is64Bit);
+
     }
 
     public void setPath(string path)
