@@ -26,5 +26,5 @@ class Hashlist:
             sleep(5)
             return False
         else:
-            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "hashlists/" + str(hashlist_id))
+            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "hashlists/" + str(hashlist_id), True)
             return True

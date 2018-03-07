@@ -92,6 +92,19 @@ namespace hashtopolis
                     Console.WriteLine("Client already exists, skipping download");
                 }
                 client.crackerBinary = jsonUpd.getRetVar(ret, "executable");
+
+
+                if (client.is64Bit)
+                {
+                    client.crackerBinary = client.crackerBinary.Replace(".", "64.");
+                }
+                else
+                {
+                    client.crackerBinary = client.crackerBinary.Replace(".", "32.");
+                }
+                    
+
+
                 client.crackerPath = Path.Combine(AppPath, crackerName.ToLower(), binaryVersionId.ToString());
             }
 

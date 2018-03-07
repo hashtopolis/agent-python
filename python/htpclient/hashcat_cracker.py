@@ -1,4 +1,3 @@
-import signal
 import string
 import logging
 import subprocess
@@ -11,7 +10,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import print_speed, send_error, get_bit
+from htpclient.helpers import printSpeed, send_error, update_files, kill_hashcat, get_bit
 from htpclient.dicts import *
 
 
@@ -22,7 +21,10 @@ class HashcatCracker:
         self.executable_name = binary_download.get_version()['executable']
         k = self.executable_name.rfind(".")
         self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
-        self.callPath = "../crackers/" + str(cracker_id) + "/" + self.executable_name
+        self.cracker_path = "crackers/" + str(cracker_id) + "/"
+        self.callPath = self.executable_name
+        if Initialize.get_os() != 1:
+            self.callPath = "./" + self.callPath
         self.lock = Lock()
         self.cracks = []
         self.first_status = False
@@ -33,11 +35,11 @@ class HashcatCracker:
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
-        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -48,14 +50,15 @@ class HashcatCracker:
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files',
-                                preexec_fn=os.setsid)
+        if Initialize.get_os() != 1:
+            proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
+        else:
+            proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
 
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
         err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
-        crk_thread = Thread(target=self.output_watcher, name='crack-watcher',
-                            args=("hashlists/" + str(task['hashlistId']) + ".out", proc))
+        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=("hashlists/" + str(task['hashlistId']) + ".out", proc))
         out_thread.start()
         err_thread.start()
         crk_thread.start()
@@ -104,10 +107,8 @@ class HashcatCracker:
                     if status.is_valid():
                         self.first_status = True
                         # send update to server
-                        chunk_start = int(
-                            status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
-                        relative_progress = int((status.get_progress() - chunk_start) / float(
-                            status.get_progress_total() - chunk_start) * 10000)
+                        chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
+                        relative_progress = int((status.get_progress() - chunk_start) / float(status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
                         initial = True
                         if status.get_state() == 5:
@@ -143,14 +144,14 @@ class HashcatCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                                 try:
-                                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                    kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
                                 try:
-                                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                                    kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
                             else:
@@ -181,11 +182,11 @@ class HashcatCracker:
                     send_error(msg, self.config.get_value('token'), task['taskId'])
 
     def measure_keyspace(self, task, chunk):
-        full_cmd = self.callPath + " --keyspace --quiet " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "")
+        full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "")
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
-            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+            output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError:
             logging.error("Error during keyspace measure")
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
@@ -205,13 +206,13 @@ class HashcatCracker:
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
         output, error = proc.communicate()
         logging.debug("started benchmark")
         proc.wait()  # wait until done
@@ -228,7 +229,7 @@ class HashcatCracker:
                 query['message'] = line
                 req = JsonRequest(query)
                 req.execute()
-            return 0
+            # return 0  it might not be ideal to return here.  In case of errors still try to read the benchmark.
         if len(output) > 0:
             output = output.replace(b"\r\n", b"\n").decode('utf-8')
             output = output.split('\n')
@@ -242,8 +243,7 @@ class HashcatCracker:
                     last_valid_status = status
             if last_valid_status is None:
                 return 0
-            return (last_valid_status.get_progress() - last_valid_status.get_rejected()) / float(
-                last_valid_status.get_progress_total())
+            return (last_valid_status.get_progress() - last_valid_status.get_rejected()) / float(last_valid_status.get_progress_total())
         return 0
 
     def stream_watcher(self, identifier, stream):
@@ -256,14 +256,14 @@ class HashcatCracker:
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        args += " -o ../hashlists/" + str(task['hashlistId']) + ".out"
+        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
             logging.debug("CALL: " + full_cmd)
-            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+            output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measure, return code: " + str(e.returncode))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
