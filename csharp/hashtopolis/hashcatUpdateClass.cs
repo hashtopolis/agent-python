@@ -95,14 +95,10 @@ namespace hashtopolis
 
 
                 if (client.is64Bit)
-                    client.crackerBinary += "32";
+                    client.crackerBinary.Replace(".", "64.");
                 else
-                    client.crackerBinary += "64";
+                    client.crackerBinary.Replace(".", "32.");
 
-                if (client.osID != 1)
-                    client.crackerBinary += ".bin";
-                else
-                    client.crackerBinary += ".exe";
 
                 client.crackerPath = Path.Combine(AppPath, crackerName.ToLower(), binaryVersionId.ToString());
             }
