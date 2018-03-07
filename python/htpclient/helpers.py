@@ -2,6 +2,7 @@ import signal
 import sys
 import logging
 from types import MappingProxyType
+import struct
 
 import os
 import subprocess
@@ -10,12 +11,12 @@ from htpclient.dicts import copyAndSetToken, dict_clientError
 from htpclient.jsonRequest import JsonRequest
 
 
-def logErrorAndExit(message):
+def log_error_and_exit(message):
     logging.error(message)
     sys.exit(1)
 
 
-def printSpeed(speed):
+def print_speed(speed):
     prefixes = MappingProxyType(
         {0: "",
          1: "k",
@@ -29,6 +30,12 @@ def printSpeed(speed):
     return str("{:6.2f}".format(speed)) + prefixes[exponent] + "H/s"
 
 
+def get_bit():
+    if struct.calcsize('P') * 8 == 64:
+        return "64"
+    return "32"
+
+
 def kill_hashcat(pid, get_os):
     if get_os != 1:
         os.killpg(os.getpgid(pid), signal.SIGTERM)
@@ -40,7 +47,8 @@ def send_error(error, token, task_id):
     query = copyAndSetToken(dict_clientError, token)
     query['message'] = error
     query['taskId'] = task_id
-    JsonRequest(query)
+    req = JsonRequest(query)
+    req.execute()
 
 
 def update_files(command):

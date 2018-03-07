@@ -10,7 +10,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import printSpeed, send_error, update_files, kill_hashcat
+from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed
 from htpclient.dicts import *
 
 
@@ -18,8 +18,11 @@ class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
         self.io_q = Queue()
+        self.executable_name = binary_download.get_version()['executable']
+        k = self.executable_name.rfind(".")
+        self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
         self.cracker_path = "crackers/" + str(cracker_id) + "/"
-        self.callPath = binary_download.get_version()['executable']
+        self.callPath = self.executable_name
         if Initialize.get_os() != 1:
             self.callPath = "./" + self.callPath
         self.lock = Lock()
@@ -162,7 +165,7 @@ class HashcatCracker:
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str(
-                                    "{:6.2f}".format(relative_progress / 100)) + "% Speed: " + printSpeed(
+                                    "{:6.2f}".format(relative_progress / 100)) + "% Speed: " + print_speed(
                                     speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(
                                     ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                             self.lock.release()
