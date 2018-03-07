@@ -10,6 +10,7 @@ public class registerClass
     private string tokenPath;
     public string tokenID { get; set; }
     public int osID { get; set; }
+    public Boolean is64Bit { get; set; }
     public string connectURL { get; set; }
     public Boolean debugFlag { set; get; }
     public string crackerPath { set; get; }
@@ -49,10 +50,33 @@ public class registerClass
         return false;
     }
 
+    //Code to run commands
+    private static string ReadProcessOutput(string procName, string args)
+    {
+        try
+        {
+            Process p = new Process();
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            if (args != null && args != "") p.StartInfo.Arguments = " " + args;
+            p.StartInfo.FileName = procName;
+            p.Start();
+            string output = p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            if (output == null) output = "";
+            output = output.Trim();
+            return output;
+        }
+        catch
+        {
+            return "";
+        }
+    }
 
     //Detect whether we are running under mono
     private void setOS()
     {
+        is64Bit = false; //Default to 32bit unless 64bit detected
         if (Type.GetType("Mono.Runtime") != null)
         {
             if (!IsRunningOnMac())
@@ -65,12 +89,24 @@ public class registerClass
                 Console.WriteLine("System is Mac");
                 osID = 2;
             }
+            string machine = ReadProcessOutput("uname", "-m");
+            if (machine.Contains("x86_64"))
+            {
+                is64Bit = true;
+            }
+
+                
         }
         else
         {
             Console.WriteLine("System is Windows");
+            if (Environment.Is64BitProcess)
+            {
+                is64Bit = true;
+            }
             osID = 1;
         }
+        Console.WriteLine(is64Bit);
     }
 
     public void setPath(string path)
