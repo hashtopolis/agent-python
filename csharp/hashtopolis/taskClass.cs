@@ -488,6 +488,9 @@ namespace hashtopolis
                     case "OK":
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\" "); //Add the path to Hashlist
+
+                        attackcmdMod = convertToRelative(attackcmdMod);
+
                         attackcmdMod += " --outfile-check-dir=\"" + zapPath + hashlistID.ToString() + "\" "; //Add the zap path to the commands
 
                         hcClass.setArgs(attackcmdMod); 
@@ -513,6 +516,9 @@ namespace hashtopolis
                         hcClass.setDirs(appPath);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, ""); //Remove out the #HL#
+
+                        attackcmdMod = convertToRelative(attackcmdMod);
+
                         hcClass.setArgs(attackcmdMod);
                         long calcKeyspace = 0;
 
@@ -557,6 +563,9 @@ namespace hashtopolis
                         hcClass.setDirs(appPath);
                         attackcmdMod = " " + cmdpars + " "; //Reset the argument string
                         attackcmdMod += attackcmd.Replace(hashlistAlias, "\"" + actualHLpath + "\""); //Add the path to Hashlist
+
+                        attackcmdMod = convertToRelative(attackcmdMod);
+
                         hcClass.setArgs(attackcmdMod);
 
                         Dictionary<string, double> collection = new Dictionary<string, double>(); //Holds all the returned benchmark values1
@@ -621,6 +630,32 @@ namespace hashtopolis
             return 0;
         }
 
+        private string convertToRelative(string input)
+        {
+            string[] filename = input.Split(' '); //Split by spaces
+            string final = "";
+
+
+            foreach (var file in filename)
+            {
+                if (File.Exists("files\\" + file))
+                {
+                    final  += "..\\..\\files\\" + file + " ";
+                }
+                else
+                {
+                    final += file + " ";
+                }
+            }
+
+            if (client.osID != 1)
+            {
+                final = final.Replace("\\", "/");
+            }
+
+            return final;
+
+        }
         private Boolean getFile(string fileName)
         {
             FileProps get = new FileProps
