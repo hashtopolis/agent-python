@@ -141,14 +141,14 @@ class HashcatCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                                 try:
-                                    kill_hashcat(proc.pid)
+                                    kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
                                 try:
-                                    kill_hashcat(proc.pid)
+                                    kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
                             else:
