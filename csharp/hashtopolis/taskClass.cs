@@ -579,17 +579,26 @@ namespace hashtopolis
                             taskId = taskID,
                         };
 
-                        if (benchMethod == 1) //Old benchmark method using actual run
+                        try
                         {
-                            bProps.type = "run";
-                            bProps.result = collection["PROGRESS_REJ"].ToString("0." + new string('#', 100));
+                            if (benchMethod == 1) //Old benchmark method using actual run
+                            {
+                                bProps.type = "run";
+                                bProps.result = collection["PROGRESS_REJ"].ToString("0." + new string('#', 100));
 
+                            }
+                            else //New benchmark method using --speed param
+                            {
+                                bProps.type = "speed";
+                                bProps.result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString();
+                            }
                         }
-                        else //New benchmark method using --speed param
+                        catch
                         {
-                            bProps.type = "speed"; 
-                            bProps.result = collection["LEFT_TOTAL"].ToString() + ":" + collection["RIGHT_TOTAL"].ToString();
+                            Console.WriteLine("Benchmark was unsuccessful, check all files for cracker is present");
+                            return 0;
                         }
+
 
 
                         jsonString = jsC.toJson(bProps);
