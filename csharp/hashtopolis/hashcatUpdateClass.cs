@@ -42,7 +42,7 @@ namespace hashtopolis
             if (jsonUpd.isJsonSuccess(ret))
             {
                 string crackerName = jsonUpd.getRetVar(ret, "name");
-                string fullSubDir = Path.Combine(AppPath, crackerName, binaryVersionId.ToString());
+                string fullSubDir = Path.Combine(AppPath, crackerName.ToLower(), binaryVersionId.ToString());
                 if (!Directory.Exists(fullSubDir)) //We need to download
                 {
                     Console.WriteLine("Client doesn't have required cracker...");
