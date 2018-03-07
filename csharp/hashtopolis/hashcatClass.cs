@@ -243,7 +243,7 @@ namespace hashtopolis
                 return false;
             }
 
-            pInfo.WorkingDirectory = filesDir;
+            pInfo.WorkingDirectory = hcDirectory;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
@@ -444,7 +444,7 @@ namespace hashtopolis
                 return false;
             }
 
-            pInfo.WorkingDirectory = filesDir;
+            pInfo.WorkingDirectory = hcDirectory;
 
 
             pInfo.Arguments = hcArgs + suffixArgs;
@@ -453,7 +453,7 @@ namespace hashtopolis
             pInfo.RedirectStandardOutput = true;
             if (debugFlag)
             {
-                Console.WriteLine("Using {0} as working directory", filesDir);
+                Console.WriteLine("Using {0} as working directory", pInfo.WorkingDirectory);
                 Console.WriteLine(pInfo.FileName + " " + pInfo.Arguments);
             }
 
@@ -584,7 +584,7 @@ namespace hashtopolis
             }
 
             pInfo.Arguments = hcArgs + " --potfile-disable --quiet --restore-disable --session=hashtopolis --status --machine-readable --status-timer=" + interval + " --outfile-check-timer=" + interval + " --remove --remove-timer=" + interval  + " -s " + skip + " -l " + size;
-            pInfo.WorkingDirectory = filesDir;
+            pInfo.WorkingDirectory = hcDirectory;
             pInfo.UseShellExecute = false;
             pInfo.RedirectStandardError = true;
             pInfo.RedirectStandardOutput = true;
