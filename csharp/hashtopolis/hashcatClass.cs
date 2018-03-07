@@ -237,6 +237,12 @@ namespace hashtopolis
             ProcessStartInfo pInfo = new ProcessStartInfo();
             pInfo.FileName = Path.Combine(hcDirectory, hcBinary);
             
+            if (!File.Exists(pInfo.FileName))
+            {
+                Console.WriteLine("Could not locate " + pInfo.FileName);
+                return false;
+            }
+
             pInfo.WorkingDirectory = filesDir;
             pInfo.Arguments = hcArgs + suffixArgs;
             pInfo.UseShellExecute = false;
