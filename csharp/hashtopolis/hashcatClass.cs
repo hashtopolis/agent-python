@@ -510,15 +510,24 @@ namespace hashtopolis
 
             if (!string.IsNullOrEmpty(stdOut))
             {
-                
-        
-                if (stdOut.StartsWith("Hashfile"))
+
+                if ((!stdOut.Contains("STATUS\t") && (!stdOut.Contains("EXEC_RUNTIME\t")) && (!stdOut.Contains("CURKU\t"))))
                 {
-                    if (!stdOut.Contains("Line-length exception"))
+                    if (stdOut.StartsWith("Hashfile"))
                     {
-                        lock (crackedLock)
+                        if (!stdOut.Contains("Line-length exception"))
                         {
-                            hashlist.Add(stdOut);
+                            lock (crackedLock)
+                            {
+                                hashlist.Add(stdOut);
+                            }
+                        }
+                        else
+                        {
+                            lock (crackedLock)
+                            {
+                                hashlist.Add(stdOut);
+                            }
                         }
                     }
                     else
@@ -530,14 +539,9 @@ namespace hashtopolis
                     }
                 }
 
-                else //Is a status output
+                else
+
                 {
-
-                    if (!stdOut.Contains("STATUS"))
-                    {
-                        return;
-                    }
-
                     lock (statusLock)
                     {
                         Dictionary<string, double> dStats = new Dictionary<string, double>();
@@ -556,9 +560,8 @@ namespace hashtopolis
                             }
                         }
                     }
-
                 }
-                    //Check if upload running, check if chunk has finished
+
             }
         }
 
