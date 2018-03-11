@@ -151,7 +151,7 @@ namespace hashtopolis
                 }
             }
 
-            string AppVersion = "0.51.9";
+            string AppVersion = "0.52.0";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
