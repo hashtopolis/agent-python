@@ -79,30 +79,53 @@ public class registerClass
         is64Bit = false; //Default to 32bit unless 64bit detected
         if (Type.GetType("Mono.Runtime") != null)
         {
-            if (!IsRunningOnMac())
-            {
-                Console.WriteLine("System is Linux");
-                osID = 0;
-            }
-            else
-            {
-                Console.WriteLine("System is Mac");
-                osID = 2;
-            }
+
             string machine = ReadProcessOutput("uname", "-m");
             if (machine.Contains("x86_64"))
             {
                 is64Bit = true;
             }
 
+            if (!IsRunningOnMac())
+            {
+
+                if (is64Bit)
+                {
+                    Console.WriteLine("System is Linux 64-bit");
+                }
+                else
+                {
+                    Console.WriteLine("System is Linux 32-bit");
+                }
+                osID = 0;
+            }
+            else
+            {
+                if (is64Bit)
+                {
+                    Console.WriteLine("System is MAC 64-bit");
+                }
+                else
+                {
+                    Console.WriteLine("System is MAC 32-bit");
+                };
+                osID = 2;
+            }
+
+
                 
         }
         else
         {
-            Console.WriteLine("System is Windows");
+            
             if (Environment.Is64BitProcess)
             {
+                Console.WriteLine("System is Windows 64-bit");
                 is64Bit = true;
+            }
+            else
+            {
+                Console.WriteLine("System is Windows 32-bit");
             }
             osID = 1;
         }
