@@ -295,6 +295,7 @@ class HashcatCracker:
                     time.sleep(0.05)
                     file.seek(where)
                 else:
+                    time.sleep(0.05)
                     end_count += 1
                     if end_count > 20:
                         break
