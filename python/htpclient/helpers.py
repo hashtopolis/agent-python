@@ -1,8 +1,8 @@
 import signal
 import sys
+import platform
 import logging
 from types import MappingProxyType
-import struct
 
 import os
 import subprocess
@@ -31,7 +31,7 @@ def print_speed(speed):
 
 
 def get_bit():
-    if struct.calcsize('P') * 8 == 64:
+    if platform.machine().endswith('64'):
         return "64"
     return "32"
 

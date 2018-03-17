@@ -1,3 +1,9 @@
+## 0.1.2 -> 0.1.x
+
+* Fixed detection of 32/64 bit operating systems
+* Changed timestamp format on logging
+* Catching connection problems on downloads
+
 ## 0.1.1 -> 0.1.2
 
 * Added support for reading the 32/64bit settings from the client itself and use the appropriate hashcat binary
