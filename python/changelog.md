@@ -3,6 +3,7 @@
 * Fixed detection of 32/64 bit operating systems
 * Changed timestamp format on logging
 * Catching connection problems on downloads
+* Added switch to 7z extraction to force overwrite of conflicting files
 
 ## 0.1.1 -> 0.1.2
 
