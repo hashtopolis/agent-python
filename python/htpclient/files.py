@@ -37,7 +37,7 @@ class Files:
                 if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile("files/" + file.replace(".7z", ".txt")):
                     # extract if needed
                     if Initialize.get_os() != 1:
-                        os.system("./7zr" + Initialize.get_os_extension() + " x -aoa -ofiles/ files/" + file)
+                        os.system("./7zr" + Initialize.get_os_extension() + " x -aoa -ofiles/ -y files/" + file)
                     else:
-                        os.system("7zr" + Initialize.get_os_extension() + " x -aoa -ofiles/ files/" + file)
+                        os.system("7zr" + Initialize.get_os_extension() + " x -aoa -ofiles/ -y files/" + file)
         return True
