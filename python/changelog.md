@@ -1,4 +1,4 @@
-## 0.1.2 -> 0.1.x
+## 0.1.2 -> 0.1.3
 
 * Fixed detection of 32/64 bit operating systems
 * Changed timestamp format on logging
