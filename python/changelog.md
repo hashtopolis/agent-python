@@ -1,3 +1,9 @@
+## 0.1.3 -> 0.x.x
+
+### Bugfixes
+
+* Fixed endless loop on error from server when sending chunk progress
+
 ## 0.1.2 -> 0.1.3
 
 * Fixed detection of 32/64 bit operating systems

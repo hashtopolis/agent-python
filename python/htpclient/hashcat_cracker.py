@@ -147,6 +147,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
+                                return
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
                                 logging.info("Received stop order from server!")
@@ -154,6 +155,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
+                                return
                             else:
                                 cracks_count = len(self.cracks)
                                 self.cracks = cracks_backup
