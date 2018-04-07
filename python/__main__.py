@@ -93,7 +93,7 @@ def loop():
             result = cracker.run_benchmark(task.get_task())
             if result == 0:
                 sleep(10)
-                task_change = True
+                task.reset_task()
                 # some error must have occurred on benchmarking
                 continue
             # send result of benchmark
@@ -106,12 +106,12 @@ def loop():
             if ans is None:
                 logging.error("Failed to send benchmark!")
                 sleep(5)
-                task_change = True
+                task.reset_task()
                 continue
             elif ans['response'] != 'SUCCESS':
                 logging.error("Error on sending benchmark: " + str(ans))
                 sleep(5)
-                task_change = True
+                task.reset_task()
                 continue
             else:
                 logging.info("Server accepted benchmark!")
