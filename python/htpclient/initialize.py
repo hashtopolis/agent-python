@@ -67,7 +67,7 @@ class Initialize:
                     continue
                 devices.append(line.replace("Model name:", "").strip("\r\n "))
             try:
-                output = subprocess.check_output("lspci | grep 'VGA compatible controller'", shell=True)
+                output = subprocess.check_output("lspci | grep -E 'VGA compatible controller|3D controller'", shell=True)
             except subprocess.CalledProcessError:
                 # we silently ignore this case on machines where lspci is not present or architecture has no pci bus
                 output = b""
