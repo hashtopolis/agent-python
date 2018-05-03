@@ -277,17 +277,23 @@ public class registerClass
             Process lspci = new Process();
             lspci.StartInfo = pinfo;
             lspci.Start();
-            string searchString = "VGA compatible controller: ";
+            List<string> searchList = new List<string>(new string[] { "VGA compatible controller: ", "3D controller: "});
+
+
             while (!lspci.HasExited)
             {
                 while (!lspci.StandardOutput.EndOfStream)
                 {
                     string stdOut = lspci.StandardOutput.ReadLine();
-                    int pozi = stdOut.IndexOf(searchString);
-                    if (pozi != -1)
+                    foreach (string searchItem in searchList)
                     {
-                        deviceList.Add(stdOut.Substring(pozi + searchString.Length));
+                        int pozi = stdOut.IndexOf(searchItem);
+                        if (pozi != -1)
+                        {
+                            deviceList.Add(stdOut.Substring(pozi + searchItem.Length));
+                        }
                     }
+
                 }
             }
 
@@ -297,7 +303,7 @@ public class registerClass
             pinfo.RedirectStandardOutput = true;
             lspci.StartInfo = pinfo;
             lspci.Start();
-            searchString = "Model Name: ";
+            string searchString = "Model Name: ";
             while (!lspci.HasExited)
             {
                 while (!lspci.StandardOutput.EndOfStream)
