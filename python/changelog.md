@@ -3,6 +3,7 @@
 ### Bugfixes
 
 * Fixed endless loop on error from server when sending chunk progress
+* Fixed a critical bug in parsing the hashcat status when TEMP values are included
 
 ## 0.1.2 -> 0.1.3
 
