@@ -31,7 +31,11 @@ class HashcatStatus:
         self.rec_hash[1] = int(line[index + 7])
         self.rec_salt[0] = int(line[index + 9])
         self.rec_salt[1] = int(line[index + 10])
-        self.rejected = int(line[index + 12])
+        if line[index + 11] == "TEMP":
+            # we have temp values
+            while line[index] != "REJECTED":
+                index += 1
+        self.rejected = int(line[index + 1])
 
     def is_valid(self):
         return self.status >= 0
