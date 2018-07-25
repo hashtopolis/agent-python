@@ -120,6 +120,9 @@ def loop():
         # run chunk
         logging.info("Start chunk...")
         cracker.run_chunk(task.get_task(), chunk.chunk_data())
+        if cracker.agentStopped():
+            # if the chunk was aborted by a stop from the server, we need to ask for a task again first
+            task.reset_task()
 
 
 if __name__ == "__main__":
