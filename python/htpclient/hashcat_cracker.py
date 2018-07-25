@@ -132,7 +132,8 @@ class HashcatCracker:
                         if not self.usePipe and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < 95:
                             # we need to try piping -> kill the process and then wait for issuing the chunk again
                             self.usePipe = True
-                            self.progressVal = status.get_progress_total()
+                            chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
+                            self.progressVal = status.get_progress_total() - chunk_start
                             logging.info("Detected low UTIL value, restart chunk with piping...")
                             try:
                                 kill_hashcat(proc.pid, Initialize.get_os())
@@ -143,10 +144,10 @@ class HashcatCracker:
                         self.first_status = True
                         # send update to server
                         logging.debug(line.decode().replace('\n', '').replace('\r', ''))
-                        chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         total = status.get_progress_total()
                         if self.usePipe:
                             total = self.progressVal
+                        chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
                         speed = status.get_speed()
                         initial = True

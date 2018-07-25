@@ -10,6 +10,7 @@ class HashcatStatus:
         self.rec_salt = [0, 0]
         self.rejected = 0
         self.util = []
+        self.temp = []
 
         line = line.split("\t")
         if line[0] != "STATUS":
@@ -34,7 +35,9 @@ class HashcatStatus:
         self.rec_salt[1] = int(line[index + 10])
         if line[index + 11] == "TEMP":
             # we have temp values
+            index += 12
             while line[index] != "REJECTED":
+                self.temp.append(int(line[index]))
                 index += 1
         self.rejected = int(line[index + 1])
         if len(line) > index + 2:
@@ -56,6 +59,9 @@ class HashcatStatus:
 
     def get_curku(self):
         return self.curku
+
+    def get_temps(self):
+        return self.temp
 
     def get_progress_total(self):
         return self.progress[1]
