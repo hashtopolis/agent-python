@@ -28,19 +28,30 @@ class HashcatCracker:
         self.lock = Lock()
         self.cracks = []
         self.first_status = False
+        self.usePipe = False
+        self.statusCount = 0
         self.last_update = 0
 
     def run_chunk(self, task, chunk):
         args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
-        args += " --outfile-check-dir=../hashlist_" + str(task['hashlistId'])
+        args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + args
+
+        if self.usePipe:
+            # call the command with piping
+            # TODO: implement piping
+            preArgs = "--stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
+            postArgs = ""
+            pass
+
+        self.statusCount = 0
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         # clear old found file
@@ -105,8 +116,20 @@ class HashcatCracker:
                 if identifier == 'OUT':
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
+                        # test if we have a low utility
+                        if not self.usePipe and 2 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < 90:
+                            # we need to try piping -> kill the process and then wait for issuing the chunk again
+                            self.usePipe = True
+                            logging.info("Detected low UTIL value, restart chunk with piping...")
+                            try:
+                                kill_hashcat(proc.pid, Initialize.get_os())
+                            except ProcessLookupError:
+                                pass
+                            return
+
                         self.first_status = True
                         # send update to server
+                        logging.debug(line.decode().replace('\n', '').replace('\r', ''))
                         chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         relative_progress = int((status.get_progress() - chunk_start) / float(status.get_progress_total() - chunk_start) * 10000)
                         speed = status.get_speed()
@@ -162,7 +185,7 @@ class HashcatCracker:
                                 zaps = ans['zaps']
                                 if len(zaps) > 0:
                                     logging.debug("Writing zaps")
-                                    zap_output = '\n'.join(zaps) + '\n'
+                                    zap_output = ":FF\n".join(zaps) + ':FF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()

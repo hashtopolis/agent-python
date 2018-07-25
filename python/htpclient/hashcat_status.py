@@ -9,6 +9,7 @@ class HashcatStatus:
         self.rec_hash = [0, 0]
         self.rec_salt = [0, 0]
         self.rejected = 0
+        self.util = []
 
         line = line.split("\t")
         if line[0] != "STATUS":
@@ -36,6 +37,13 @@ class HashcatStatus:
             while line[index] != "REJECTED":
                 index += 1
         self.rejected = int(line[index + 1])
+        if len(line) > index + 2:
+            index += 2
+            if line[index] == "UTIL":
+                index += 1
+                while len(line) - 1 > index: # -1 because the \r\n is also included in the split
+                    self.util.append(int(line[index]))
+                    index += 1
 
     def is_valid(self):
         return self.status >= 0
@@ -51,6 +59,14 @@ class HashcatStatus:
 
     def get_progress_total(self):
         return self.progress[1]
+
+    def get_util(self):
+        if len(self.util) == 0:
+            return -1
+        sum = 0
+        for u in self.util:
+            sum += u
+        return int(sum/len(self.util))
 
     def get_speed(self):
         total_speed = 0
