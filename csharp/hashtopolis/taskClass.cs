@@ -382,7 +382,7 @@ namespace hashtopolis
                         if (receivedZaps.Count > 0)
                         {
                             zapCount++;
-                            File.WriteAllLines(Path.Combine(zapfilePath + zapCount.ToString()), receivedZaps); //Write hashes for zapping
+                            File.WriteAllLines(Path.Combine(zapfilePath,zapCount.ToString()), receivedZaps); //Write hashes for zapping
                             
                         }
                         Console.WriteLine("Progress:{0,7} | Speed:{1,-4} | Cracks:{2,-4} | Accepted:{3,-4} | Zapped:{4,-4} | Queue:{5,-2}", chunkPercent.ToString("F") + "%", speedCalc(singlePacket[0].statusPackets["SPEED_TOTAL"]), singlePacket[0].crackedPackets.Count, jsC.getRetVar(ret, "cracked"), receivedZaps.Count,ulQueue);
