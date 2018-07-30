@@ -27,7 +27,7 @@ class Initialize:
         os = platform.system()
         try:
             return dict_os[os]
-        except:
+        except KeyError:
             logging.debug("OS: %s" % os)
             log_error_and_exit("It seems your operating system is not supported.")
 
@@ -53,7 +53,7 @@ class Initialize:
             logging.info("Login successful!")
 
     def __update_information(self):
-        if len(self.config.get_value('uuid')) == 0:
+        if not self.config.get_value('uuid'):
             self.config.set_value('uuid', str(uuid.uuid4()))
 
         # collect devices
@@ -63,7 +63,7 @@ class Initialize:
             output = subprocess.check_output("lscpu | grep 'Model name'", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
-                if len(line) == 0:
+                if not line:
                     continue
                 devices.append(line.replace("Model name:", "").strip("\r\n "))
             try:
@@ -73,7 +73,7 @@ class Initialize:
                 output = b""
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
-                if len(line) == 0:
+                if not line:
                     continue
                 line = line.split(":")
                 devices.append(line[2].strip())
@@ -83,14 +83,14 @@ class Initialize:
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
                 line = line.rstrip("\r\n ")
-                if line == "Name" or len(line) == 0:
+                if line == "Name" or not line:
                     continue
                 devices.append(line)
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
                 line = line.rstrip("\r\n ")
-                if line == "Name" or len(line) == 0:
+                if line == "Name" or not line:
                     continue
                 devices.append(line)
 
@@ -120,8 +120,8 @@ class Initialize:
             self.__update_information()
 
     def __check_token(self):
-        if len(self.config.get_value('token')) == 0:
-            if len(self.config.get_value('voucher')) > 0:
+        if not self.config.get_value('token'):
+            if self.config.get_value('voucher'):
                 # voucher is set in config and can be used to autoregister
                 voucher = self.config.get_value('voucher')
             else:
@@ -135,7 +135,7 @@ class Initialize:
             if ans is None:
                 logging.error("Request failed!")
                 self.__check_token()
-            elif ans['response'] != 'SUCCESS' or len(ans['token']) == 0:
+            elif ans['response'] != 'SUCCESS' or not ans['token']:
                 logging.error("Registering failed: " + str(ans))
                 self.__check_token()
             else:
@@ -145,7 +145,7 @@ class Initialize:
                 logging.info("Successfully registered!")
 
     def __check_url(self):
-        if len(self.config.get_value('url')) == 0:
+        if not self.config.get_value('url'):
             # ask for url
             url = input("Please enter the url to the API of your Hashtopolis installation:\n").strip()
             logging.debug("Setting url to: " + url)
