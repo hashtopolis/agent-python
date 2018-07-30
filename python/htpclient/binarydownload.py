@@ -32,7 +32,7 @@ class BinaryDownload:
                 logging.error("Failed to get 7zr!")
                 sleep(5)
                 self.__check_utils()
-            elif ans['response'] != 'SUCCESS' or len(ans['executable']) == 0:
+            elif ans['response'] != 'SUCCESS' or not ans['executable']:
                 logging.error("Getting 7zr failed: " + str(ans))
                 sleep(5)
                 self.__check_utils()
@@ -55,7 +55,7 @@ class BinaryDownload:
             logging.error("Failed to load prince!")
             sleep(5)
             return False
-        elif ans['response'] != 'SUCCESS' or len(ans['url']) == 0:
+        elif ans['response'] != 'SUCCESS' or not ans['url']:
             logging.error("Getting prince failed: " + str(ans))
             sleep(5)
             return False
@@ -88,7 +88,7 @@ class BinaryDownload:
             logging.error("Failed to load cracker!")
             sleep(5)
             return False
-        elif ans['response'] != 'SUCCESS' or len(ans['url']) == 0:
+        elif ans['response'] != 'SUCCESS' or not ans['url']:
             logging.error("Getting cracker failed: " + str(ans))
             sleep(5)
             return False
