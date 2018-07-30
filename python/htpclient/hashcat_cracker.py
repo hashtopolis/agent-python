@@ -158,7 +158,7 @@ class HashcatCracker:
                             # reset piping stuff when a chunk is successfully finished
                             self.progressVal = 0
                             self.usePipe = False
-                        while len(self.cracks) > 0 or initial:
+                        while self.cracks or initial:
                             self.lock.acquire()
                             initial = False
                             cracks_backup = []
@@ -208,7 +208,7 @@ class HashcatCracker:
                                 cracks_count = len(self.cracks)
                                 self.cracks = cracks_backup
                                 zaps = ans['zaps']
-                                if len(zaps) > 0:
+                                if zaps:
                                     logging.debug("Writing zaps")
                                     zap_output = ":FF\n".join(zaps) + ':FF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
@@ -244,7 +244,7 @@ class HashcatCracker:
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
-            if len(line) == 0:
+            if not line:
                 continue
             keyspace = line
         chunk.send_keyspace(int(keyspace), task['taskId'])
@@ -266,13 +266,13 @@ class HashcatCracker:
         output, error = proc.communicate()
         logging.debug("started benchmark")
         proc.wait()  # wait until done
-        if len(error) > 0:
+        if error:
             # TODO: strip here the ANSI color stuff from the errors
             error = error.replace(b"\r\n", b"\n").decode('utf-8')
             # parse errors and send it to server
             error = error.split('\n')
             for line in error:
-                if len(line) == 0:
+                if not line:
                     continue
                 query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
                 query['taskId'] = task['taskId']
@@ -280,12 +280,12 @@ class HashcatCracker:
                 req = JsonRequest(query)
                 req.execute()
             # return 0  it might not be ideal to return here.  In case of errors still try to read the benchmark.
-        if len(output) > 0:
+        if output:
             output = output.replace(b"\r\n", b"\n").decode('utf-8')
             output = output.split('\n')
             last_valid_status = None
             for line in output:
-                if len(line) == 0:
+                if not line:
                     continue
                 logging.debug("HCSTAT: " + line.strip())
                 status = HashcatStatus(line)
@@ -319,31 +319,31 @@ class HashcatCracker:
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
             return 0
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-        sum = [0, 0]
+        benchmark_sum = [0, 0]
         for line in output:
-            if len(line) == 0:
+            if not line:
                 continue
             line = line.split(":")
             if len(line) != 3:
                 continue
-            sum[0] += int(line[1])
-            sum[1] += float(line[2])
-        return str(sum[0]) + ":" + str(sum[1])
+            benchmark_sum[0] += int(line[1])
+            benchmark_sum[1] += float(line[2])
+        return str(benchmark_sum[0]) + ":" + str(benchmark_sum[1])
 
     def output_watcher(self, file_path, proc):
         while not os.path.exists(file_path):
             time.sleep(1)
             if proc.poll() is not None:
                 return
-        file = open(file_path)
+        file_handle = open(file_path)
         end_count = 0
         while 1:
-            where = file.tell()
-            line = file.readline()
+            where = file_handle.tell()
+            line = file_handle.readline()
             if not line:
                 if proc.poll() is None:
                     time.sleep(0.05)
-                    file.seek(where)
+                    file_handle.seek(where)
                 else:
                     time.sleep(0.05)
                     end_count += 1
@@ -353,7 +353,7 @@ class HashcatCracker:
                 self.lock.acquire()
                 self.cracks.append(line.strip())
                 self.lock.release()
-        file.close()
+        file_handle.close()
 
     def agentStopped(self):
         return self.wasStopped
