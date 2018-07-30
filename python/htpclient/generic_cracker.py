@@ -63,7 +63,7 @@ class GenericCracker:
                         progress = status.get_progress()
                         speed = status.get_speed()
                         initial = True
-                        while len(cracks) > 0 or initial:
+                        while cracks or initial:
                             initial = False
                             cracks_backup = []
                             if len(cracks) > 1000:
@@ -94,10 +94,10 @@ class GenericCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
-                                if len(ans['zaps']) > 0:
-                                    with open("files/zap", "wb") as file:  # need to check if we are in the main dir here
-                                        file.write('\n'.join(ans['zaps']).encode())
-                                        file.close()
+                                if ans['zaps']:
+                                    with open("files/zap", "wb") as zapfile:  # need to check if we are in the main dir here
+                                        zapfile.write('\n'.join(ans['zaps']).encode())
+                                        zapfile.close()
                                 cracks = cracks_backup
                                 logging.info(
                                     "Progress: " + str(progress / 100) + "% Cracks: " + str(len(cracks)) +
@@ -120,7 +120,7 @@ class GenericCracker:
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
-            if len(line) == 0:
+            if not line:
                 continue
             keyspace = line
         self.keyspace = int(keyspace)
@@ -136,12 +136,12 @@ class GenericCracker:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
         output = subprocess.check_output(full_cmd, shell=True, cwd='files')
-        if len(output) > 0:
+        if output:
             output = output.replace(b"\r\n", b"\n").decode('utf-8')
             output = output.split('\n')
             last_valid_status = None
             for line in output:
-                if len(line) == 0:
+                if not line:
                     continue
                 status = GenericStatus(line)
                 if status.is_valid():
