@@ -48,7 +48,6 @@ class HashcatCracker:
 
         if self.usePipe:
             # call the command with piping
-            # TODO: implement piping
             preArgs = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
             preArgs += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
             postArgs = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
@@ -99,6 +98,9 @@ class HashcatCracker:
 
     def run_loop(self, proc, chunk, task):
         self.cracks = []
+        pipingThreshold = 95
+        if self.config.get_value('piping-threshold'):
+           pipingThreshold = self.config.get_value('piping-threshold')
         while True:
             try:
                 # Block for 1 second.
@@ -129,7 +131,7 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < 95:
+                        if not self.usePipe and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < pipingThreshold:
                             # we need to try piping -> kill the process and then wait for issuing the chunk again
                             self.usePipe = True
                             chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])

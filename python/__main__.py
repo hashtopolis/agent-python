@@ -52,6 +52,7 @@ def loop():
     hashlist = Hashlist()
     task_change = True
     last_task_id = 0
+    cracker = None
     while True:
         CONFIG.update()
         if task.get_task() is not None:
