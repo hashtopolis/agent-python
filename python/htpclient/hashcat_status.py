@@ -67,12 +67,12 @@ class HashcatStatus:
         return self.progress[1]
 
     def get_util(self):
-        if len(self.util) == 0:
+        if not self.util:
             return -1
-        sum = 0
+        util_sum = 0
         for u in self.util:
-            sum += u
-        return int(sum/len(self.util))
+            util_sum += u
+        return int(util_sum/len(self.util))
 
     def get_speed(self):
         total_speed = 0
