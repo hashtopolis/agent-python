@@ -18,8 +18,8 @@ class Download:
             # Check header
             if not no_header:
                 head = requests.head(url)
-                # not sure if we only should allow 200, but then it's present for sure
-                if head.status_code != 200:
+                # not sure if we only should allow 200/302, but then it's present for sure
+                if head.status_code != 200 and head.status_code != 302:
                     return False
 
             with open(output, "wb") as file:
