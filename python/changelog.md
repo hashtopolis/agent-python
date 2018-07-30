@@ -1,3 +1,13 @@
+## 0.1.4 -> 0.x.x
+
+### Bugfixes
+
+* Fixed zap handling (including also unsalted hashes)
+
+### Features
+
+* When a chunk can not ideally fully use the GPU it tries to use piping to increase the speed to the most possible.
+
 ## 0.1.3 -> 0.1.4
 
 ### Bugfixes
