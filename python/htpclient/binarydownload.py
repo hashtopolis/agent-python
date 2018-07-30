@@ -40,6 +40,43 @@ class BinaryDownload:
                 Download.download(ans['executable'], path)
                 os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
+    def check_prince(self):
+        logging.debug("Checking if PRINCE is present...")
+        path = "prince/"
+        if os.path.isdir(path): # if it already exists, we don't need to download it
+            logging.debug("PRINCE is already downloaded")
+            return True
+        logging.debug("PRINCE not found, download...")
+        query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
+        query['type'] = 'prince'
+        req = JsonRequest(query)
+        ans = req.execute()
+        if ans is None:
+            logging.error("Failed to load prince!")
+            sleep(5)
+            return False
+        elif ans['response'] != 'SUCCESS' or len(ans['url']) == 0:
+            logging.error("Getting prince failed: " + str(ans))
+            sleep(5)
+            return False
+        else:
+            if not Download.download(ans['url'], "prince.7z"):
+                logging.error("Download of prince failed!")
+                sleep(5)
+                return False
+            if Initialize.get_os() == 1:
+                os.system("7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
+            else:
+                os.system("./7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
+            for name in os.listdir("temp"): # this part needs to be done because it is compressed with the main subfolder of prince
+                if os.path.isdir("temp/" + name):
+                    os.rename("temp/" + name, "prince")
+                    break
+            os.unlink("prince.7z")
+            os.rmdir("temp")
+            logging.debug("PRINCE downloaded and extracted")
+        return True
+
     def check_version(self, cracker_id):
         path = "crackers/" + str(cracker_id) + "/"
         query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
@@ -48,7 +85,7 @@ class BinaryDownload:
         req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
-            logging.error("Failed to load cracker`!")
+            logging.error("Failed to load cracker!")
             sleep(5)
             return False
         elif ans['response'] != 'SUCCESS' or len(ans['url']) == 0:
