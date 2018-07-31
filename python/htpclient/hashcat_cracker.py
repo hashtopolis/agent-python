@@ -34,7 +34,7 @@ class HashcatCracker:
         self.last_update = 0
         self.wasStopped = False
 
-    def run_chunk(self, task, chunk):
+    def build_command(self, task, chunk):
         args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -44,21 +44,45 @@ class HashcatCracker:
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + " " + task['cmdpars']
-        full_cmd = self.callPath + args
+        return self.callPath + args
 
-        if self.usePipe:
-            # call the command with piping
-            preArgs = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
-            preArgs += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
-            postArgs = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
-            postArgs += " --status-timer " + str(task['statustimer'])
-            postArgs += " --outfile-check-timer=" + str(task['statustimer'])
-            postArgs += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-            postArgs += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
-            postArgs += " --remove-timer=" + str(task['statustimer'])
-            postArgs += " ../../hashlists/" + str(task['hashlistId'])
-            full_cmd = self.callPath + preArgs + " | " + self.callPath + postArgs + task['cmdpars']
+    def build_pipe_command(self, task, chunk):
+        # call the command with piping
+        preArgs = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
+        preArgs += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        postArgs = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        postArgs += " --status-timer " + str(task['statustimer'])
+        postArgs += " --outfile-check-timer=" + str(task['statustimer'])
+        postArgs += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
+        postArgs += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        postArgs += " --remove-timer=" + str(task['statustimer'])
+        postArgs += " ../../hashlists/" + str(task['hashlistId'])
+        return self.callPath + preArgs + " | " + self.callPath + postArgs + task['cmdpars']
 
+    def build_prince_command(self, task, chunk):
+        binary = "..\..\prince\pp64."
+        if Initialize.get_os() != 1:
+            binary = "./" + binary + "bin"
+        else:
+            binary += "exe"
+        preArgs = " -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
+        preArgs += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        postArgs = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        postArgs += " --status-timer " + str(task['statustimer'])
+        postArgs += " --outfile-check-timer=" + str(task['statustimer'])
+        postArgs += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
+        postArgs += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        postArgs += " --remove-timer=" + str(task['statustimer'])
+        postArgs += " ../../hashlists/" + str(task['hashlistId'])
+        return binary + preArgs + " | " + self.callPath + postArgs + task['cmdpars']
+
+    def run_chunk(self, task, chunk):
+        if task['usePrince']:
+            full_cmd = self.build_prince_command(task, chunk)
+        elif self.usePipe:
+            full_cmd = self.build_pipe_command(task, chunk)
+        else:
+            full_cmd = self.build_command(task, chunk)
         self.statusCount = 0
         self.wasStopped = False
         if Initialize.get_os() == 1:
@@ -131,7 +155,7 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < pipingThreshold:
+                        if not self.usePipe and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < pipingThreshold:
                             # we need to try piping -> kill the process and then wait for issuing the chunk again
                             self.usePipe = True
                             chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
@@ -150,7 +174,10 @@ class HashcatCracker:
                         if self.usePipe:
                             total = self.progressVal
                         chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
-                        relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
+                        if total > 0:
+                            relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
+                        else:
+                            relative_progress = 0
                         speed = status.get_speed()
                         initial = True
                         if status.get_state() == 5:
@@ -176,7 +203,7 @@ class HashcatCracker:
                             query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
                             query['chunkId'] = chunk['chunkId']
                             query['keyspaceProgress'] = status.get_curku()
-                            if self.usePipe and status.get_curku() == 0:
+                            if (self.usePipe or task['usePrince']) and status.get_curku() == 0:
                                 query['keyspaceProgress'] = chunk['skip']
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
