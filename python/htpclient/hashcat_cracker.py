@@ -232,6 +232,9 @@ class HashcatCracker:
                     send_error(msg, self.config.get_value('token'), task['taskId'])
 
     def measure_keyspace(self, task, chunk):
+        if task['usePrince']:
+            self.prince_keyspace(task, chunk)
+            return
         full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -248,6 +251,33 @@ class HashcatCracker:
                 continue
             keyspace = line
         chunk.send_keyspace(int(keyspace), task['taskId'])
+
+    def prince_keyspace(self, task, chunk):
+        binary = "pp64."
+        if Initialize.get_os() != 1:
+            binary = "./" + binary + "bin"
+        else:
+            binary += "exe"
+        full_cmd = binary + " --keyspace " + update_files(task['attackcmd'], True).replace(task['hashlistAlias'], "")
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        try:
+            logging.debug("CALL: " + full_cmd)
+            output = subprocess.check_output(full_cmd, shell=True, cwd="prince")
+        except subprocess.CalledProcessError:
+            logging.error("Error during keyspace measure")
+            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            return
+        output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+        keyspace = "0"
+        for line in output:
+            if not line:
+                continue
+            keyspace = line
+        if int(keyspace) > 9000000000000000000: # max size of a long long int
+            chunk.send_keyspace(-1, task['taskId'])
+        else:
+            chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
         if task['benchType'] == 'speed':
@@ -306,7 +336,11 @@ class HashcatCracker:
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
         args += " --restore-disable --potfile-disable --session=hashtopolis "
-        args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
+        if task['usePrince']:
+            args += "../../hashlists/" + str(task['hashlistId'])
+            args += " example.dict"
+        else:
+            args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
