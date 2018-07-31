@@ -51,7 +51,7 @@ def send_error(error, token, task_id):
     req.execute()
 
 
-def update_files(command):
+def update_files(command, prince=False):
     split = command.split(" ")
     ret = []
     for part in split:
@@ -60,7 +60,10 @@ def update_files(command):
             continue
         path = "files/" + part
         if os.path.exists(path):
-            ret.append("../../" + path)
+            if prince:
+                ret.append("../" + path)
+            else:
+                ret.append("../../" + path)
         else:
             ret.append(part)
     return " ".join(ret)
