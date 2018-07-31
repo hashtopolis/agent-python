@@ -10,7 +10,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed
+from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist
 from htpclient.dicts import *
 
 
@@ -65,8 +65,8 @@ class HashcatCracker:
             binary = "./" + binary + "bin"
         else:
             binary += "exe"
-        pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
-        pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
+        pre_args += get_wordlist(update_files(task['attackcmd'])).replace(task['hashlistAlias'], '')
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -74,6 +74,7 @@ class HashcatCracker:
         post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
+        post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
     def run_chunk(self, task, chunk):
@@ -288,7 +289,7 @@ class HashcatCracker:
             binary = "./" + binary + "bin"
         else:
             binary += "exe"
-        full_cmd = binary + " --keyspace " + update_files(task['attackcmd'], True).replace(task['hashlistAlias'], "")
+        full_cmd = binary + " --keyspace " + get_wordlist(update_files(task['attackcmd'], True)).replace(task['hashlistAlias'], "")
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
@@ -367,7 +368,7 @@ class HashcatCracker:
         args = " --machine-readable --quiet --progress-only"
         args += " --restore-disable --potfile-disable --session=hashtopolis "
         if task['usePrince']:
-            args += "../../hashlists/" + str(task['hashlistId'])
+            args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' '
             args += " example.dict" + ' ' + task['cmdpars']
         else:
             args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
