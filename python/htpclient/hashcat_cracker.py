@@ -123,8 +123,11 @@ class HashcatCracker:
     def run_loop(self, proc, chunk, task):
         self.cracks = []
         piping_threshold = 95
+        enable_piping = True
         if self.config.get_value('piping-threshold'):
             piping_threshold = self.config.get_value('piping-threshold')
+        if self.config.get_value('allow-piping'):
+            enable_piping = self.config.get_value('allow-piping')
         while True:
             try:
                 # Block for 1 second.
@@ -155,7 +158,7 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
+                        if not self.usePipe and enable_piping and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
                             # we need to try piping -> kill the process and then wait for issuing the chunk again
                             self.usePipe = True
                             chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
