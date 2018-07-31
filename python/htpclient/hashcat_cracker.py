@@ -368,7 +368,7 @@ class HashcatCracker:
         args += " --restore-disable --potfile-disable --session=hashtopolis "
         if task['usePrince']:
             args += "../../hashlists/" + str(task['hashlistId'])
-            args += " example.dict"
+            args += " example.dict" + ' ' + task['cmdpars']
         else:
             args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
