@@ -217,14 +217,18 @@ namespace hashtopolis
 
             StringBuilder stdOutBuild = new StringBuilder();
 
-
+            string suffixArgs = " --restore-disable --potfile-disable  --machine-readable --session=hashtopolis";
             string suffixExtra = "";
-            if (benchMethod == 2)
+
+            if (benchMethod == 1)
+            {
+                suffixExtra = " --runtime=" + benchSecs; 
+            }
+            else if (benchMethod == 2)
             {
                 suffixExtra = " --progress-only";
             }
-            string suffixArgs = " --runtime=" + benchSecs + " --restore-disable --potfile-disable  --machine-readable --session=hashtopolis ";
-
+            
             if (legacy) //--weak was removed post HC 3.6, don't issue this command
             {
                 suffixArgs = suffixArgs + "--weak=0" + suffixExtra;
