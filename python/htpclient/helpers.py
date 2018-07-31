@@ -53,31 +53,30 @@ def send_error(error, token, task_id):
 
 def get_wordlist(command):
     split = clean_list(command.split(" "))
-    for index in range(0, len(split)):
-        index += 1
-        if split[index][0] == '-':
+    for index, part in enumerate(split):
+        if part[0] == '-':
             continue
         elif index == 0 or split[index - 1][0] != '-':
-            return split[index]
+            return part
     return ''
 
 
 def get_rules_and_hl(command, alias):
     split = clean_list(command.split(" "))
     rules = []
-    for index in range(0, len(split)):
+    for index, part in enumerate(split):
         if index > 0 and (split[index - 1] == '-r' or split[index - 1] == '--rules-file'):
             rules.append(split[index - 1])
             rules.append(split[index - 0])
-        if split[index] == alias:
-            rules.append(split[index])
+        if part == alias:
+            rules.append(part)
     return " ".join(rules)
 
 
 def clean_list(element_list):
     index = 0
     for part in element_list:
-        if len(part) == 0:
+        if not part:
             del element_list[index]
             index -= 1
         index += 1
@@ -89,7 +88,7 @@ def update_files(command, prince=False):
     ret = []
     for part in split:
         # test if file exists
-        if len(part) == 0:
+        if not part:
             continue
         path = "files/" + part
         if os.path.exists(path):
