@@ -7,7 +7,7 @@ from types import MappingProxyType
 import os
 import subprocess
 
-from htpclient.dicts import copyAndSetToken, dict_clientError
+from htpclient.dicts import copy_and_set_token, dict_clientError
 from htpclient.jsonRequest import JsonRequest
 
 
@@ -44,7 +44,7 @@ def kill_hashcat(pid, get_os):
 
 
 def send_error(error, token, task_id):
-    query = copyAndSetToken(dict_clientError, token)
+    query = copy_and_set_token(dict_clientError, token)
     query['message'] = error
     query['taskId'] = task_id
     req = JsonRequest(query)

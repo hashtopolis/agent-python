@@ -24,7 +24,7 @@ class BinaryDownload:
     def __check_utils(self):
         path = '7zr' + Initialize.get_os_extension()
         if not os.path.isfile(path):
-            query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
+            query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
             query['type'] = '7zr'
             req = JsonRequest(query)
             ans = req.execute()
@@ -47,7 +47,7 @@ class BinaryDownload:
             logging.debug("PRINCE is already downloaded")
             return True
         logging.debug("PRINCE not found, download...")
-        query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
+        query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'prince'
         req = JsonRequest(query)
         ans = req.execute()
@@ -79,7 +79,7 @@ class BinaryDownload:
 
     def check_version(self, cracker_id):
         path = "crackers/" + str(cracker_id) + "/"
-        query = copyAndSetToken(dict_downloadBinary, self.config.get_value('token'))
+        query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'cracker'
         query['binaryVersionId'] = cracker_id
         req = JsonRequest(query)

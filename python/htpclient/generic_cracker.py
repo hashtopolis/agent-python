@@ -26,24 +26,24 @@ class GenericCracker:
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
-        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
+        process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
 
         logging.debug("started cracking")
-        out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
-        err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
+        out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
+        err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', process.stderr))
         out_thread.start()
         err_thread.start()
 
-        main_thread = Thread(target=self.run_loop, name='run_loop', args=(proc, chunk, task))
+        main_thread = Thread(target=self.run_loop, name='run_loop', args=(process, chunk, task))
         main_thread.start()
 
         # wait for all threads to finish
-        proc.wait()
+        process.wait()
         out_thread.join()
         err_thread.join()
         logging.info("finished chunk")
 
-    def run_loop(self, proc, chunk, task):
+    def run_loop(self, process, chunk, task):
         cracks = []
         while True:
             try:
@@ -51,7 +51,7 @@ class GenericCracker:
                 item = self.io_q.get(True, 1)
             except Empty:
                 # No output in either streams for a second. Are we done?
-                if proc.poll() is not None:
+                if process.poll() is not None:
                     # is the case when the process is finished
                     break
             else:
@@ -78,7 +78,7 @@ class GenericCracker:
                                         new_cracks.append(crack)
                                 cracks = new_cracks
 
-                            query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
+                            query = copy_and_set_token(dict_sendProgress, self.config.get_value('token'))
                             query['chunkId'] = chunk['chunkId']
                             query['keyspaceProgress'] = chunk['skip']
                             query['relativeProgress'] = progress
@@ -147,7 +147,7 @@ class GenericCracker:
                 if status.is_valid():
                     last_valid_status = status
             if last_valid_status is None:
-                query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
+                query = copy_and_set_token(dict_clientError, self.config.get_value('token'))
                 query['taskId'] = task['taskId']
                 query['message'] = "Generic benchmark failed!"
                 req = JsonRequest(query)
@@ -155,7 +155,7 @@ class GenericCracker:
                 return 0
             return float(last_valid_status.get_progress()) / 10000
         else:
-            query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
+            query = copy_and_set_token(dict_clientError, self.config.get_value('token'))
             query['taskId'] = task['taskId']
             query['message'] = "Generic benchmark gave no output!"
             req = JsonRequest(query)

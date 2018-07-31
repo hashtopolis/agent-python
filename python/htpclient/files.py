@@ -19,7 +19,7 @@ class Files:
         for file in files:
             if os.path.isfile("files/" + file) or os.path.isfile("files/" + file.replace(".7z", ".txt")):
                 continue
-            query = copyAndSetToken(ditc_getFile, self.config.get_value('token'))
+            query = copy_and_set_token(ditc_getFile, self.config.get_value('token'))
             query['taskId'] = task_id
             query['file'] = file
             req = JsonRequest(query)

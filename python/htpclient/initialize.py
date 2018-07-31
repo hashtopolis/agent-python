@@ -37,7 +37,7 @@ class Initialize:
         return dict_ext[os]
 
     def __login(self):
-        query = copyAndSetToken(dict_login, self.config.get_value('token'))
+        query = copy_and_set_token(dict_login, self.config.get_value('token'))
         query['clientSignature'] = self.get_version()
         req = JsonRequest(query)
         ans = req.execute()
@@ -104,7 +104,7 @@ class Initialize:
                 line = line.split(":")
                 devices.append(line[1].strip())
 
-        query = copyAndSetToken(dict_updateInformation, self.config.get_value('token'))
+        query = copy_and_set_token(dict_updateInformation, self.config.get_value('token'))
         query['uid'] = self.config.get_value('uuid')
         query['os'] = self.get_os()
         query['devices'] = devices

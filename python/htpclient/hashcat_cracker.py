@@ -48,16 +48,16 @@ class HashcatCracker:
 
     def build_pipe_command(self, task, chunk):
         # call the command with piping
-        preArgs = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
-        preArgs += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
-        postArgs = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
-        postArgs += " --status-timer " + str(task['statustimer'])
-        postArgs += " --outfile-check-timer=" + str(task['statustimer'])
-        postArgs += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        postArgs += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
-        postArgs += " --remove-timer=" + str(task['statustimer'])
-        postArgs += " ../../hashlists/" + str(task['hashlistId'])
-        return self.callPath + preArgs + " | " + self.callPath + postArgs + task['cmdpars']
+        pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
+        pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        post_args += " --status-timer " + str(task['statustimer'])
+        post_args += " --outfile-check-timer=" + str(task['statustimer'])
+        post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        post_args += " --remove-timer=" + str(task['statustimer'])
+        post_args += " ../../hashlists/" + str(task['hashlistId'])
+        return self.callPath + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
     def build_prince_command(self, task, chunk):
         binary = "..\..\prince\pp64."
@@ -65,16 +65,16 @@ class HashcatCracker:
             binary = "./" + binary + "bin"
         else:
             binary += "exe"
-        preArgs = " -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
-        preArgs += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
-        postArgs = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
-        postArgs += " --status-timer " + str(task['statustimer'])
-        postArgs += " --outfile-check-timer=" + str(task['statustimer'])
-        postArgs += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        postArgs += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
-        postArgs += " --remove-timer=" + str(task['statustimer'])
-        postArgs += " ../../hashlists/" + str(task['hashlistId'])
-        return binary + preArgs + " | " + self.callPath + postArgs + task['cmdpars']
+        pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
+        pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        post_args += " --status-timer " + str(task['statustimer'])
+        post_args += " --outfile-check-timer=" + str(task['statustimer'])
+        post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        post_args += " --remove-timer=" + str(task['statustimer'])
+        post_args += " ../../hashlists/" + str(task['hashlistId'])
+        return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
     def run_chunk(self, task, chunk):
         if task['usePrince']:
@@ -95,25 +95,25 @@ class HashcatCracker:
             os.mkdir("hashlist_" + str(task['hashlistId']))
         logging.debug("CALL: " + full_cmd)
         if Initialize.get_os() != 1:
-            proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
+            process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
         else:
-            proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
+            process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
 
         logging.debug("started cracking")
-        out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', proc.stdout))
-        err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', proc.stderr))
-        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=("hashlists/" + str(task['hashlistId']) + ".out", proc))
+        out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
+        err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', process.stderr))
+        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=("hashlists/" + str(task['hashlistId']) + ".out", process))
         out_thread.start()
         err_thread.start()
         crk_thread.start()
         self.first_status = False
         self.last_update = time.time()
 
-        main_thread = Thread(target=self.run_loop, name='run_loop', args=(proc, chunk, task))
+        main_thread = Thread(target=self.run_loop, name='run_loop', args=(process, chunk, task))
         main_thread.start()
 
         # wait for all threads to finish
-        proc.wait()
+        process.wait()
         crk_thread.join()
         out_thread.join()
         err_thread.join()
@@ -122,15 +122,15 @@ class HashcatCracker:
 
     def run_loop(self, proc, chunk, task):
         self.cracks = []
-        pipingThreshold = 95
+        piping_threshold = 95
         if self.config.get_value('piping-threshold'):
-           pipingThreshold = self.config.get_value('piping-threshold')
+            piping_threshold = self.config.get_value('piping-threshold')
         while True:
             try:
                 # Block for 1 second.
                 if not self.first_status and self.last_update < time.time() - 5:
                     # send update
-                    query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
+                    query = copy_and_set_token(dict_sendProgress, self.config.get_value('token'))
                     query['chunkId'] = chunk['chunkId']
                     query['keyspaceProgress'] = chunk['skip']
                     query['relativeProgress'] = 0
@@ -155,7 +155,7 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < pipingThreshold:
+                        if not self.usePipe and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
                             # we need to try piping -> kill the process and then wait for issuing the chunk again
                             self.usePipe = True
                             chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
@@ -200,7 +200,7 @@ class HashcatCracker:
                                     else:
                                         new_cracks.append(crack)
                                 self.cracks = new_cracks
-                            query = copyAndSetToken(dict_sendProgress, self.config.get_value('token'))
+                            query = copy_and_set_token(dict_sendProgress, self.config.get_value('token'))
                             query['chunkId'] = chunk['chunkId']
                             query['keyspaceProgress'] = status.get_curku()
                             if (self.usePipe or task['usePrince']) and status.get_curku() == 0:
@@ -301,7 +301,7 @@ class HashcatCracker:
             if not line:
                 continue
             keyspace = line
-        if int(keyspace) > 9000000000000000000: # max size of a long long int
+        if int(keyspace) > 9000000000000000000:  # max size of a long long int
             chunk.send_keyspace(-1, task['taskId'])
         else:
             chunk.send_keyspace(int(keyspace), task['taskId'])
@@ -331,7 +331,7 @@ class HashcatCracker:
             for line in error:
                 if not line:
                     continue
-                query = copyAndSetToken(dict_clientError, self.config.get_value('token'))
+                query = copy_and_set_token(dict_clientError, self.config.get_value('token'))
                 query['taskId'] = task['taskId']
                 query['message'] = line
                 req = JsonRequest(query)
@@ -391,10 +391,10 @@ class HashcatCracker:
             benchmark_sum[1] += float(line[2])
         return str(benchmark_sum[0]) + ":" + str(benchmark_sum[1])
 
-    def output_watcher(self, file_path, proc):
+    def output_watcher(self, file_path, process):
         while not os.path.exists(file_path):
             time.sleep(1)
-            if proc.poll() is not None:
+            if process.poll() is not None:
                 return
         file_handle = open(file_path)
         end_count = 0
@@ -402,7 +402,7 @@ class HashcatCracker:
             where = file_handle.tell()
             line = file_handle.readline()
             if not line:
-                if proc.poll() is None:
+                if process.poll() is None:
                     time.sleep(0.05)
                     file_handle.seek(where)
                 else:
@@ -416,5 +416,5 @@ class HashcatCracker:
                 self.lock.release()
         file_handle.close()
 
-    def agentStopped(self):
+    def agent_stopped(self):
         return self.wasStopped

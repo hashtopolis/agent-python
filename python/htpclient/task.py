@@ -20,7 +20,7 @@ class Task:
         if self.taskId != 0:
             return
         self.task = None
-        query = copyAndSetToken(dict_getTask, self.config.get_value('token'))
+        query = copy_and_set_token(dict_getTask, self.config.get_value('token'))
         req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
