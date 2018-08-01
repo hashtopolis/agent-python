@@ -10,7 +10,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist
+from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi
 from htpclient.dicts import *
 
 
@@ -159,7 +159,7 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and enable_piping and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
+                        if not self.usePipe and enable_piping and task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
                             # we need to try piping -> kill the process and then wait for issuing the chunk again
                             self.usePipe = True
                             chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
@@ -258,9 +258,10 @@ class HashcatCracker:
                             pass
                             # logging.warning("HCOUT: " + line.strip())
                 else:
-                    logging.error("HC error: " + str(line).strip())
-                    msg = str(line).strip()
-                    send_error(msg, self.config.get_value('token'), task['taskId'])
+                    msg = escape_ansi(line.replace(b"\r\n", b"\n").decode('utf-8')).strip()
+                    if msg:
+                        logging.error("HC error: " + msg)
+                        send_error(msg, self.config.get_value('token'), task['taskId'])
 
     def measure_keyspace(self, task, chunk):
         if task['usePrince']:
@@ -328,8 +329,7 @@ class HashcatCracker:
         logging.debug("started benchmark")
         proc.wait()  # wait until done
         if error:
-            # TODO: strip here the ANSI color stuff from the errors
-            error = error.replace(b"\r\n", b"\n").decode('utf-8')
+            error = escape_ansi(error.replace(b"\r\n", b"\n").decode('utf-8'))
             # parse errors and send it to server
             error = error.split('\n')
             for line in error:

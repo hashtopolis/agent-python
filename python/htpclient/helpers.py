@@ -1,3 +1,4 @@
+import re
 import signal
 import sys
 import platform
@@ -99,3 +100,8 @@ def update_files(command, prince=False):
         else:
             ret.append(part)
     return " ".join(ret)
+
+
+def escape_ansi(line):
+    ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
+    return ansi_escape.sub('', line)
