@@ -296,8 +296,8 @@ class HashcatCracker:
             logging.debug("CALL: " + full_cmd)
             output = subprocess.check_output(full_cmd, shell=True, cwd="prince")
         except subprocess.CalledProcessError:
-            logging.error("Error during keyspace measure")
-            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            logging.error("Error during PRINCE keyspace measure")
+            send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'])
             return
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
