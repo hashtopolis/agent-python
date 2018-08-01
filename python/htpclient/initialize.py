@@ -59,12 +59,22 @@ class Initialize:
         logging.info("Collecting agent data...")
         devices = []
         if Initialize.get_os() == 0:  # linux
-            output = subprocess.check_output("lscpu | grep 'Model name'", shell=True)
+            output = subprocess.check_output("cat /proc/cpuinfo", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            tmp = []
             for line in output:
-                if not line:
+                line = line.strip()
+                if not line.startswith('model name') and not line.startswith('physical id'):
                     continue
-                devices.append(line.replace("Model name:", "").strip("\r\n "))
+                value = line.split(':', 1)[1].strip()
+                tmp.append(value)
+
+            pairs = []
+            for i in range(0, len(tmp), 2):
+                pairs.append("%s:%s" % (tmp[i + 1], tmp[i]))
+
+            for line in sorted(set(pairs)):
+                devices.append(line.split(':', 1)[1].replace('\t', ' ').replace('    ', ' '))
             try:
                 output = subprocess.check_output("lspci | grep -E 'VGA compatible controller|3D controller'", shell=True)
             except subprocess.CalledProcessError:
