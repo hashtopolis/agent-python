@@ -67,6 +67,8 @@ class Initialize:
                 if not line.startswith('model name') and not line.startswith('physical id'):
                     continue
                 value = line.split(':', 1)[1].strip()
+                while '  ' in value:
+                    value = value.replace('  ', ' ')
                 tmp.append(value)
 
             pairs = []
@@ -74,7 +76,7 @@ class Initialize:
                 pairs.append("%s:%s" % (tmp[i + 1], tmp[i]))
 
             for line in sorted(set(pairs)):
-                devices.append(line.split(':', 1)[1].replace('\t', ' ').replace('    ', ' '))
+                devices.append(line.split(':', 1)[1].replace('\t', ' '))
             try:
                 output = subprocess.check_output("lspci | grep -E 'VGA compatible controller|3D controller'", shell=True)
             except subprocess.CalledProcessError:
