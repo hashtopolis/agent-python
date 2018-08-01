@@ -1,4 +1,3 @@
-import platform
 import uuid
 from time import sleep
 
@@ -24,17 +23,17 @@ class Initialize:
 
     @staticmethod
     def get_os():
-        os = platform.system()
+        operating_system = platform.system()
         try:
-            return dict_os[os]
+            return dict_os[operating_system]
         except KeyError:
-            logging.debug("OS: %s" % os)
+            logging.debug("OS: %s" % operating_system)
             log_error_and_exit("It seems your operating system is not supported.")
 
     @staticmethod
     def get_os_extension():
-        os = Initialize.get_os()
-        return dict_ext[os]
+        operating_system = Initialize.get_os()
+        return dict_ext[operating_system]
 
     def __login(self):
         query = copy_and_set_token(dict_login, self.config.get_value('token'))

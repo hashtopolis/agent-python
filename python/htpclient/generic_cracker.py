@@ -169,5 +169,5 @@ class GenericCracker:
         if not stream.closed:
             stream.close()
 
-    def agentStopped(self):
+    def agent_stopped(self):
         return False

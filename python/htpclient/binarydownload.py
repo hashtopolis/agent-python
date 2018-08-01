@@ -43,7 +43,7 @@ class BinaryDownload:
     def check_prince(self):
         logging.debug("Checking if PRINCE is present...")
         path = "prince/"
-        if os.path.isdir(path): # if it already exists, we don't need to download it
+        if os.path.isdir(path):  # if it already exists, we don't need to download it
             logging.debug("PRINCE is already downloaded")
             return True
         logging.debug("PRINCE not found, download...")
@@ -68,7 +68,7 @@ class BinaryDownload:
                 os.system("7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
             else:
                 os.system("./7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
-            for name in os.listdir("temp"): # this part needs to be done because it is compressed with the main subfolder of prince
+            for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
                 if os.path.isdir("temp/" + name):
                     os.rename("temp/" + name, "prince")
                     break

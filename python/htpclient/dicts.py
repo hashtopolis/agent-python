@@ -1,8 +1,8 @@
 from types import MappingProxyType
 
 
-def copy_and_set_token(dict, token):
-    dict_copy = dict.copy()
+def copy_and_set_token(dictionary, token):
+    dict_copy = dictionary.copy()
     dict_copy["token"] = token
     return dict_copy
 
