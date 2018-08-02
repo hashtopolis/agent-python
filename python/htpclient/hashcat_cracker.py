@@ -49,7 +49,7 @@ class HashcatCracker:
 
     def build_pipe_command(self, task, chunk):
         # call the command with piping
-        pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length'])
+        pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
         pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
