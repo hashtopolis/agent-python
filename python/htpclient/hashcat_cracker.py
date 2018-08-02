@@ -128,7 +128,7 @@ class HashcatCracker:
         enable_piping = True
         if self.config.get_value('piping-threshold'):
             piping_threshold = self.config.get_value('piping-threshold')
-        if self.config.get_value('allow-piping'):
+        if self.config.get_value('allow-piping') != '':
             enable_piping = self.config.get_value('allow-piping')
         while True:
             try:
