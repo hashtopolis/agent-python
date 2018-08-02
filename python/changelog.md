@@ -8,6 +8,7 @@
 
 * When a chunk can not ideally fully use the GPU it tries to use piping to increase the speed to the most possible.
 * Agents can now run PRINCE tasks
+* Device detection for CPUs now is independent from localization on Linux computers
 
 ## 0.1.3 -> 0.1.4
 
