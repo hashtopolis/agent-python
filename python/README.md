@@ -1,5 +1,7 @@
 # Hashtopolis Python Agent
 
+[![CodeFactor](https://www.codefactor.io/repository/github/s3inlc/hashtopolis-agent/badge)](https://www.codefactor.io/repository/github/s3inlc/hashtopolis-agent)
+
 This Hashtopolis agent is only compatible with Hashtopolis versions 0.5.0 and higher.
 
 ## Prerequisites

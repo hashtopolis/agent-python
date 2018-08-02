@@ -68,6 +68,8 @@ def loop():
             task_change = True
             task.reset_task()
             continue
+        if task.get_task()['usePrince']:
+            binaryDownload.check_prince()
         if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
             task_change = True
             continue
@@ -98,7 +100,7 @@ def loop():
                 # some error must have occurred on benchmarking
                 continue
             # send result of benchmark
-            query = copyAndSetToken(dict_sendBenchmark, CONFIG.get_value('token'))
+            query = copy_and_set_token(dict_sendBenchmark, CONFIG.get_value('token'))
             query['taskId'] = task.get_task()['taskId']
             query['result'] = result
             query['type'] = task.get_task()['benchType']
@@ -121,7 +123,7 @@ def loop():
         # run chunk
         logging.info("Start chunk...")
         cracker.run_chunk(task.get_task(), chunk.chunk_data())
-        if cracker.agentStopped():
+        if cracker.agent_stopped():
             # if the chunk was aborted by a stop from the server, we need to ask for a task again first
             task.reset_task()
 

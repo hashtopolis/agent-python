@@ -13,7 +13,7 @@ class Hashlist:
         self.chunk = None
 
     def load_hashlist(self, hashlist_id):
-        query = copyAndSetToken(dict_getHashlist, self.config.get_value('token'))
+        query = copy_and_set_token(dict_getHashlist, self.config.get_value('token'))
         query['hashlistId'] = hashlist_id
         req = JsonRequest(query)
         ans = req.execute()

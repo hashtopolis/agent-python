@@ -1,12 +1,15 @@
 ## 0.1.4 -> 0.x.x
 
-### Bugfixes
-
-* Fixed zap handling (including also unsalted hashes)
-
 ### Features
 
 * When a chunk can not ideally fully use the GPU it tries to use piping to increase the speed to the most possible.
+* Agents can now run PRINCE tasks
+* Device detection for CPUs now is independent from localization on Linux computers
+
+### Bugfixes
+
+* Fixed zap handling (including also unsalted hashes)
+* Added delay to avoid very fast looping on agent errors
 
 ## 0.1.3 -> 0.1.4
 
