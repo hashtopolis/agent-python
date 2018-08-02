@@ -68,6 +68,8 @@ def loop():
             task_change = True
             task.reset_task()
             continue
+        if task.get_task()['usePrince']:
+            binaryDownload.check_prince()
         if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
             task_change = True
             continue

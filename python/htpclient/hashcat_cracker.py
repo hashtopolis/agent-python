@@ -60,13 +60,13 @@ class HashcatCracker:
         return self.callPath + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
     def build_prince_command(self, task, chunk):
-        binary = "..\..\prince\pp64."
+        binary = "../../prince/pp64."
         if Initialize.get_os() != 1:
             binary = "./" + binary + "bin"
         else:
             binary += "exe"
         pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
-        pre_args += get_wordlist(update_files(task['attackcmd'])).replace(task['hashlistAlias'], '')
+        pre_args += get_wordlist(update_files(task['attackcmd']).replace(task['hashlistAlias'], ''))
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -290,7 +290,7 @@ class HashcatCracker:
             binary = "./" + binary + "bin"
         else:
             binary += "exe"
-        full_cmd = binary + " --keyspace " + get_wordlist(update_files(task['attackcmd'], True)).replace(task['hashlistAlias'], "")
+        full_cmd = binary + " --keyspace " + get_wordlist(update_files(task['attackcmd'], True).replace(task['hashlistAlias'], ""))
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
