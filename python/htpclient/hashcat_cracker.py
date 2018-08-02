@@ -1,6 +1,7 @@
 import string
 import logging
 import subprocess
+from time import sleep
 from queue import Queue, Empty
 from threading import Thread, Lock
 
@@ -225,6 +226,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
+                                sleep(5)
                                 return
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
@@ -262,6 +264,7 @@ class HashcatCracker:
                     if msg:
                         logging.error("HC error: " + msg)
                         send_error(msg, self.config.get_value('token'), task['taskId'])
+                        sleep(5)
 
     def measure_keyspace(self, task, chunk):
         if task['usePrince']:
