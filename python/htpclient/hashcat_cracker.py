@@ -125,7 +125,7 @@ class HashcatCracker:
     def run_loop(self, proc, chunk, task):
         self.cracks = []
         piping_threshold = 95
-        enable_piping = True
+        enable_piping = False
         if self.config.get_value('piping-threshold'):
             piping_threshold = self.config.get_value('piping-threshold')
         if self.config.get_value('allow-piping') != '':
