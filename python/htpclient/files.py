@@ -17,8 +17,7 @@ class Files:
 
     def check_files(self, files, task_id):
         for file in files:
-            if os.path.isfile("files/" + file) or os.path.isfile("files/" + file.replace(".7z", ".txt")):
-                continue
+            file_localpath = "files/" + file
             query = copy_and_set_token(ditc_getFile, self.config.get_value('token'))
             query['taskId'] = task_id
             query['file'] = file
@@ -33,7 +32,20 @@ class Files:
                 sleep(5)
                 return False
             else:
-                Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "files/" + file)
+                file_size = int(ans['filesize'])
+                if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size == file_size:
+                    continue
+                # TODO: we might need a better check for this
+                if os.path.isfile(file_localpath.replace(".7z", ".txt")):
+                    continue
+                if self.config.get_value('rsync') and Initialize.get_os() != 1:
+                    Download.rsync(self.config.get_value('rsync-path') + '/' + file, file_localpath)
+                else:
+                    Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], file_localpath)
+                if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size != file_size:
+                    logging.error("file size mismatch on file: %s" % file)
+                    sleep(5)
+                    return False
                 if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile("files/" + file.replace(".7z", ".txt")):
                     # extract if needed
                     if Initialize.get_os() != 1:

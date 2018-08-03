@@ -2,8 +2,8 @@ import logging
 from time import sleep
 
 import requests
-
 import sys
+import os
 
 from htpclient.initialize import Initialize
 
@@ -43,3 +43,8 @@ class Download:
             logging.error("Download error: " + str(e))
             sleep(30)
             return False
+
+    @staticmethod
+    def rsync(remote_path, local_path):
+        logging.info('getting file "%s" via rsync' % local_path.split('/')[-1])
+        os.system('rsync -avzP --partial %s %s' % (remote_path, local_path))
