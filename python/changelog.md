@@ -1,3 +1,9 @@
+## 0.1.5 -> 0.x.x
+
+### Bugfixes
+
+* Fixed reading of allow-piping config variable
+
 ## 0.1.4 -> 0.1.5
 
 ### Features
