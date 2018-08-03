@@ -76,6 +76,7 @@ def loop():
         if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
             continue
         if task_change:
+            binaryDownload.check_client_version()
             logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
             if binaryDownload.get_version()['name'].lower() == 'hashcat':
                 cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
@@ -126,6 +127,7 @@ def loop():
         if cracker.agent_stopped():
             # if the chunk was aborted by a stop from the server, we need to ask for a task again first
             task.reset_task()
+        binaryDownload.check_client_version()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,9 @@
 ## 0.1.5 -> 0.x.x
 
+### Features
+
+* The agent binary can update itself automatically and restart afterwards
+
 ### Bugfixes
 
 * Fixed reading of allow-piping config variable
