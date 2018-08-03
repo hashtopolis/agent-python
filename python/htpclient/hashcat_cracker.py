@@ -214,6 +214,10 @@ class HashcatCracker:
                             query['speed'] = speed
                             query['state'] = status.get_state()
                             query['cracks'] = self.cracks
+                            if status.get_temps():
+                                query['gpuTemp'] = status.get_temps()
+                            if status.get_all_util():
+                                query['gpuUtil'] = status.get_all_util()
                             req = JsonRequest(query)
 
                             logging.debug("Sending " + str(len(self.cracks)) + " cracks...")
