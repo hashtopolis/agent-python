@@ -50,6 +50,7 @@ Optional you can manually set the `debug` property to display more information o
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 4.2.0
 * 4.1.0
 * 4.0.1
 * 4.0.0
