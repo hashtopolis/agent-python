@@ -1,6 +1,7 @@
 import logging
 import os.path
 import stat
+import sys
 from time import sleep
 
 from htpclient.config import Config
@@ -16,10 +17,43 @@ class BinaryDownload:
         self.last_version = None
 
     def run(self):
+        self.__check_version()
         self.__check_utils()
 
     def get_version(self):
         return self.last_version
+
+    def __check_version(self):
+        if os.path.isfile("old.zip"):
+            os.unlink("old.zip")  # cleanup old version
+        query = copy_and_set_token(dict_checkVersion, self.config.get_value('token'))
+        query['version'] = Initialize.get_version_number()
+        req = JsonRequest(query)
+        ans = req.execute()
+        if ans is None:
+            logging.error("Agent version check failed!")
+        elif ans['response'] != 'SUCCESS':
+            logging.error("Error from server: " + str(ans['message']))
+        else:
+            if ans['version'] == 'OK':
+                logging.info("Client is up-to-date!")
+            else:
+                url = ans['url']
+                if not url:
+                    logging.warning("Got empty URL for client update!")
+                else:
+                    logging.info("New client version available!")
+                    if os.path.isfile("update.zip"):
+                        os.unlink("update.zip")
+                    Download.download(url, "update.zip")
+                    if os.path.isfile("update.zip") and os.path.getsize("update.zip"):
+                        if os.path.isfile("old.zip"):
+                            os.unlink("old.zip")
+                        os.rename("hashtopolis.zip", "old.zip")
+                        os.rename("update.zip", "hashtopolis.zip")
+                        logging.info("Update received, restarting client...")
+                        os.execl(sys.executable, sys.executable, "hashtopolis.zip")
+                        exit(0)
 
     def __check_utils(self):
         path = '7zr' + Initialize.get_os_extension()

@@ -31,6 +31,12 @@ dict_sendBenchmark = MappingProxyType(
      'type': '',
      'result': ''})
 
+dict_checkVersion = MappingProxyType(
+    {'action': 'checkClientVersion',
+     'token': '',
+     'version': '',
+     'type': 'python'})
+
 dict_downloadBinary = MappingProxyType(
     {'action': 'downloadBinary',
      'token': '',
