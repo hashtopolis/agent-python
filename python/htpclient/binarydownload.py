@@ -17,13 +17,13 @@ class BinaryDownload:
         self.last_version = None
 
     def run(self):
-        self.__check_version()
+        self.check_client_version()
         self.__check_utils()
 
     def get_version(self):
         return self.last_version
 
-    def __check_version(self):
+    def check_client_version(self):
         if os.path.isfile("old.zip"):
             os.unlink("old.zip")  # cleanup old version
         query = copy_and_set_token(dict_checkVersion, self.config.get_value('token'))

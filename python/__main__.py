@@ -126,6 +126,7 @@ def loop():
         if cracker.agent_stopped():
             # if the chunk was aborted by a stop from the server, we need to ask for a task again first
             task.reset_task()
+        binaryDownload.check_client_version()
 
 
 if __name__ == "__main__":
