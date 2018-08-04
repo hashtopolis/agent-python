@@ -35,7 +35,7 @@ When you run the client for the first time it will ask automatically for all the
 }
 ```
 
-## Overview
+### Overview
 
 | field            | type    | default | description                                                     |
 |------------------|---------|---------|-----------------------------------------------------------------|
@@ -49,7 +49,7 @@ When you run the client for the first time it will ask automatically for all the
 | rsync            | boolean | false   | Enables download of wordlists and rules via rsync               |
 | rsync-path       | string  |         | Remote path to hashtopolis files directory                      |
 
-## Debug example
+### Debug example
 
 ```
 {
@@ -60,7 +60,7 @@ When you run the client for the first time it will ask automatically for all the
 }
 ```
 
-## rsync
+### rsync
 
 You need a user on the server which can automatically login (e.g. SSH keys) and has read access to the files directory of hashtopolis. On the client side you need rsync installed and set the following lines in your agent config.
 
