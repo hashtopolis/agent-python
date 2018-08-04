@@ -151,7 +151,7 @@ namespace hashtopolis
                 }
             }
 
-            string AppVersion = "0.52.4";
+            string AppVersion = "0.52.6";
             Console.WriteLine("Client Version " + AppVersion);
 
             initConnect();
@@ -190,7 +190,6 @@ namespace hashtopolis
             {
                 Console.WriteLine("Failed to initialize 7zip, proceeding without. \n The client may not be able to extract compressed files");
             }
-
 
             taskClass tasks = new taskClass
             {
