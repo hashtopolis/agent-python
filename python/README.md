@@ -35,15 +35,38 @@ When you run the client for the first time it will ask automatically for all the
 }
 ```
 
-Optional you can manually set the `debug` property to display more information on the console and the log.
+## Overview
+
+| field            | type    | default | description                                                     |
+|------------------|---------|---------|-----------------------------------------------------------------|
+| voucher          | string  |         | Used for agent registration (will be prompted on first start)   |
+| url              | string  |         | The hashtopolis API endpoint (will be prompted on first start)  |
+| token            | string  |         | The access token for the API (sent by server on registration)   |
+| uuid             | string  |         | Unique identifier of the agent (generated on registration)      |
+| debug            | boolean | false   | Enables debug output                                            |
+| allow-piping     | boolean | false   | Allows hashcat to read password candidates from stdin           |
+| piping-threshold | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value |
+| rsync            | boolean | false   | Enables download of wordlists and rules via rsync               |
+| rsync-path       | string  |         | Remote path to hashtopolis files directory                      |
+
+## Debug example
 
 ```
 {
   "url": "https://coray.org/htp-test/src/api/server.php", 
   "token": "7RNDqtnPxm",
-  "debug": true,
-  "uuid": "49dcd31c-3637-4f2a-8df1-b545202df5b3"
+  "uuid": "49dcd31c-3637-4f2a-8df1-b545202df5b3",
+  "debug": true
 }
+```
+
+## rsync
+
+You need a user on the server which can automatically login (e.g. SSH keys) and has read access to the files directory of hashtopolis. On the client side you need rsync installed and set the following lines in your agent config.
+
+```
+  "rsync": true,
+  "rsync-path": "user@yourserver:/path/to/hashtopolis/files"
 ```
 
 ## Hashcat Compatibility
