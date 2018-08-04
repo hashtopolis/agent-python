@@ -450,7 +450,6 @@ public class registerClass
                 while (registerAgent(Console.ReadLine()) == false)
                 {
                     Console.WriteLine("Invalid voucher, please try again");
-                    string voucher = Console.ReadLine();
                 }
             }
             return false;
