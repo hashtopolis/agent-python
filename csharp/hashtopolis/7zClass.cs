@@ -32,7 +32,9 @@ namespace hashtopolis
                 binPath += ".exe";
             }
 
-            if (!File.Exists(binPath))
+            FileInfo f = new FileInfo(binPath);
+
+            if (!File.Exists(binPath) || f.Length == 0)
             {
                 Console.WriteLine("Downloading 7zip binary");
                 jsonClass jsC = new jsonClass { debugFlag = true, connectURL = connectURL };
@@ -92,8 +94,12 @@ namespace hashtopolis
             ProcessStartInfo pinfo = new ProcessStartInfo();
             pinfo.FileName = binPath;
             pinfo.WorkingDirectory = appPath;
+            pinfo.UseShellExecute = false;
+            pinfo.RedirectStandardError = true;
+            pinfo.RedirectStandardOutput = true;
             pinfo.Arguments = " x -y -o\"" + outDir + "\" \"" + archivePath + "\"";
-
+            string stdOutSingle = "";
+            Boolean unpackFailed = false;
             Process unpak = new Process();
             unpak.StartInfo = pinfo;
 
@@ -113,6 +119,18 @@ namespace hashtopolis
             try
             {
                 if (!unpak.Start()) return false;
+                while (!unpak.HasExited)
+                {
+                    while (!unpak.StandardOutput.EndOfStream)
+                    {
+                        stdOutSingle = unpak.StandardOutput.ReadLine().TrimEnd();
+                        if (stdOutSingle == "Error: Can not open file as archive")
+                        {
+                            unpackFailed = true;
+                        }
+                    }
+                }
+                unpak.StandardOutput.Close();
             }
             catch
             {
@@ -124,6 +142,12 @@ namespace hashtopolis
                 unpak.WaitForExit();
             }
             
+            if (unpackFailed == true)
+            {
+                Console.WriteLine("Failed to extract " + archivePath);
+                Console.WriteLine("WARNING:Some needed files may be missing and the tasks may not start correctly");
+                return false;
+            }
             return true;
 
         }
