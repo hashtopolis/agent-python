@@ -1,3 +1,4 @@
+import re
 import signal
 import sys
 import platform
@@ -7,7 +8,7 @@ from types import MappingProxyType
 import os
 import subprocess
 
-from htpclient.dicts import copyAndSetToken, dict_clientError
+from htpclient.dicts import copy_and_set_token, dict_clientError
 from htpclient.jsonRequest import JsonRequest
 
 
@@ -44,23 +45,63 @@ def kill_hashcat(pid, get_os):
 
 
 def send_error(error, token, task_id):
-    query = copyAndSetToken(dict_clientError, token)
+    query = copy_and_set_token(dict_clientError, token)
     query['message'] = error
     query['taskId'] = task_id
     req = JsonRequest(query)
     req.execute()
 
 
-def update_files(command):
+def get_wordlist(command):
+    split = clean_list(command.split(" "))
+    for index, part in enumerate(split):
+        if part[0] == '-':
+            continue
+        elif index == 0 or split[index - 1][0] != '-':
+            return part
+    return ''
+
+
+def get_rules_and_hl(command, alias):
+    split = clean_list(command.split(" "))
+    rules = []
+    for index, part in enumerate(split):
+        if index > 0 and (split[index - 1] == '-r' or split[index - 1] == '--rules-file'):
+            rules.append(split[index - 1])
+            rules.append(split[index - 0])
+        if part == alias:
+            rules.append(part)
+    return " ".join(rules)
+
+
+def clean_list(element_list):
+    index = 0
+    for part in element_list:
+        if not part:
+            del element_list[index]
+            index -= 1
+        index += 1
+    return element_list
+
+
+def update_files(command, prince=False):
     split = command.split(" ")
     ret = []
     for part in split:
         # test if file exists
-        if len(part) == 0:
+        if not part:
             continue
         path = "files/" + part
         if os.path.exists(path):
-            ret.append("../../" + path)
+            if prince:
+                ret.append("../" + path)
+            else:
+                ret.append("../../" + path)
         else:
             ret.append(part)
     return " ".join(ret)
+
+
+def escape_ansi(line):
+    ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
+    return ansi_escape.sub('', line)

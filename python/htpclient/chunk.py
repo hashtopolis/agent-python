@@ -5,6 +5,7 @@ from htpclient.config import Config
 from htpclient.jsonRequest import JsonRequest
 from htpclient.dicts import *
 
+
 class Chunk:
     def __init__(self):
         self.config = Config()
@@ -13,9 +14,9 @@ class Chunk:
     def chunk_data(self):
         return self.chunk
 
-    def get_chunk(self, taskId):
-        query = copyAndSetToken(dict_getChunk, self.config.get_value('token'))
-        query['taskId'] = taskId
+    def get_chunk(self, task_id):
+        query = copy_and_set_token(dict_getChunk, self.config.get_value('token'))
+        query['taskId'] = task_id
         req = JsonRequest(query)
         ans = req.execute()
         if ans is None:
@@ -39,7 +40,7 @@ class Chunk:
                 return 1
 
     def send_keyspace(self, keyspace, task_id):
-        query = copyAndSetToken(dict_sendKeyspace, self.config.get_value('token'))
+        query = copy_and_set_token(dict_sendKeyspace, self.config.get_value('token'))
         query['taskId'] = task_id
         query['keyspace'] = int(keyspace)
         req = JsonRequest(query)

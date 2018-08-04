@@ -66,6 +66,9 @@ class HashcatStatus:
     def get_progress_total(self):
         return self.progress[1]
 
+    def get_all_util(self):
+        return self.util
+
     def get_util(self):
         if not self.util:
             return -1
