@@ -1,3 +1,14 @@
+## 0.1.6 -> 0.x.x
+
+### Features
+
+* Agent sends GPU utilization and temperature (if available)
+* Added support for downloading files via rsync
+
+### Bugfixes
+
+* Catching the correct exception on downloads
+
 ## 0.1.5 -> 0.1.6
 
 ### Features
