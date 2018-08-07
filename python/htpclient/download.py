@@ -39,7 +39,7 @@ class Download:
                         sys.stdout.flush()
             sys.stdout.write("\n")
             return True
-        except ConnectionError as e:
+        except requests.exceptions.ConnectionError as e:
             logging.error("Download error: " + str(e))
             sleep(30)
             return False
