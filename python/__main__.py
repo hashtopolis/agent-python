@@ -74,6 +74,7 @@ def loop():
             task_change = True
             continue
         if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
+            task.reset_task()
             continue
         if task_change:
             binaryDownload.check_client_version()
