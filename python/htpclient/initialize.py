@@ -54,9 +54,11 @@ class Initialize:
             self.__login()
         else:
             logging.info("Login successful!")
-            if ans['multicastEnabled']:
+            if ans['multicastEnabled'] and self.get_os() == 0:  # currently only allow linux
                 logging.info("Multicast enabled!")
                 self.config.set_value('multicast', True)
+                if not os.path.isdir("multicast"):
+                    os.mkdir("multicast")
 
     def __update_information(self):
         if not self.config.get_value('uuid'):
