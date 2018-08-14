@@ -54,6 +54,9 @@ class Initialize:
             self.__login()
         else:
             logging.info("Login successful!")
+            if ans['multicastEnabled']:
+                logging.info("Multicast enabled!")
+                self.config.set_value('multicast', True)
 
     def __update_information(self):
         if not self.config.get_value('uuid'):
