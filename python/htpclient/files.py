@@ -35,6 +35,9 @@ class Files:
                 file_size = int(ans['filesize'])
                 if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size == file_size:
                     continue
+                elif self.config.get_value('multicast'):
+                    sleep(5)  # in case the file is not there yet (or not completely), we just wait some time and then try again
+                    return False
                 # TODO: we might need a better check for this
                 if os.path.isfile(file_localpath.replace(".7z", ".txt")):
                     continue
