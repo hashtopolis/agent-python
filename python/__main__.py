@@ -42,7 +42,7 @@ def init():
     binaryDownload = BinaryDownload()
     binaryDownload.run()
     if CONFIG.get_value('multicast') and Initialize().get_os() == 0:
-        start_uftpd(Initialize().get_os(), CONFIG)
+        start_uftpd(Initialize().get_os_extension(), CONFIG)
 
 
 def loop():
