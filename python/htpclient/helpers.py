@@ -54,13 +54,14 @@ def send_error(error, token, task_id):
 
 
 def start_uftpd(os_extension, config):
+    subprocess.check_output("killall uftpd", shell=True)  # stop running service to make sure we can start it again
     path = './uftpd' + os_extension
     cmd = path + ' '
     if config.get_value('multicast-device'):
-        cmd += config.get_value('multicast-device') + ' '
+        cmd += "-I " + config.get_value('multicast-device') + ' '
     else:
-        cmd += "eth0 "  # wild guess as default
-    cmd += "-D " + os.path.abspath("files/")
+        cmd += "-I eth0 "  # wild guess as default
+    cmd += "-D " + os.path.abspath("files/") + ' '
     cmd += "-L " + os.path.abspath("multicast/" + str(time.time()) + ".log")
     logging.debug("CALL: " + cmd)
     subprocess.check_output(cmd, shell=True)
