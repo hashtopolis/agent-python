@@ -1,3 +1,9 @@
+## 0.1.7 -> 0.x.x
+
+### Features
+
+* Added support for UDP multicast downloads on linux computers in local environments
+
 ## 0.1.6 -> 0.1.7
 
 ### Features
