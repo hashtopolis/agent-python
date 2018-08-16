@@ -40,6 +40,10 @@ class Files:
                     continue  # ignore invalid file names
                 elif os.path.exists("files/" + file):
                     logging.info("Delete file '" + file + "' as requested by server...")
+                    if os.path.splitext("files/" + file)[1] == '.7z':
+                        if os.path.exists("files/" + file.replace(".7z", ".txt")):
+                            logging.info("Also delete assumed wordlist from archive of same file...")
+                            os.unlink("files/" + file.replace(".7z", ".txt"))
                     os.unlink("files/" + file)
 
     def check_files(self, files, task_id):
