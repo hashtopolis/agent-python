@@ -38,17 +38,19 @@ When you run the client for the first time it will ask automatically for all the
 
 ### Overview
 
-| field            | type    | default | description                                                     |
-|------------------|---------|---------|-----------------------------------------------------------------|
-| voucher          | string  |         | Used for agent registration (will be prompted on first start)   |
-| url              | string  |         | The hashtopolis API endpoint (will be prompted on first start)  |
-| token            | string  |         | The access token for the API (sent by server on registration)   |
-| uuid             | string  |         | Unique identifier of the agent (generated on registration)      |
-| debug            | boolean | false   | Enables debug output                                            |
-| allow-piping     | boolean | false   | Allows hashcat to read password candidates from stdin           |
-| piping-threshold | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value |
-| rsync            | boolean | false   | Enables download of wordlists and rules via rsync               |
-| rsync-path       | string  |         | Remote path to hashtopolis files directory                      |
+| field                 | type    | default | description                                                                |
+|-----------------------|---------|---------|----------------------------------------------------------------------------|
+| voucher               | string  |         | Used for agent registration (will be prompted on first start)              |
+| url                   | string  |         | The hashtopolis API endpoint (will be prompted on first start)             |
+| token                 | string  |         | The access token for the API (sent by server on registration)              |
+| uuid                  | string  |         | Unique identifier of the agent (generated on registration)                 |
+| debug                 | boolean | false   | Enables debug output                                                       |
+| allow-piping          | boolean | false   | Allows hashcat to read password candidates from stdin                      |
+| piping-threshold      | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value            |
+| rsync                 | boolean | false   | Enables download of wordlists and rules via rsync                          |
+| rsync-path            | string  |         | Remote path to hashtopolis files directory                                 |
+| file-deletion-disable | boolean | false   | Disable requesting the server for files to delete                          |
+| file-deletion-interval| integer | 600     | Interval time in seconds in which the agent should check for deleted files |
 
 ### Debug example
 
