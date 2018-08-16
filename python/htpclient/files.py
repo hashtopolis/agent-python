@@ -38,6 +38,8 @@ class Files:
             for filename in files:
                 if filename.find("/") != -1 or filename.find("\\") != -1:
                     continue  # ignore invalid file names
+                elif os.path.dirname("files/" + filename) != "files":
+                    continue  # ignore any case in which we would leave the files folder
                 elif os.path.exists("files/" + filename):
                     logging.info("Delete file '" + filename + "' as requested by server...")
                     if os.path.splitext("files/" + filename)[1] == '.7z':
