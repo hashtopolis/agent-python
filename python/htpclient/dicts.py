@@ -103,3 +103,7 @@ ditc_getFile = MappingProxyType(
      'token': '',
      'taskId': '',
      'file': ''})
+
+ditc_getFileStatus = MappingProxyType(
+    {'action': 'getFileStatus',
+     'token': ''})

@@ -55,6 +55,7 @@ def loop():
     cracker = None
     while True:
         CONFIG.update()
+        files.deletion_check()
         if task.get_task() is not None:
             last_task_id = task.get_task()['taskId']
         task.load_task()
