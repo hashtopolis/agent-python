@@ -35,16 +35,16 @@ class Files:
             logging.error("Getting of file status failed: " + str(ans))
         else:
             files = ans['filenames']
-            for file in files:
-                if file.find("/") != -1 or file.find("\\") != -1:
+            for filename in files:
+                if filename.find("/") != -1 or filename.find("\\") != -1:
                     continue  # ignore invalid file names
-                elif os.path.exists("files/" + file):
-                    logging.info("Delete file '" + file + "' as requested by server...")
-                    if os.path.splitext("files/" + file)[1] == '.7z':
-                        if os.path.exists("files/" + file.replace(".7z", ".txt")):
+                elif os.path.exists("files/" + filename):
+                    logging.info("Delete file '" + filename + "' as requested by server...")
+                    if os.path.splitext("files/" + filename)[1] == '.7z':
+                        if os.path.exists("files/" + filename.replace(".7z", ".txt")):
                             logging.info("Also delete assumed wordlist from archive of same file...")
-                            os.unlink("files/" + file.replace(".7z", ".txt"))
-                    os.unlink("files/" + file)
+                            os.unlink("files/" + filename.replace(".7z", ".txt"))
+                    os.unlink("files/" + filename)
 
     def check_files(self, files, task_id):
         for file in files:
