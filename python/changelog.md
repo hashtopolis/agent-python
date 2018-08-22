@@ -3,6 +3,7 @@
 ### Features
 
 * The agent can request a to-delete filename list from the server and then cleanup them locally
+* Piping can be enforced from the server for specific tasks.
 
 ## 0.1.6 -> 0.1.7
 
