@@ -55,7 +55,7 @@ def send_error(error, token, task_id):
 
 def start_uftpd(os_extension, config):
     try:
-        subprocess.check_output("killall uftpd", shell=True)  # stop running service to make sure we can start it again
+        subprocess.check_output("killall -s 9 uftpd", shell=True)  # stop running service to make sure we can start it again
     except subprocess.CalledProcessError:
         pass  # ignore in case uftpd was not running
     path = './uftpd' + os_extension
