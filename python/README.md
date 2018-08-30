@@ -72,6 +72,10 @@ You need a user on the server which can automatically login (e.g. SSH keys) and 
   "rsync-path": "user@yourserver:/path/to/hashtopolis/files"
 ```
 
+### Multicast
+
+In order to use the multicast distribution for files, please make sure that the agents and server are prepared according to this:https://github.com/s3inlc/hashtopolis-runner
+
 ## Hashcat Compatibility
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
