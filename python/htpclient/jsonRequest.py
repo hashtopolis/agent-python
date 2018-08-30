@@ -1,3 +1,4 @@
+import logging
 import requests
 
 from htpclient.config import *

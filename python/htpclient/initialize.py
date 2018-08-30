@@ -54,7 +54,7 @@ class Initialize:
             self.__login()
         else:
             logging.info("Login successful!")
-            if ans['multicastEnabled'] and self.get_os() == 0:  # currently only allow linux
+            if 'multicastEnabled' in ans and ans['multicastEnabled'] and self.get_os() == 0:  # currently only allow linux
                 logging.info("Multicast enabled!")
                 self.config.set_value('multicast', True)
                 if not os.path.isdir("multicast"):
