@@ -6,6 +6,7 @@ from htpclient.files import Files
 from htpclient.generic_cracker import GenericCracker
 from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
+from htpclient.helpers import start_uftpd
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 from htpclient.dicts import *
@@ -40,6 +41,8 @@ def init():
     # download and updates
     binaryDownload = BinaryDownload()
     binaryDownload.run()
+    if CONFIG.get_value('multicast') and Initialize().get_os() == 0:
+        start_uftpd(Initialize().get_os_extension(), CONFIG)
 
 
 def loop():

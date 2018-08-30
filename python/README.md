@@ -48,6 +48,7 @@ When you run the client for the first time it will ask automatically for all the
 | piping-threshold      | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value            |
 | rsync                 | boolean | false   | Enables download of wordlists and rules via rsync                          |
 | rsync-path            | string  |         | Remote path to hashtopolis files directory                                 |
+| multicast-device      | string  | eth0    | Device which is used to retrieve UDP multicast file distribution           |
 | file-deletion-disable | boolean | false   | Disable requesting the server for files to delete                          |
 | file-deletion-interval| integer | 600     | Interval time in seconds in which the agent should check for deleted files |
 
@@ -71,10 +72,15 @@ You need a user on the server which can automatically login (e.g. SSH keys) and 
   "rsync-path": "user@yourserver:/path/to/hashtopolis/files"
 ```
 
+### Multicast
+
+In order to use the multicast distribution for files, please make sure that the agents and server are prepared according to this:https://github.com/s3inlc/hashtopolis-runner
+
 ## Hashcat Compatibility
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 4.2.1
 * 4.2.0
 * 4.1.0
 * 4.0.1

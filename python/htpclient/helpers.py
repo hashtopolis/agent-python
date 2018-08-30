@@ -3,6 +3,7 @@ import signal
 import sys
 import platform
 import logging
+import time
 from types import MappingProxyType
 
 import os
@@ -50,6 +51,24 @@ def send_error(error, token, task_id):
     query['taskId'] = task_id
     req = JsonRequest(query)
     req.execute()
+
+
+def start_uftpd(os_extension, config):
+    try:
+        subprocess.check_output("killall -s 9 uftpd", shell=True)  # stop running service to make sure we can start it again
+    except subprocess.CalledProcessError:
+        pass  # ignore in case uftpd was not running
+    path = './uftpd' + os_extension
+    cmd = path + ' '
+    if config.get_value('multicast-device'):
+        cmd += "-I " + config.get_value('multicast-device') + ' '
+    else:
+        cmd += "-I eth0 "  # wild guess as default
+    cmd += "-D " + os.path.abspath("files/") + ' '
+    cmd += "-L " + os.path.abspath("multicast/" + str(time.time()) + ".log")
+    logging.debug("CALL: " + cmd)
+    subprocess.check_output(cmd, shell=True)
+    logging.info("Started multicast daemon")
 
 
 def get_wordlist(command):

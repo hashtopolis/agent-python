@@ -73,6 +73,23 @@ class BinaryDownload:
             else:
                 Download.download(ans['executable'], path)
                 os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+        path = 'uftpd' + Initialize.get_os_extension()
+        if not os.path.isfile(path) and self.config.get_value('multicast'):
+            query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
+            query['type'] = 'uftpd'
+            req = JsonRequest(query)
+            ans = req.execute()
+            if ans is None:
+                logging.error("Failed to get uftpd!")
+                sleep(5)
+                self.__check_utils()
+            elif ans['response'] != 'SUCCESS' or not ans['executable']:
+                logging.error("Getting uftpd failed: " + str(ans))
+                sleep(5)
+                self.__check_utils()
+            else:
+                Download.download(ans['executable'], path)
+                os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     def check_prince(self):
         logging.debug("Checking if PRINCE is present...")
