@@ -75,7 +75,7 @@ def loop():
         if task.get_task()['usePrince']:
             binaryDownload.check_prince()
         if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
-            task_change = True
+            task.reset_task()
             continue
         if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
             task.reset_task()
