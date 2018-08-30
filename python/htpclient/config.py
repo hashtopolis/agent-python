@@ -1,5 +1,4 @@
 import os.path
-import logging
 import json
 
 
@@ -12,7 +11,6 @@ class Config:
         if os.path.isfile(self.CONFIG_FILE):
             self.config = json.load(open(self.CONFIG_FILE))
         else:
-            logging.debug("No config file present, create one")
             self.__save()
 
     def update(self):

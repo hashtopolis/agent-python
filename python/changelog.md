@@ -5,6 +5,10 @@
 
 * Added support for UDP multicast downloads on linux computers in local environments
 
+### Bugfixes
+
+* Fixed when a agent starts the first time there was no logging output
+
 ## 0.1.7 -> 0.1.8
 
 ### Features
