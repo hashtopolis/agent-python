@@ -1,8 +1,16 @@
-## 0.1.7 -> 0.x.x
+
+## 0.1.8 -> 0.x.x
 
 ### Features
 
 * Added support for UDP multicast downloads on linux computers in local environments
+
+## 0.1.7 -> 0.1.8
+
+### Features
+
+* The agent can request a to-delete filename list from the server and then cleanup them locally
+* Piping can be enforced from the server for specific tasks.
 
 ## 0.1.6 -> 0.1.7
 

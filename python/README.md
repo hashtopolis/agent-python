@@ -1,6 +1,5 @@
 # Hashtopolis Python Agent
 
-[![CodeFactor](https://www.codefactor.io/repository/github/s3inlc/hashtopolis-agent/badge)](https://www.codefactor.io/repository/github/s3inlc/hashtopolis-agent)
 [![LoC](https://tokei.rs/b1/github/s3inlc/Hashtopolis-Agent?category=code)](https://github.com/s3inlc/Hashtopolis-Agent)
 
 This Hashtopolis agent is only compatible with Hashtopolis versions 0.5.0 and higher.
@@ -38,18 +37,20 @@ When you run the client for the first time it will ask automatically for all the
 
 ### Overview
 
-| field            | type    | default | description                                                      |
-|------------------|---------|---------|------------------------------------------------------------------|
-| voucher          | string  |         | Used for agent registration (will be prompted on first start)    |
-| url              | string  |         | The hashtopolis API endpoint (will be prompted on first start)   |
-| token            | string  |         | The access token for the API (sent by server on registration)    |
-| uuid             | string  |         | Unique identifier of the agent (generated on registration)       |
-| debug            | boolean | false   | Enables debug output                                             |
-| allow-piping     | boolean | false   | Allows hashcat to read password candidates from stdin            |
-| piping-threshold | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value  | 
-| rsync            | boolean | false   | Enables download of wordlists and rules via rsync                |
-| rsync-path       | string  |         | Remote path to hashtopolis files directory                       |
-| multicast-device | string  | eth0    | Device which is used to retrieve UDP multicast file distribution |
+| field                 | type    | default | description                                                                |
+|-----------------------|---------|---------|----------------------------------------------------------------------------|
+| voucher               | string  |         | Used for agent registration (will be prompted on first start)              |
+| url                   | string  |         | The hashtopolis API endpoint (will be prompted on first start)             |
+| token                 | string  |         | The access token for the API (sent by server on registration)              |
+| uuid                  | string  |         | Unique identifier of the agent (generated on registration)                 |
+| debug                 | boolean | false   | Enables debug output                                                       |
+| allow-piping          | boolean | false   | Allows hashcat to read password candidates from stdin                      |
+| piping-threshold      | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value            |
+| rsync                 | boolean | false   | Enables download of wordlists and rules via rsync                          |
+| rsync-path            | string  |         | Remote path to hashtopolis files directory                                 |
+| multicast-device      | string  | eth0    | Device which is used to retrieve UDP multicast file distribution           |
+| file-deletion-disable | boolean | false   | Disable requesting the server for files to delete                          |
+| file-deletion-interval| integer | 600     | Interval time in seconds in which the agent should check for deleted files |
 
 ### Debug example
 
@@ -75,6 +76,7 @@ You need a user on the server which can automatically login (e.g. SSH keys) and 
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 4.2.1
 * 4.2.0
 * 4.1.0
 * 4.0.1

@@ -1,4 +1,5 @@
 import logging
+import time
 from time import sleep
 
 import os
@@ -14,6 +15,38 @@ class Files:
     def __init__(self):
         self.config = Config()
         self.chunk = None
+        self.last_check = None
+        self.check_interval = 600
+        if self.config.get_value('file-deletion-interval'):
+            self.check_interval = int(self.config.get_value('file-deletion-interval'))
+
+    def deletion_check(self):
+        if self.config.get_value('file-deletion-disable'):
+            return
+        elif self.last_check is not None and time.time() - self.last_check < self.check_interval:
+            return
+        query = copy_and_set_token(ditc_getFileStatus, self.config.get_value('token'))
+        req = JsonRequest(query)
+        ans = req.execute()
+        self.last_check = time.time()
+        if ans is None:
+            logging.error("Failed to get file status!")
+        elif ans['response'] != 'SUCCESS':
+            logging.error("Getting of file status failed: " + str(ans))
+        else:
+            files = ans['filenames']
+            for filename in files:
+                if filename.find("/") != -1 or filename.find("\\") != -1:
+                    continue  # ignore invalid file names
+                elif os.path.dirname("files/" + filename) != "files":
+                    continue  # ignore any case in which we would leave the files folder
+                elif os.path.exists("files/" + filename):
+                    logging.info("Delete file '" + filename + "' as requested by server...")
+                    if os.path.splitext("files/" + filename)[1] == '.7z':
+                        if os.path.exists("files/" + filename.replace(".7z", ".txt")):
+                            logging.info("Also delete assumed wordlist from archive of same file...")
+                            os.unlink("files/" + filename.replace(".7z", ".txt"))
+                    os.unlink("files/" + filename)
 
     def check_files(self, files, task_id):
         for file in files:

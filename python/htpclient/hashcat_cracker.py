@@ -79,6 +79,9 @@ class HashcatCracker:
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
     def run_chunk(self, task, chunk):
+        if 'enforcePipe' in task and task['enforcePipe']:
+            logging.info("Enforcing pipe command because of task setting...")
+            self.usePipe = True
         if task['usePrince']:
             full_cmd = self.build_prince_command(task, chunk)
         elif self.usePipe:
