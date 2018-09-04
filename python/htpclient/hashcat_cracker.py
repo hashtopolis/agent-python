@@ -40,7 +40,7 @@ class HashcatCracker:
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
@@ -55,7 +55,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         return self.callPath + pre_args + " | " + self.callPath + post_args + task['cmdpars']
@@ -72,7 +72,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
@@ -216,7 +216,11 @@ class HashcatCracker:
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
                             query['state'] = status.get_state()
-                            query['cracks'] = self.cracks
+                            # crack format: hash[:salt]:plain:hex_plain:crack_pos
+                            prepared = []
+                            for crack in self.cracks:
+                                prepared.append(crack.split("\t"))
+                            query['cracks'] = prepared
                             if status.get_temps():
                                 query['gpuTemp'] = status.get_temps()
                             if status.get_all_util():
@@ -250,7 +254,7 @@ class HashcatCracker:
                                 zaps = ans['zaps']
                                 if zaps:
                                     logging.debug("Writing zaps")
-                                    zap_output = ":FF\n".join(zaps) + ':FF\n'
+                                    zap_output = "\tFF\n".join(zaps) + ':FF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()
