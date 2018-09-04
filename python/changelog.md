@@ -1,3 +1,8 @@
+## 0.2.0 -> 0.x.x
+
+### Enhancements
+
+* Added check for chunk length 0 sent from the server to avoid full agent crash on running.
 
 ## 0.1.8 -> 0.2.0
 

@@ -20,9 +20,9 @@ binaryDownload = None
 
 def init():
     global CONFIG, binaryDownload
-    logformat  = '[%(asctime)s] [%(levelname)-5s] %(message)s'
+    logformat = '[%(asctime)s] [%(levelname)-5s] %(message)s'
     dateformat = '%Y-%m-%d %H:%M:%S'
-    logfile  = 'client.log'
+    logfile = 'client.log'
     loglevel = logging.INFO
 
     logging.getLogger("requests").setLevel(logging.WARNING)
@@ -125,6 +125,12 @@ def loop():
             else:
                 logging.info("Server accepted benchmark!")
                 continue
+
+        # check if we have an invalid chunk
+        if chunk.chunk_data()['length'] == 0:
+            logging.error("Invalid chunk size (0) retrieved! Retrying...")
+            task.reset_task()
+            continue
 
         # run chunk
         logging.info("Start chunk...")
