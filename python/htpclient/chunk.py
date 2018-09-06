@@ -35,6 +35,8 @@ class Chunk:
                 return -2
             elif ans['status'] == 'fully_dispatched':
                 return 0
+            elif ans['status'] == 'health_check':
+                return -3
             else:
                 self.chunk = ans
                 return 1

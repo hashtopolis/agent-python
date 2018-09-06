@@ -31,6 +31,22 @@ dict_sendBenchmark = MappingProxyType(
      'type': '',
      'result': ''})
 
+dict_getHealthCheck = MappingProxyType(
+    {'action': 'getHealthCheck',
+     'token': ''}
+)
+
+dict_sendHealthCheck = MappingProxyType(
+    {'action': 'sendHealthCheck',
+     'token': '',
+     'numCracked': 0,
+     'start': 0,
+     'end': 0,
+     'numGpus': 0,
+     'errors': '',
+     'checkId': 0}
+)
+
 dict_checkVersion = MappingProxyType(
     {'action': 'checkClientVersion',
      'token': '',
