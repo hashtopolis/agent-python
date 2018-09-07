@@ -4,6 +4,7 @@
 
 * Added check for chunk length 0 sent from the server to avoid full agent crash on running.
 * Using requests session
+* Added option for using proxies
 
 ## 0.1.8 -> 0.2.0
 

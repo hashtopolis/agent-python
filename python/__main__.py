@@ -39,6 +39,9 @@ def init():
     session = Session(requests.Session()).s
     session.headers.update({'User-Agent': Initialize.get_version()})
 
+    if CONFIG.get_value('proxies'):
+        session.proxies = CONFIG.get_value('proxies')
+
     # connection initialization
     Initialize().run()
     # download and updates
