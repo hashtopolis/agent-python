@@ -166,7 +166,23 @@ namespace hashtopolis
                         collection.Add("PROGRESS_REJ", Math.Round((collection["PROGRESS1"]-collection["REJECTED"]) / collection["PROGRESS2"], 15)); //Total progress value
                         i += 1;
                         break;
-                    
+                    case "UTIL":
+                        while (items[i + 1] != "") //Due to multiple cards, perform micro-loop
+                        {
+                            collection.Add("UTIL" + countStep, Convert.ToDouble(items[i + 1]));
+                            countStep++;
+                            i += 2;
+                        }
+                        break;
+                    case "TEMP":
+                        while (items[i + 1] != "REJECTED") //Due to multiple cards, perform micro-loop
+                        {
+                            collection.Add("TEMP" + countStep, Convert.ToDouble(items[i + 1]));
+                            countStep++;
+                            i += 2;
+                        }
+                        break;
+
                 }
                 i += 1;
             }

@@ -272,7 +272,6 @@ namespace hashtopolis
 
                     sProps.speed = 0;
                     sProps.state = 3; //Can't find the status code list lets try 3
-   
                     sProps.cracks = new List<string>();
                     
                     jsonString = jsC.toJson(sProps);
