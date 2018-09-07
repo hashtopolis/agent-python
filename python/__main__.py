@@ -36,6 +36,9 @@ def init():
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
+    session = Session(requests.Session()).s
+    session.headers.update({'User-Agent': Initialize.get_version()})
+
     # connection initialization
     Initialize().run()
     # download and updates
