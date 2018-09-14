@@ -237,8 +237,6 @@ namespace hashtopolis
             hcClass.debugFlag = debugFlag;
             Boolean firstRun = true;
             
-
-            
             string oPath = Path.Combine(tasksPath, taskID + "_" + chunkNo + ".txt"); // Path to write th -o file
 
             while (run)
@@ -248,7 +246,6 @@ namespace hashtopolis
                 {
                     if (uploadPackets.Count > 0)
                     {
-
                         singlePacket.Add(uploadPackets[0]);
                         ulQueue = uploadPackets.Count;
                         uploadPackets.RemoveAt(0);
@@ -260,10 +257,16 @@ namespace hashtopolis
                     {
                         sleepTime = 2500; //Decrese the time we process the queue
                     }
+                    firstRun = false;
                 }
 
                 if (firstRun == true) //This is a work around to send a server a dummy stat to prevent timeouts on the initial start
                 {
+
+                    if (sleepTime < 25000)
+                    {
+                        sleepTime += 2000; //Keep backing off the sleep timer until 25 secs
+                    }
                     sProps.token = client.tokenID;
                     sProps.chunkId = chunkNo;
                     sProps.keyspaceProgress = skip;
@@ -281,11 +284,11 @@ namespace hashtopolis
                     {
                         break;
                     }
-                    firstRun = false;
                 }
 
                 if (singlePacket.Count == 0)
                 {
+                    firstRun = false;
                     continue;
                 }
 
@@ -505,6 +508,9 @@ namespace hashtopolis
 
                         Thread thread = new Thread(() => threadPeriodicUpdate(ref uploadPackets, ref packetLock)); 
                         thread.Start(); //Start our thread to monitor the upload queue
+
+                        //Start the monitor thread here
+                       
 
                         hcClass.startAttack(chunkNo, taskID, skip, length, statusTimer, tasksPath); //Start the hashcat binary
                         thread.Join();
