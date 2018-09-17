@@ -255,7 +255,7 @@ namespace hashtopolis
                     }
                     else
                     {
-                        sleepTime = 2500; //Decrese the time we process the queue
+                        sleepTime = 5000; //Decrese the time we process the queue
                     }
                     firstRun = false;
                 }
@@ -263,10 +263,6 @@ namespace hashtopolis
                 if (firstRun == true) //This is a work around to send a server a dummy stat to prevent timeouts on the initial start
                 {
 
-                    if (sleepTime < 25000)
-                    {
-                        sleepTime += 2000; //Keep backing off the sleep timer until 25 secs
-                    }
                     sProps.token = client.tokenID;
                     sProps.chunkId = chunkNo;
                     sProps.keyspaceProgress = skip;

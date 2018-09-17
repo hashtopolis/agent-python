@@ -525,7 +525,17 @@ namespace hashtopolis
 
         }
 
-        public void stdOutTrigger(string stdOut)
+
+        //There is very little discruption to the attack as a very quick lock/unlock is performed on the packet list to pop the job off the queue
+        public void threadReadOutfile(ref List<Packets> uploadPackets, ref object objPacketlock)
+        {
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+
+        }
+
+            public void stdOutTrigger(string stdOut)
         {
 
             if (!string.IsNullOrEmpty(stdOut))
@@ -576,7 +586,6 @@ namespace hashtopolis
                                 passedPackets.Add(new Packets { statusPackets = new Dictionary<string, double>(dStats), crackedPackets = new List<string>(hashlist) });
                                 dStats.Clear();
                                 hashlist.Clear();
-
                             }
                         }
                     }
