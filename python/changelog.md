@@ -1,5 +1,9 @@
 ## 0.2.0 -> 0.x.x
 
+### Bugfixes
+
+* Fixed benchmark results when having many GPUs in one agent.
+
 ### Enhancements
 
 * Added check for chunk length 0 sent from the server to avoid full agent crash on running.

@@ -406,8 +406,8 @@ class HashcatCracker:
             if len(line) != 3:
                 continue
             benchmark_sum[0] += int(line[1])
-            benchmark_sum[1] += float(line[2])
-        return str(benchmark_sum[0]) + ":" + str(benchmark_sum[1])
+            benchmark_sum[1] += float(line[2])*int(line[1])
+        return str(benchmark_sum[0]) + ":" + str(float(benchmark_sum[1]) / benchmark_sum[0])
 
     def output_watcher(self, file_path, process):
         while not os.path.exists(file_path):
