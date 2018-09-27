@@ -394,8 +394,8 @@ class HashcatCracker:
             logging.debug("CALL: " + full_cmd)
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
-            logging.error("Error during keyspace measure, return code: " + str(e.returncode))
-            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            logging.error("Error during speed benchmark, return code: " + str(e.returncode))
+            send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'])
             return 0
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         benchmark_sum = [0, 0]
