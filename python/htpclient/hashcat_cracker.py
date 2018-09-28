@@ -254,7 +254,7 @@ class HashcatCracker:
                                 zaps = ans['zaps']
                                 if zaps:
                                     logging.debug("Writing zaps")
-                                    zap_output = "\tFF\n".join(zaps) + ':FF\n'
+                                    zap_output = "\tFF\n".join(zaps) + '\tFF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()

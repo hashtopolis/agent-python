@@ -1,5 +1,9 @@
 ## 0.2.0 -> 0.x.x
 
+### Features
+
+* Agents can run health checks requested from the server.
+
 ### Bugfixes
 
 * Fixed benchmark results when having many GPUs in one agent.
