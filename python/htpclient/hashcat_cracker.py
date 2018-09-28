@@ -436,3 +436,37 @@ class HashcatCracker:
 
     def agent_stopped(self):
         return self.wasStopped
+
+    def run_health_check(self, attack, hashlist_alias):
+        args = " --machine-readable --quiet"
+        args += " --restore-disable --potfile-disable --session=health "
+        args += update_files(attack).replace(hashlist_alias, "../../hashlists/health_check.txt")
+        args += " -o ../../hashlists/health_check.out"
+        full_cmd = self.callPath + args
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        logging.debug("CALL: " + full_cmd)
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
+        output, error = proc.communicate()
+        logging.debug("Started health check attack")
+        proc.wait()  # wait until done
+        errors = []
+        states = []
+        if error:
+            error = escape_ansi(error.replace(b"\r\n", b"\n").decode('utf-8'))
+            error = error.split('\n')
+            for line in error:
+                if not line:
+                    continue
+                errors.append(line)
+        if output:
+            output = escape_ansi(output.replace(b"\r\n", b"\n").decode('utf-8'))
+            output = output.split('\n')
+            for line in output:
+                if not line:
+                    continue
+                logging.debug(line)
+                status = HashcatStatus(line)
+                if status.is_valid():
+                    states.append(status)
+        return [states, errors]

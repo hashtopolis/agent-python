@@ -1,3 +1,4 @@
+import time
 from time import sleep
 
 from htpclient.binarydownload import BinaryDownload
@@ -6,7 +7,7 @@ from htpclient.files import Files
 from htpclient.generic_cracker import GenericCracker
 from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
-from htpclient.helpers import start_uftpd
+from htpclient.helpers import start_uftpd, file_get_contents
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 from htpclient.dicts import *
@@ -16,6 +17,66 @@ from htpclient.task import Task
 
 CONFIG = None
 binaryDownload = None
+
+
+def run_health_check():
+    global CONFIG, binaryDownload
+    logging.info("Health check requested by server!")
+    logging.info("Retrieving health check settings...")
+    query = copy_and_set_token(dict_getHealthCheck, CONFIG.get_value('token'))
+    req = JsonRequest(query)
+    ans = req.execute()
+    if ans is None:
+        logging.error("Failed to get health check!")
+        sleep(5)
+        return
+    elif ans['response'] != 'SUCCESS':
+        logging.error("Error on getting health check: " + str(ans))
+        sleep(5)
+        return
+    binaryDownload.check_version(ans['crackerBinaryId'])
+    check_id = ans['checkId']
+    logging.info("Starting check ID " + str(check_id))
+
+    # write hashes to file
+    hash_file = open("hashlists/health_check.txt", "w")
+    hash_file.write("\n".join(ans['hashes']))
+    hash_file.close()
+
+    # delete old file if necessary
+    if os.path.exists("hashlists/health_check.out"):
+        os.unlink("hashlists/health_check.out")
+
+    # run task
+    cracker = HashcatCracker(ans['crackerBinaryId'], binaryDownload)
+    start = int(time.time())
+    [states, errors] = cracker.run_health_check(ans['attack'], ans['hashlistAlias'])
+    end = int(time.time())
+
+    # read results
+    if os.path.exists("hashlists/health_check.out"):
+        founds = file_get_contents("hashlists/health_check.out").replace("\r\n", "\n").split("\n")
+    else:
+        founds = []
+    num_gpus = len(states[0].get_temps())
+    query = copy_and_set_token(dict_sendHealthCheck, CONFIG.get_value('token'))
+    query['checkId'] = check_id
+    query['start'] = start
+    query['end'] = end
+    query['numGpus'] = num_gpus
+    query['numCracked'] = len(founds) - 1
+    query['errors'] = errors
+    req = JsonRequest(query)
+    ans = req.execute()
+    if ans is None:
+        logging.error("Failed to send health check results!")
+        sleep(5)
+        return
+    elif ans['response'] != 'OK':
+        logging.error("Error on sending health check results: " + str(ans))
+        sleep(5)
+        return
+    logging.info("Health check completed successfully!")
 
 
 def init():
@@ -62,7 +123,11 @@ def loop():
         if task.get_task() is not None:
             last_task_id = task.get_task()['taskId']
         task.load_task()
-        if task.get_task() is None:
+        if task.get_task_id() == -1:
+            run_health_check()
+            task.reset_task()
+            continue
+        elif task.get_task() is None:
             task_change = True
             continue
         else:
@@ -95,6 +160,10 @@ def loop():
         elif chunk_resp == -1:
             # measure keyspace
             cracker.measure_keyspace(task.get_task(), chunk)
+            continue
+        elif chunk_resp == -3:
+            run_health_check()
+            task.reset_task()
             continue
         elif chunk_resp == -2:
             # measure benchmark
