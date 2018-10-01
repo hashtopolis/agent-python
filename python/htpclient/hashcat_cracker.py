@@ -414,7 +414,7 @@ class HashcatCracker:
             time.sleep(1)
             if process.poll() is not None:
                 return
-        file_handle = open(file_path)
+        file_handle = open(file_path, encoding="utf-8")
         end_count = 0
         while 1:
             where = file_handle.tell()

@@ -83,8 +83,8 @@ def init():
     global CONFIG, binaryDownload
     logformat = '[%(asctime)s] [%(levelname)-5s] %(message)s'
     dateformat = '%Y-%m-%d %H:%M:%S'
-    logfile = 'client.log'
     loglevel = logging.INFO
+    logfile = open('client.log', "a", encoding="utf-8")
 
     logging.getLogger("requests").setLevel(logging.WARNING)
 
@@ -92,8 +92,8 @@ def init():
     if CONFIG.get_value('debug'):
         loglevel = logging.DEBUG
         logging.getLogger("requests").setLevel(logging.DEBUG)
-    logging.basicConfig(filename=logfile, level=loglevel, format=logformat, datefmt=dateformat)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    logging.basicConfig(level=loglevel, format=logformat, datefmt=dateformat)
+    logging.getLogger().addHandler(logging.StreamHandler(logfile))
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
