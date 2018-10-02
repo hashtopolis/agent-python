@@ -81,21 +81,21 @@ def run_health_check():
 
 def init():
     global CONFIG, binaryDownload
-    logformat = '[%(asctime)s] [%(levelname)-5s] %(message)s'
-    printformat = '%(message)s'
-    dateformat = '%Y-%m-%d %H:%M:%S'
-    loglevel = logging.INFO
+    log_format = '[%(asctime)s] [%(levelname)-5s] %(message)s'
+    print_format = '%(message)s'
+    date_format = '%Y-%m-%d %H:%M:%S'
+    log_level = logging.INFO
     logfile = open('client.log', "a", encoding="utf-8")
 
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     CONFIG = Config()
     if CONFIG.get_value('debug'):
-        loglevel = logging.DEBUG
+        log_level = logging.DEBUG
         logging.getLogger("requests").setLevel(logging.DEBUG)
-    logging.basicConfig(level=loglevel, format=printformat, datefmt=dateformat)
+    logging.basicConfig(level=log_level, format=print_format, datefmt=date_format)
     file_handler = logging.StreamHandler(logfile)
-    file_handler.setFormatter(logging.Formatter(logformat))
+    file_handler.setFormatter(logging.Formatter(log_format))
     logging.getLogger().addHandler(file_handler)
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
