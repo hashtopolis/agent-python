@@ -54,6 +54,8 @@ class Initialize:
             self.__login()
         else:
             logging.info("Login successful!")
+            if 'server-version' in ans:
+                logging.info("Hashtopolis Server version: " + ans['server-version'])
             if 'multicastEnabled' in ans and ans['multicastEnabled'] and self.get_os() == 0:  # currently only allow linux
                 logging.info("Multicast enabled!")
                 self.config.set_value('multicast', True)
