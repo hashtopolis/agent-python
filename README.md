@@ -3,7 +3,7 @@
 Official agents for using the distributed hashcracker [Hashtopolis](https://github.com/s3inlc/hashtopolis).
 
 Currently available agents:
-- [C#](csharp)
+- [C#](csharp) (Currently not recommended as not all new features are available)
 - [Python](python)
 
 ## Protocol Documentation
