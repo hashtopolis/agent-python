@@ -1,3 +1,4 @@
+import sys
 import time
 from time import sleep
 
@@ -221,6 +222,9 @@ def loop():
 
 if __name__ == "__main__":
     try:
+        if len(sys.argv) > 1 and sys.argv[1] == '--version':
+            print(Initialize.get_version())
+            exit()
         init()
         loop()
     except KeyboardInterrupt:
