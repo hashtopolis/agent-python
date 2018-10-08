@@ -5,5 +5,5 @@ python:
 install:
   - pip install -r python/requirements.txt
 script:
-  - python/build.sh
+  - cd python && ./build.sh
   - python python/hashtopolis.zip --version
