@@ -1,3 +1,8 @@
+## 0.2.0 -> 0.x.x
+
+### Bugfixes
+
+* Fixed sleep after finishing of task to avoid cracks not being caught.
 
 ## 0.1.8 -> 0.2.0
 
