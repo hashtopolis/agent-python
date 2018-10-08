@@ -94,7 +94,7 @@ class HashcatCracker:
             full_cmd = full_cmd.replace("/", '\\')
         # clear old found file
         if os.path.exists("hashlists/" + str(task['hashlistId']) + ".out"):
-            os.remove("hashlists/" + str(task['hashlistId']) + ".out")
+            os.rename("hashlists/" + str(task['hashlistId']) + ".out", "hashlists/" + str(task['hashlistId']) + "_" + str(time.time()) + ".out")
         # create zap folder
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
