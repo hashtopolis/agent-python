@@ -52,6 +52,9 @@ When you run the client for the first time it will ask automatically for all the
 | multicast-device      | string  | eth0    | Device which is used to retrieve UDP multicast file distribution           |
 | file-deletion-disable | boolean | false   | Disable requesting the server for files to delete                          |
 | file-deletion-interval| integer | 600     | Interval time in seconds in which the agent should check for deleted files |
+| proxies               | object  |         | Specify proxies e.g. `"proxies": {"https": "localhost:8433"}`              |
+| auth-user             | string  |         | HTTP Basic Auth user                                                       |
+| auth-password         | string  |         | HTTP Basic AUth password                                                   |
 
 ### Debug example
 

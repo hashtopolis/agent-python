@@ -97,6 +97,15 @@ def init():
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
+    session = Session(requests.Session()).s
+    session.headers.update({'User-Agent': Initialize.get_version()})
+
+    if CONFIG.get_value('proxies'):
+        session.proxies = CONFIG.get_value('proxies')
+
+    if CONFIG.get_value('auth-user') and CONFIG.get_value('auth-password'):
+        session.auth = (CONFIG.get_value('auth-user'), CONFIG.get_value('auth-password'))
+
     # connection initialization
     Initialize().run()
     # download and updates
