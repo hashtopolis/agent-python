@@ -421,7 +421,6 @@ public class registerClass
                 Console.WriteLine("Invalid voucher, please try again");
             }
 
-
         }
         else
         {
@@ -440,7 +439,6 @@ public class registerClass
 
             if (jsC.isJsonSuccess(ret))
             {
-
                 updateAgentInformation();
                 return true;
             }
