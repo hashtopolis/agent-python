@@ -50,10 +50,11 @@ class Chunk:
         if ans is None:
             logging.error("Failed to send keyspace!")
             sleep(5)
-            return 0
+            return False
         elif ans['response'] != 'SUCCESS':
             logging.error("Sending of keyspace failed: " + str(ans))
             sleep(5)
-            return 0
+            return False
         else:
             logging.info("Keyspace got accepted!")
+            return True

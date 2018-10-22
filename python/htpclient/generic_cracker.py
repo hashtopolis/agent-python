@@ -124,7 +124,7 @@ class GenericCracker:
                 continue
             keyspace = line
         self.keyspace = int(keyspace)
-        chunk.send_keyspace(int(keyspace), task['taskId'])
+        return chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
         ksp = self.keyspace

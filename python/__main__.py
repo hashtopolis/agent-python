@@ -172,8 +172,10 @@ def loop():
             continue
         elif chunk_resp == -1:
             # measure keyspace
-            cracker.measure_keyspace(task.get_task(), chunk)
-            continue
+            if cracker.measure_keyspace(task.get_task(), chunk):
+                continue
+            else:  # failure case
+                task.reset_task()
         elif chunk_resp == -3:
             run_health_check()
             task.reset_task()

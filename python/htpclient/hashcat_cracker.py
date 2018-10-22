@@ -128,7 +128,7 @@ class HashcatCracker:
     def run_loop(self, proc, chunk, task):
         self.cracks = []
         piping_threshold = 95
-        enable_piping = False
+        enable_piping = True
         if self.config.get_value('piping-threshold'):
             piping_threshold = self.config.get_value('piping-threshold')
         if self.config.get_value('allow-piping') != '':
@@ -163,17 +163,18 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and enable_piping and task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
-                            # we need to try piping -> kill the process and then wait for issuing the chunk again
-                            self.usePipe = True
-                            chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
-                            self.progressVal = status.get_progress_total() - chunk_start
-                            logging.info("Detected low UTIL value, restart chunk with piping...")
-                            try:
-                                kill_hashcat(proc.pid, Initialize.get_os())
-                            except ProcessLookupError:
-                                pass
-                            return
+                        if enable_piping and 'slowHash' in task and task['slowHash'] and not self.usePipe:
+                            if task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
+                                # we need to try piping -> kill the process and then wait for issuing the chunk again
+                                self.usePipe = True
+                                chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
+                                self.progressVal = status.get_progress_total() - chunk_start
+                                logging.info("Detected low UTIL value, restart chunk with piping...")
+                                try:
+                                    kill_hashcat(proc.pid, Initialize.get_os())
+                                except ProcessLookupError:
+                                    pass
+                                return
 
                         self.first_status = True
                         # send update to server
@@ -279,8 +280,7 @@ class HashcatCracker:
 
     def measure_keyspace(self, task, chunk):
         if task['usePrince']:
-            self.prince_keyspace(task, chunk)
-            return
+            return self.prince_keyspace(task, chunk)
         full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -289,14 +289,15 @@ class HashcatCracker:
         except subprocess.CalledProcessError:
             logging.error("Error during keyspace measure")
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
-            return
+            sleep(5)
+            return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
             if not line:
                 continue
             keyspace = line
-        chunk.send_keyspace(int(keyspace), task['taskId'])
+        return chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def prince_keyspace(self, task, chunk):
         binary = "pp64."
@@ -313,7 +314,8 @@ class HashcatCracker:
         except subprocess.CalledProcessError:
             logging.error("Error during PRINCE keyspace measure")
             send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'])
-            return
+            sleep(5)
+            return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
@@ -321,9 +323,9 @@ class HashcatCracker:
                 continue
             keyspace = line
         if int(keyspace) > 9000000000000000000:  # max size of a long long int
-            chunk.send_keyspace(-1, task['taskId'])
+            return chunk.send_keyspace(-1, task['taskId'])
         else:
-            chunk.send_keyspace(int(keyspace), task['taskId'])
+            return chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
         if task['benchType'] == 'speed':
