@@ -8,3 +8,4 @@ files
 hashlists
 __pycache__
 *.zip
+.idea
