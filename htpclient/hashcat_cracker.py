@@ -33,6 +33,7 @@ class HashcatCracker:
         self.progressVal = 0
         self.statusCount = 0
         self.last_update = 0
+        self.hc_proc = None
         self.wasStopped = False
 
     def build_command(self, task, chunk):
@@ -40,7 +41,7 @@ class HashcatCracker:
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
@@ -55,7 +56,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         return self.callPath + pre_args + " | " + self.callPath + post_args + task['cmdpars']
@@ -72,7 +73,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
@@ -94,7 +95,7 @@ class HashcatCracker:
             full_cmd = full_cmd.replace("/", '\\')
         # clear old found file
         if os.path.exists("hashlists/" + str(task['hashlistId']) + ".out"):
-            os.remove("hashlists/" + str(task['hashlistId']) + ".out")
+            os.rename("hashlists/" + str(task['hashlistId']) + ".out", "hashlists/" + str(task['hashlistId']) + "_" + str(time.time()) + ".out")
         # create zap folder
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
@@ -128,7 +129,7 @@ class HashcatCracker:
     def run_loop(self, proc, chunk, task):
         self.cracks = []
         piping_threshold = 95
-        enable_piping = False
+        enable_piping = True
         if self.config.get_value('piping-threshold'):
             piping_threshold = self.config.get_value('piping-threshold')
         if self.config.get_value('allow-piping') != '':
@@ -163,17 +164,18 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if not self.usePipe and enable_piping and task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
-                            # we need to try piping -> kill the process and then wait for issuing the chunk again
-                            self.usePipe = True
-                            chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
-                            self.progressVal = status.get_progress_total() - chunk_start
-                            logging.info("Detected low UTIL value, restart chunk with piping...")
-                            try:
-                                kill_hashcat(proc.pid, Initialize.get_os())
-                            except ProcessLookupError:
-                                pass
-                            return
+                        if enable_piping and 'slowHash' in task and task['slowHash'] and not self.usePipe:
+                            if task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
+                                # we need to try piping -> kill the process and then wait for issuing the chunk again
+                                self.usePipe = True
+                                chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
+                                self.progressVal = status.get_progress_total() - chunk_start
+                                logging.info("Detected low UTIL value, restart chunk with piping...")
+                                try:
+                                    kill_hashcat(proc.pid, Initialize.get_os())
+                                except ProcessLookupError:
+                                    pass
+                                return
 
                         self.first_status = True
                         # send update to server
@@ -216,7 +218,11 @@ class HashcatCracker:
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
                             query['state'] = status.get_state()
-                            query['cracks'] = self.cracks
+                            # crack format: hash[:salt]:plain:hex_plain:crack_pos
+                            prepared = []
+                            for crack in self.cracks:
+                                prepared.append(crack.split("\t"))
+                            query['cracks'] = prepared
                             if status.get_temps():
                                 query['gpuTemp'] = status.get_temps()
                             if status.get_all_util():
@@ -228,6 +234,7 @@ class HashcatCracker:
                             if ans is None:
                                 logging.error("Failed to send solve!")
                             elif ans['response'] != 'SUCCESS':
+                                self.wasStopped = True
                                 logging.error("Error from server on solve: " + str(ans))
                                 try:
                                     kill_hashcat(proc.pid, Initialize.get_os())
@@ -243,6 +250,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
+                                sleep(5)
                                 return
                             else:
                                 cracks_count = len(self.cracks)
@@ -250,7 +258,7 @@ class HashcatCracker:
                                 zaps = ans['zaps']
                                 if zaps:
                                     logging.debug("Writing zaps")
-                                    zap_output = ":FF\n".join(zaps) + ':FF\n'
+                                    zap_output = "\tFF\n".join(zaps) + '\tFF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()
@@ -266,33 +274,34 @@ class HashcatCracker:
                         else:
                             pass
                             # logging.warning("HCOUT: " + line.strip())
-                else:
+                elif identifier == 'ERR':
                     msg = escape_ansi(line.replace(b"\r\n", b"\n").decode('utf-8')).strip()
-                    if msg:
+                    if msg and str(msg) != '^C':  # this is maybe not the fanciest way, but as ctrl+c is sent to the underlying process it reports it to stderr
                         logging.error("HC error: " + msg)
                         send_error(msg, self.config.get_value('token'), task['taskId'])
-                        sleep(5)
+                        sleep(0.1)
 
     def measure_keyspace(self, task, chunk):
         if task['usePrince']:
-            self.prince_keyspace(task, chunk)
-            return
+            return self.prince_keyspace(task, chunk)
         full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
+            logging.debug("CALL: " + full_cmd)
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
-        except subprocess.CalledProcessError:
-            logging.error("Error during keyspace measure")
+        except subprocess.CalledProcessError as e:
+            logging.error("Error during keyspace measure: " + str(e))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
-            return
+            sleep(5)
+            return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
             if not line:
                 continue
             keyspace = line
-        chunk.send_keyspace(int(keyspace), task['taskId'])
+        return chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def prince_keyspace(self, task, chunk):
         binary = "pp64."
@@ -309,7 +318,8 @@ class HashcatCracker:
         except subprocess.CalledProcessError:
             logging.error("Error during PRINCE keyspace measure")
             send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'])
-            return
+            sleep(5)
+            return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
@@ -317,9 +327,9 @@ class HashcatCracker:
                 continue
             keyspace = line
         if int(keyspace) > 9000000000000000000:  # max size of a long long int
-            chunk.send_keyspace(-1, task['taskId'])
+            return chunk.send_keyspace(-1, task['taskId'])
         else:
-            chunk.send_keyspace(int(keyspace), task['taskId'])
+            return chunk.send_keyspace(int(keyspace), task['taskId'])
 
     def run_benchmark(self, task):
         if task['benchType'] == 'speed':
@@ -390,8 +400,8 @@ class HashcatCracker:
             logging.debug("CALL: " + full_cmd)
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
-            logging.error("Error during keyspace measure, return code: " + str(e.returncode))
-            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            logging.error("Error during speed benchmark, return code: " + str(e.returncode))
+            send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'])
             return 0
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         benchmark_sum = [0, 0]
@@ -402,15 +412,15 @@ class HashcatCracker:
             if len(line) != 3:
                 continue
             benchmark_sum[0] += int(line[1])
-            benchmark_sum[1] += float(line[2])
-        return str(benchmark_sum[0]) + ":" + str(benchmark_sum[1])
+            benchmark_sum[1] += float(line[2])*int(line[1])
+        return str(benchmark_sum[0]) + ":" + str(float(benchmark_sum[1]) / benchmark_sum[0])
 
     def output_watcher(self, file_path, process):
         while not os.path.exists(file_path):
             time.sleep(1)
             if process.poll() is not None:
                 return
-        file_handle = open(file_path)
+        file_handle = open(file_path, encoding="utf-8")
         end_count = 0
         while 1:
             where = file_handle.tell()
@@ -432,3 +442,37 @@ class HashcatCracker:
 
     def agent_stopped(self):
         return self.wasStopped
+
+    def run_health_check(self, attack, hashlist_alias):
+        args = " --machine-readable --quiet"
+        args += " --restore-disable --potfile-disable --session=health "
+        args += update_files(attack).replace(hashlist_alias, "../../hashlists/health_check.txt")
+        args += " -o ../../hashlists/health_check.out"
+        full_cmd = self.callPath + args
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        logging.debug("CALL: " + full_cmd)
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
+        output, error = proc.communicate()
+        logging.debug("Started health check attack")
+        proc.wait()  # wait until done
+        errors = []
+        states = []
+        if error:
+            error = escape_ansi(error.replace(b"\r\n", b"\n").decode('utf-8'))
+            error = error.split('\n')
+            for line in error:
+                if not line:
+                    continue
+                errors.append(line)
+        if output:
+            output = escape_ansi(output.replace(b"\r\n", b"\n").decode('utf-8'))
+            output = output.split('\n')
+            for line in output:
+                if not line:
+                    continue
+                logging.debug(line)
+                status = HashcatStatus(line)
+                if status.is_valid():
+                    states.append(status)
+        return [states, errors]

@@ -1,3 +1,5 @@
+import sys
+import time
 from time import sleep
 
 from htpclient.binarydownload import BinaryDownload
@@ -6,7 +8,7 @@ from htpclient.files import Files
 from htpclient.generic_cracker import GenericCracker
 from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
-from htpclient.helpers import start_uftpd
+from htpclient.helpers import start_uftpd, file_get_contents
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 from htpclient.dicts import *
@@ -16,25 +18,98 @@ from htpclient.task import Task
 
 CONFIG = None
 binaryDownload = None
+current_cracker = None
+
+
+def run_health_check():
+    global CONFIG, binaryDownload
+    logging.info("Health check requested by server!")
+    logging.info("Retrieving health check settings...")
+    query = copy_and_set_token(dict_getHealthCheck, CONFIG.get_value('token'))
+    req = JsonRequest(query)
+    ans = req.execute()
+    if ans is None:
+        logging.error("Failed to get health check!")
+        sleep(5)
+        return
+    elif ans['response'] != 'SUCCESS':
+        logging.error("Error on getting health check: " + str(ans))
+        sleep(5)
+        return
+    binaryDownload.check_version(ans['crackerBinaryId'])
+    check_id = ans['checkId']
+    logging.info("Starting check ID " + str(check_id))
+
+    # write hashes to file
+    hash_file = open("hashlists/health_check.txt", "w")
+    hash_file.write("\n".join(ans['hashes']))
+    hash_file.close()
+
+    # delete old file if necessary
+    if os.path.exists("hashlists/health_check.out"):
+        os.unlink("hashlists/health_check.out")
+
+    # run task
+    cracker = HashcatCracker(ans['crackerBinaryId'], binaryDownload)
+    start = int(time.time())
+    [states, errors] = cracker.run_health_check(ans['attack'], ans['hashlistAlias'])
+    end = int(time.time())
+
+    # read results
+    if os.path.exists("hashlists/health_check.out"):
+        founds = file_get_contents("hashlists/health_check.out").replace("\r\n", "\n").split("\n")
+    else:
+        founds = []
+    num_gpus = len(states[0].get_temps())
+    query = copy_and_set_token(dict_sendHealthCheck, CONFIG.get_value('token'))
+    query['checkId'] = check_id
+    query['start'] = start
+    query['end'] = end
+    query['numGpus'] = num_gpus
+    query['numCracked'] = len(founds) - 1
+    query['errors'] = errors
+    req = JsonRequest(query)
+    ans = req.execute()
+    if ans is None:
+        logging.error("Failed to send health check results!")
+        sleep(5)
+        return
+    elif ans['response'] != 'OK':
+        logging.error("Error on sending health check results: " + str(ans))
+        sleep(5)
+        return
+    logging.info("Health check completed successfully!")
 
 
 def init():
     global CONFIG, binaryDownload
-    logformat  = '[%(asctime)s] [%(levelname)-5s] %(message)s'
-    dateformat = '%Y-%m-%d %H:%M:%S'
-    logfile  = 'client.log'
-    loglevel = logging.INFO
+    log_format = '[%(asctime)s] [%(levelname)-5s] %(message)s'
+    print_format = '%(message)s'
+    date_format = '%Y-%m-%d %H:%M:%S'
+    log_level = logging.INFO
+    logfile = open('client.log', "a", encoding="utf-8")
 
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     CONFIG = Config()
     if CONFIG.get_value('debug'):
-        loglevel = logging.DEBUG
+        log_level = logging.DEBUG
         logging.getLogger("requests").setLevel(logging.DEBUG)
-    logging.basicConfig(filename=logfile, level=loglevel, format=logformat, datefmt=dateformat)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    logging.basicConfig(level=log_level, format=print_format, datefmt=date_format)
+    file_handler = logging.StreamHandler(logfile)
+    file_handler.setFormatter(logging.Formatter(log_format))
+    logging.getLogger().addHandler(file_handler)
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
+
+    session = Session(requests.Session()).s
+    session.headers.update({'User-Agent': Initialize.get_version()})
+
+    if CONFIG.get_value('proxies'):
+        session.proxies = CONFIG.get_value('proxies')
+
+    if CONFIG.get_value('auth-user') and CONFIG.get_value('auth-password'):
+        session.auth = (CONFIG.get_value('auth-user'), CONFIG.get_value('auth-password'))
 
     # connection initialization
     Initialize().run()
@@ -46,7 +121,7 @@ def init():
 
 
 def loop():
-    global binaryDownload, CONFIG
+    global binaryDownload, CONFIG, current_cracker
 
     logging.debug("Entering loop...")
     task = Task()
@@ -62,7 +137,11 @@ def loop():
         if task.get_task() is not None:
             last_task_id = task.get_task()['taskId']
         task.load_task()
-        if task.get_task() is None:
+        if task.get_task_id() == -1:
+            run_health_check()
+            task.reset_task()
+            continue
+        elif task.get_task() is None:
             task_change = True
             continue
         else:
@@ -85,8 +164,10 @@ def loop():
             logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
             if binaryDownload.get_version()['name'].lower() == 'hashcat':
                 cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+                current_cracker = cracker
             else:
                 cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
+                current_cracker = cracker
         task_change = False
         chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
         if chunk_resp == 0:
@@ -94,7 +175,12 @@ def loop():
             continue
         elif chunk_resp == -1:
             # measure keyspace
-            cracker.measure_keyspace(task.get_task(), chunk)
+            if not cracker.measure_keyspace(task.get_task(), chunk):  # failure case
+                task.reset_task()
+            continue
+        elif chunk_resp == -3:
+            run_health_check()
+            task.reset_task()
             continue
         elif chunk_resp == -2:
             # measure benchmark
@@ -126,6 +212,12 @@ def loop():
                 logging.info("Server accepted benchmark!")
                 continue
 
+        # check if we have an invalid chunk
+        if chunk.chunk_data() is not None and chunk.chunk_data()['length'] == 0:
+            logging.error("Invalid chunk size (0) retrieved! Retrying...")
+            task.reset_task()
+            continue
+
         # run chunk
         logging.info("Start chunk...")
         cracker.run_chunk(task.get_task(), chunk.chunk_data())
@@ -137,8 +229,11 @@ def loop():
 
 if __name__ == "__main__":
     try:
+        if len(sys.argv) > 1 and sys.argv[1] == '--version':
+            print(Initialize.get_version())
+            sys.exit()
         init()
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
-        exit()
+        sys.exit()

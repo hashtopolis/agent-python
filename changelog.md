@@ -1,5 +1,21 @@
 ## 0.2.0 -> 0.x.x
 
+### Features
+
+* Agents can run health checks requested from the server.
+
+### Bugfixes
+
+* Fixed benchmark results when having many GPUs in one agent.
+* Fixed sleep after finishing of task to avoid cracks not being caught.
+
+### Enhancements
+
+* Added check for chunk length 0 sent from the server to avoid full agent crash on running.
+* Using requests session
+* Added option for using proxies
+* Added HTTP Basic Auth support
+=======
 ### Bugfixes
 
 * Fixed sleep after finishing of task to avoid cracks not being caught.

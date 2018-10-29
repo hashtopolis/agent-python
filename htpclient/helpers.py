@@ -53,6 +53,11 @@ def send_error(error, token, task_id):
     req.execute()
 
 
+def file_get_contents(filename):
+    with open(filename) as f:
+        return f.read()
+
+
 def start_uftpd(os_extension, config):
     try:
         subprocess.check_output("killall -s 9 uftpd", shell=True)  # stop running service to make sure we can start it again

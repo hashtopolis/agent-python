@@ -1,4 +1,10 @@
-
-.idea/
 *.iml
-java/
+*.exe
+*.log
+*.json
+crackers
+prince
+files
+hashlists
+__pycache__
+*.zip

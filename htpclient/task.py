@@ -34,9 +34,15 @@ class Task:
                 logging.info("No task available!")
                 sleep(5)
                 return
+            elif ans['taskId'] == -1:
+                self.taskId = -1
+                return
             self.task = ans
             self.taskId = ans['taskId']
             logging.info("Got task with id: " + str(ans['taskId']))
 
     def get_task(self):
         return self.task
+
+    def get_task_id(self):
+        return self.taskId
