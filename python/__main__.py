@@ -18,6 +18,7 @@ from htpclient.task import Task
 
 CONFIG = None
 binaryDownload = None
+current_cracker = None
 
 
 def run_health_check():
@@ -120,7 +121,7 @@ def init():
 
 
 def loop():
-    global binaryDownload, CONFIG
+    global binaryDownload, CONFIG, current_cracker
 
     logging.debug("Entering loop...")
     task = Task()
@@ -163,8 +164,10 @@ def loop():
             logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
             if binaryDownload.get_version()['name'].lower() == 'hashcat':
                 cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+                current_cracker = cracker
             else:
                 cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
+                current_cracker = cracker
         task_change = False
         chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
         if chunk_resp == 0:
@@ -228,9 +231,9 @@ if __name__ == "__main__":
     try:
         if len(sys.argv) > 1 and sys.argv[1] == '--version':
             print(Initialize.get_version())
-            exit()
+            sys.exit()
         init()
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
-        exit()
+        sys.exit()

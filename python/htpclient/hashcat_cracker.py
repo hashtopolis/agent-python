@@ -33,6 +33,7 @@ class HashcatCracker:
         self.progressVal = 0
         self.statusCount = 0
         self.last_update = 0
+        self.hc_proc = None
         self.wasStopped = False
 
     def build_command(self, task, chunk):
@@ -273,12 +274,12 @@ class HashcatCracker:
                         else:
                             pass
                             # logging.warning("HCOUT: " + line.strip())
-                else:
+                elif identifier == 'ERR':
                     msg = escape_ansi(line.replace(b"\r\n", b"\n").decode('utf-8')).strip()
-                    if msg:
+                    if msg and str(msg) != '^C':  # this is maybe not the fanciest way, but as ctrl+c is sent to the underlying process it reports it to stderr
                         logging.error("HC error: " + msg)
                         send_error(msg, self.config.get_value('token'), task['taskId'])
-                        sleep(5)
+                        sleep(0.1)
 
     def measure_keyspace(self, task, chunk):
         if task['usePrince']:
