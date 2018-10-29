@@ -233,6 +233,7 @@ class HashcatCracker:
                             if ans is None:
                                 logging.error("Failed to send solve!")
                             elif ans['response'] != 'SUCCESS':
+                                self.wasStopped = True
                                 logging.error("Error from server on solve: " + str(ans))
                                 try:
                                     kill_hashcat(proc.pid, Initialize.get_os())
@@ -248,6 +249,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
+                                sleep(5)
                                 return
                             else:
                                 cracks_count = len(self.cracks)
