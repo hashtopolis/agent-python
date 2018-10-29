@@ -172,10 +172,9 @@ def loop():
             continue
         elif chunk_resp == -1:
             # measure keyspace
-            if cracker.measure_keyspace(task.get_task(), chunk):
-                continue
-            else:  # failure case
+            if not cracker.measure_keyspace(task.get_task(), chunk):  # failure case
                 task.reset_task()
+            continue
         elif chunk_resp == -3:
             run_health_check()
             task.reset_task()
@@ -211,7 +210,7 @@ def loop():
                 continue
 
         # check if we have an invalid chunk
-        if chunk.chunk_data()['length'] == 0:
+        if chunk.chunk_data() is not None and chunk.chunk_data()['length'] == 0:
             logging.error("Invalid chunk size (0) retrieved! Retrying...")
             task.reset_task()
             continue

@@ -285,9 +285,10 @@ class HashcatCracker:
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
+            logging.debug("CALL: " + full_cmd)
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
-        except subprocess.CalledProcessError:
-            logging.error("Error during keyspace measure")
+        except subprocess.CalledProcessError as e:
+            logging.error("Error during keyspace measure: " + str(e))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
             sleep(5)
             return False
