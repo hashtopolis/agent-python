@@ -4,6 +4,7 @@
 [![LoC](https://tokei.rs/b1/github/s3inlc/Hashtopolis-Agent-Python?category=code)](https://github.com/s3inlc/Hashtopolis-Agent-Python)
 [![Build Status](https://travis-ci.org/s3inlc/hashtopolis-agent-python.svg?branch=master)](https://travis-ci.org/s3inlc/hashtopolis-agent-python)
 
+This agent is used with [Hashtopolis](https://github.com/s3inlc/hashtopolis), read the wiki or create issues there, visit the [Forum](https://hashtopolis.org).
 This Hashtopolis agent is only compatible with Hashtopolis versions 0.5.0 and higher.
 
 ## Prerequisites
