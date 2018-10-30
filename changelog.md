@@ -15,7 +15,7 @@
 * Using requests session
 * Added option for using proxies
 * Added HTTP Basic Auth support
-=======
+
 ### Bugfixes
 
 * Fixed sleep after finishing of task to avoid cracks not being caught.
