@@ -37,20 +37,25 @@ class HashcatCracker:
         self.wasStopped = False
 
     def build_command(self, task, chunk):
-        args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        args = " --machine-readable --quiet --status --restore-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
-        args += " --remove-timer=" + str(task['statustimer'])
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
+        # TODO: check for brain
+        if 'useBrain' in task and task['useBrain']:  # when using brain we set the according parameters
+            args += " --brain-client --brain-host --brain-port --brain-password"
+        else:  # remove should only be used if we run without brain
+            args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + " " + task['cmdpars']
         return self.callPath + args
 
     def build_pipe_command(self, task, chunk):
         # call the command with piping
         pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
+        # TODO: check for brain
         pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
@@ -75,6 +80,7 @@ class HashcatCracker:
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
         post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
+        # TODO: check for brain
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']

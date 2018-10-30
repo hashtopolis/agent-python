@@ -114,6 +114,11 @@ dict_getHashlist = MappingProxyType(
      'token': '',
      'hashlistId': ''})
 
+dict_getFound = MappingProxyType(
+    {'action': 'getFound',
+     'token': '',
+     'hashlistId': ''})
+
 ditc_getFile = MappingProxyType(
     {'action': 'getFile',
      'token': '',

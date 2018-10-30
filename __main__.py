@@ -168,6 +168,9 @@ def loop():
             else:
                 cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
                 current_cracker = cracker
+        if task_change and 'useBrain' in task.get_task() and task.get_task()['useBrain'] and not hashlist.load_found(task.get_task()['hashlistId'], task.get_task()['crackerId']):
+            task.reset_task()
+            continue
         task_change = False
         chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
         if chunk_resp == 0:
