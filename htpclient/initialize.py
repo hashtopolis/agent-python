@@ -16,7 +16,7 @@ class Initialize:
 
     @staticmethod
     def get_version_number():
-        return "0.2.0"
+        return "0.3.0"
 
     def run(self):
         self.__check_url()

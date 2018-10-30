@@ -1,4 +1,4 @@
-## 0.2.0 -> 0.x.x
+## v0.2.0 -> v0.3.0
 
 ### Features
 
@@ -20,7 +20,7 @@
 
 * Fixed sleep after finishing of task to avoid cracks not being caught.
 
-## 0.1.8 -> 0.2.0
+## v0.1.8 -> v0.2.0
 
 ### Features
 
@@ -30,14 +30,14 @@
 
 * Fixed when a agent starts the first time there was no logging output
 
-## 0.1.7 -> 0.1.8
+## v0.1.7 -> v0.1.8
 
 ### Features
 
 * The agent can request a to-delete filename list from the server and then cleanup them locally
 * Piping can be enforced from the server for specific tasks.
 
-## 0.1.6 -> 0.1.7
+## v0.1.6 -> v0.1.7
 
 ### Features
 
@@ -49,7 +49,7 @@
 * Catching the correct exception on downloads
 * Avoiding endless loop on hashlist download error
 
-## 0.1.5 -> 0.1.6
+## v0.1.5 -> v0.1.6
 
 ### Features
 
@@ -59,7 +59,7 @@
 
 * Fixed reading of allow-piping config variable
 
-## 0.1.4 -> 0.1.5
+## v0.1.4 -> v0.1.5
 
 ### Features
 
@@ -72,21 +72,21 @@
 * Fixed zap handling (including also unsalted hashes)
 * Added delay to avoid very fast looping on agent errors
 
-## 0.1.3 -> 0.1.4
+## v0.1.3 -> v0.1.4
 
 ### Bugfixes
 
 * Fixed endless loop on error from server when sending chunk progress
 * Fixed a critical bug in parsing the hashcat status when TEMP values are included
 
-## 0.1.2 -> 0.1.3
+## v0.1.2 -> v0.1.3
 
 * Fixed detection of 32/64 bit operating systems
 * Changed timestamp format on logging
 * Catching connection problems on downloads
 * Added switch to 7z extraction to force overwrite of conflicting files
 
-## 0.1.1 -> 0.1.2
+## v0.1.1 -> v0.1.2
 
 * Added support for reading the 32/64bit settings from the client itself and use the appropriate hashcat binary
 * On the logfile output timestamp and log level are now reported
