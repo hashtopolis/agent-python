@@ -43,5 +43,6 @@ class Hashlist:
             sleep(5)
             return False
         else:
-            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "crackers/" + str(cracker_id) + "/hashtopolis.pot", True)
+            logging.info("Saving found hashes to hashcat potfile...")
+            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "crackers/" + str(cracker_id) + "/hashcat.potfile", True)
             return True

@@ -44,9 +44,10 @@ class HashcatCracker:
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        # TODO: check for brain
         if 'useBrain' in task and task['useBrain']:  # when using brain we set the according parameters
-            args += " --brain-client --brain-host --brain-port --brain-password"
+            args += " --brain-client --brain-host " + task['brainHost']
+            args += " --brain-port " + str(task['brainPort'])
+            args += " --brain-password " + task['brainPass']
         else:  # remove should only be used if we run without brain
             args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + " " + task['cmdpars']
@@ -55,7 +56,6 @@ class HashcatCracker:
     def build_pipe_command(self, task, chunk):
         # call the command with piping
         pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
-        # TODO: check for brain
         pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
@@ -80,7 +80,6 @@ class HashcatCracker:
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
         post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
-        # TODO: check for brain
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
@@ -170,7 +169,8 @@ class HashcatCracker:
                         self.statusCount += 1
 
                         # test if we have a low utility
-                        if enable_piping and 'slowHash' in task and task['slowHash'] and not self.usePipe:
+                        # not allowed if brain is used
+                        if enable_piping and ('useBrain' not in task or task['useBrain']) and 'slowHash' in task and task['slowHash'] and not self.usePipe:
                             if task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
                                 # we need to try piping -> kill the process and then wait for issuing the chunk again
                                 self.usePipe = True
@@ -266,6 +266,7 @@ class HashcatCracker:
                                     logging.debug("Writing zaps")
                                     zap_output = "\tFF\n".join(zaps) + '\tFF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
+                                    # TODO: maybe we need to write it to pot in case of brain
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str(
