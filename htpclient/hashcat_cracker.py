@@ -33,7 +33,6 @@ class HashcatCracker:
         self.progressVal = 0
         self.statusCount = 0
         self.last_update = 0
-        self.hc_proc = None
         self.wasStopped = False
 
     def build_command(self, task, chunk):
@@ -269,24 +268,20 @@ class HashcatCracker:
                                     # TODO: maybe we need to write it to pot in case of brain
                                     f.write(zap_output)
                                     f.close()
-                                logging.info("Progress:" + str(
-                                    "{:6.2f}".format(relative_progress / 100)) + "% Speed: " + print_speed(
-                                    speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(
-                                    ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
+                                logging.info("Progress:" + str("{:6.2f}".format(relative_progress / 100)) + "% Speed: " + print_speed(speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
                             self.lock.release()
                     else:
                         # hacky solution to exclude warnings from hashcat
                         if str(line[0]) not in string.printable:
                             continue
                         else:
-                            pass
-                            # logging.warning("HCOUT: " + line.strip())
+                            pass  # logging.warning("HCOUT: " + line.strip())
                 elif identifier == 'ERR':
                     msg = escape_ansi(line.replace(b"\r\n", b"\n").decode('utf-8')).strip()
                     if msg and str(msg) != '^C':  # this is maybe not the fanciest way, but as ctrl+c is sent to the underlying process it reports it to stderr
                         logging.error("HC error: " + msg)
                         send_error(msg, self.config.get_value('token'), task['taskId'])
-                        sleep(0.1)
+                        sleep(0.1)  # we set a minimal sleep to avoid overreaction of the client sending a huge number of errors, but it should not be slowed down too much, in case the errors are not critical and the agent can continue
 
     def measure_keyspace(self, task, chunk):
         if task['usePrince']:
@@ -333,7 +328,9 @@ class HashcatCracker:
             if not line:
                 continue
             keyspace = line
-        if int(keyspace) > 9000000000000000000:  # max size of a long long int
+        # as the keyspace of prince can get very very large, we only save it in case it's small enough to fit in a long,
+        # otherwise we assume that the user will abort the task earlier anyway
+        if int(keyspace) > 9000000000000000000:  # close to max size of a long long int
             return chunk.send_keyspace(-1, task['taskId'])
         else:
             return chunk.send_keyspace(int(keyspace), task['taskId'])
@@ -387,7 +384,6 @@ class HashcatCracker:
     def stream_watcher(self, identifier, stream):
         for line in stream:
             self.io_q.put((identifier, line))
-
         if not stream.closed:
             stream.close()
 
@@ -462,7 +458,9 @@ class HashcatCracker:
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
         output, error = proc.communicate()
         logging.debug("Started health check attack")
-        proc.wait()  # wait until done
+        # wait until done, on the health check we don't send any update during running. Maybe later we could at least
+        # introduce some heartbeat update to make visible that the agent is still alive.
+        proc.wait()
         errors = []
         states = []
         if error:
