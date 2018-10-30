@@ -13,6 +13,6 @@ fi;
 zip -r hashtopolis.zip __main__.py htpclient -x "*__pycache__*"
 if [ ${count} \> 0 ];
 then
-    ssed -i -E 's/return "([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)"/return "\1.\2.\3"/g' htpclient/initialize.py
+    sed -i -E 's/return "([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)"/return "\1.\2.\3"/g' htpclient/initialize.py
 fi;
 
