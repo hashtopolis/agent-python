@@ -19,6 +19,8 @@ class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
         self.io_q = Queue()
+
+        # Build cracker executable name by taking basename and adding 32/64 plus extension
         self.executable_name = binary_download.get_version()['executable']
         k = self.executable_name.rfind(".")
         self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
@@ -26,6 +28,7 @@ class HashcatCracker:
         self.callPath = self.executable_name
         if Initialize.get_os() != 1:
             self.callPath = "./" + self.callPath
+
         self.lock = Lock()
         self.cracks = []
         self.first_status = False
@@ -97,7 +100,7 @@ class HashcatCracker:
         self.wasStopped = False
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        # clear old found file
+        # clear old found file - earlier we deleted them, but just in case, we just move it to a unique filename
         if os.path.exists("hashlists/" + str(task['hashlistId']) + ".out"):
             os.rename("hashlists/" + str(task['hashlistId']) + ".out", "hashlists/" + str(task['hashlistId']) + "_" + str(time.time()) + ".out")
         # create zap folder
@@ -186,12 +189,13 @@ class HashcatCracker:
                         # send update to server
                         logging.debug(line.decode().replace('\n', '').replace('\r', ''))
                         total = status.get_progress_total()
-                        if self.usePipe:
+                        if self.usePipe:  # if we are piping, we might have saved the total progress before switching to piping, so we can use this
                             total = self.progressVal
+                        # we need to calculate the chunk start, because progress does not start at 0 for a chunk
                         chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         if total > 0:
                             relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
-                        else:
+                        else:  # this is the case when we cannot say anything about the progress
                             relative_progress = 0
                         speed = status.get_speed()
                         initial = True
@@ -223,7 +227,7 @@ class HashcatCracker:
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
                             query['state'] = status.get_state()
-                            # crack format: hash[:salt]:plain:hex_plain:crack_pos
+                            # crack format: hash[:salt]:plain:hex_plain:crack_pos (separator will be tab instead of :)
                             prepared = []
                             for crack in self.cracks:
                                 prepared.append(crack.split("\t"))
@@ -378,6 +382,7 @@ class HashcatCracker:
                     last_valid_status = status
             if last_valid_status is None:
                 return 0
+            # we just calculate how far in the task the agent went during the benchmark time
             return (last_valid_status.get_progress() - last_valid_status.get_rejected()) / float(last_valid_status.get_progress_total())
         return 0
 
@@ -414,6 +419,7 @@ class HashcatCracker:
             line = line.split(":")
             if len(line) != 3:
                 continue
+            # we need to do a weighted sum of all the time outputs of the GPUs
             benchmark_sum[0] += int(line[1])
             benchmark_sum[1] += float(line[2])*int(line[1])
         return str(benchmark_sum[0]) + ":" + str(float(benchmark_sum[1]) / benchmark_sum[0])

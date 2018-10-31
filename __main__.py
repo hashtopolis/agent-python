@@ -18,7 +18,6 @@ from htpclient.task import Task
 
 CONFIG = None
 binaryDownload = None
-current_cracker = None
 
 
 def run_health_check():
@@ -116,12 +115,14 @@ def init():
     # download and updates
     binaryDownload = BinaryDownload()
     binaryDownload.run()
+
+    # if multicast is set to run, we need to start the daemon
     if CONFIG.get_value('multicast') and Initialize().get_os() == 0:
         start_uftpd(Initialize().get_os_extension(), CONFIG)
 
 
 def loop():
-    global binaryDownload, CONFIG, current_cracker
+    global binaryDownload, CONFIG
 
     logging.debug("Entering loop...")
     task = Task()
@@ -133,11 +134,11 @@ def loop():
     cracker = None
     while True:
         CONFIG.update()
-        files.deletion_check()
+        files.deletion_check()  # check if there are deletion orders from the server
         if task.get_task() is not None:
             last_task_id = task.get_task()['taskId']
         task.load_task()
-        if task.get_task_id() == -1:
+        if task.get_task_id() == -1:  # get task returned to run a health check
             run_health_check()
             task.reset_task()
             continue
@@ -147,27 +148,30 @@ def loop():
         else:
             if task.get_task()['taskId'] is not last_task_id:
                 task_change = True
+        # try to download the needed cracker (if not already present)
         if not binaryDownload.check_version(task.get_task()['crackerId']):
             task_change = True
             task.reset_task()
             continue
+        # if prince is used, make sure it's downloaded
         if task.get_task()['usePrince']:
             binaryDownload.check_prince()
+        # check if all required files are present
         if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
             task.reset_task()
             continue
+        # download the hashlist for the task
         if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
             task.reset_task()
             continue
-        if task_change:
+        if task_change:  # check if the client version is up-to-date and load the appropriate cracker
             binaryDownload.check_client_version()
             logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
             if binaryDownload.get_version()['name'].lower() == 'hashcat':
                 cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
-                current_cracker = cracker
             else:
                 cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
-                current_cracker = cracker
+        # if it's a task using hashcat brain, we need to load the found hashes
         if task_change and 'useBrain' in task.get_task() and task.get_task()['useBrain'] and not hashlist.load_found(task.get_task()['hashlistId'], task.get_task()['crackerId']):
             task.reset_task()
             continue
