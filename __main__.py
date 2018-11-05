@@ -2,6 +2,8 @@ import sys
 import time
 from time import sleep
 
+import psutil as psutil
+
 from htpclient.binarydownload import BinaryDownload
 from htpclient.chunk import Chunk
 from htpclient.files import Files
@@ -80,8 +82,9 @@ def run_health_check():
     logging.info("Health check completed successfully!")
 
 
-def init():
-    global CONFIG, binaryDownload
+def init_logging():
+    global CONFIG
+
     log_format = '[%(asctime)s] [%(levelname)-5s] %(message)s'
     print_format = '%(message)s'
     date_format = '%Y-%m-%d %H:%M:%S'
@@ -98,6 +101,10 @@ def init():
     file_handler = logging.StreamHandler(logfile)
     file_handler.setFormatter(logging.Formatter(log_format))
     logging.getLogger().addHandler(file_handler)
+
+
+def init():
+    global CONFIG, binaryDownload
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
@@ -239,8 +246,35 @@ if __name__ == "__main__":
         if len(sys.argv) > 1 and sys.argv[1] == '--version':
             print(Initialize.get_version())
             sys.exit()
+
+        init_logging()
+
+        # check if there is a lock file and check if this pid is still running hashtopolis
+        if os.path.exists("lock.pid") and os.path.isfile("lock.pid"):
+            pid = file_get_contents("lock.pid")
+            logging.info("Found existing lock.pid, checking if python process is running...")
+            if psutil.pid_exists(int(pid)):
+                try:
+                    command = psutil.Process(int(pid)).cmdline()[0].replace('\\', '/').split('/')
+                    print(command)
+                    if str.startswith(command[-1], "python"):
+                        logging.fatal("There is already a hashtopolis agent running in this directory!")
+                        sys.exit(-1)
+                except Exception:
+                    # if we fail to determine the cmd line we assume that it's either not running anymore or another process (non-hashtopolis)
+                    pass
+            logging.info("Ignoring lock.pid file because PID is not existant anymore or not running python!")
+
+        # create lock file
+        with open("lock.pid", 'w') as f:
+            f.write(str(os.getpid()))
+            f.close()
+
         init()
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
+        # if lock file exists, remove
+        if os.path.exists("lock.pid"):
+            os.unlink("lock.pid")
         sys.exit()

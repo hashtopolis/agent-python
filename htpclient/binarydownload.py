@@ -52,6 +52,8 @@ class BinaryDownload:
                         os.rename("hashtopolis.zip", "old.zip")
                         os.rename("update.zip", "hashtopolis.zip")
                         logging.info("Update received, restarting client...")
+                        if os.path.exists("lock.pid"):
+                            os.unlink("lock.pid")
                         os.execl(sys.executable, sys.executable, "hashtopolis.zip")
                         exit(0)
 
