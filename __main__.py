@@ -108,6 +108,14 @@ def init():
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
+    # check if there are running hashcat.pid files around (as we assume that nothing is running anymore if the client gets newly started)
+    if os.path.exists("crackers"):
+        for root, dirs, files in os.walk("crackers"):
+            for folder in dirs:
+                if folder.isdigit() and os.path.exists("crackers/" + folder + "/hashtopolis.pid"):
+                    logging.info("Cleaning hashcat PID file from crackers/" + folder)
+                    os.unlink("crackers/" + folder + "/hashtopolis.pid")
+
     session = Session(requests.Session()).s
     session.headers.update({'User-Agent': Initialize.get_version()})
 
@@ -263,7 +271,7 @@ if __name__ == "__main__":
                 except Exception:
                     # if we fail to determine the cmd line we assume that it's either not running anymore or another process (non-hashtopolis)
                     pass
-            logging.info("Ignoring lock.pid file because PID is not existant anymore or not running python!")
+            logging.info("Ignoring lock.pid file because PID is not existent anymore or not running python!")
 
         # create lock file
         with open("lock.pid", 'w') as f:

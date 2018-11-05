@@ -1,5 +1,10 @@
 ## v0.3.0 -> v0.x.x
 
+### Enhancements
+
+* Agent checks if there is already an agent running in the same directory.
+* Agent cleans up old hashcat PID files on startup.
+
 ## v0.2.0 -> v0.3.0
 
 ### Features
