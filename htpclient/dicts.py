@@ -119,12 +119,12 @@ dict_getFound = MappingProxyType(
      'token': '',
      'hashlistId': ''})
 
-ditc_getFile = MappingProxyType(
+dict_getFile = MappingProxyType(
     {'action': 'getFile',
      'token': '',
      'taskId': '',
      'file': ''})
 
-ditc_getFileStatus = MappingProxyType(
+dict_getFileStatus = MappingProxyType(
     {'action': 'getFileStatus',
      'token': ''})
