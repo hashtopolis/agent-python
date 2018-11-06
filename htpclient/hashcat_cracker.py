@@ -401,6 +401,8 @@ class HashcatCracker:
             args += " example.dict" + ' ' + task['cmdpars']
         else:
             args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
+        if 'useBrain' in task and task['useBrain']:
+            args += " -S"
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
