@@ -13,6 +13,7 @@ You need python3 installed on your agent system.
 Following python packages are required:
 
 * requests
+* psutil
 
 ## Manual
 
