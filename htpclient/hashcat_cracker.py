@@ -269,7 +269,6 @@ class HashcatCracker:
                                     logging.debug("Writing zaps")
                                     zap_output = "\tFF\n".join(zaps) + '\tFF\n'
                                     f = open("hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
-                                    # TODO: maybe we need to write it to pot in case of brain
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str("{:6.2f}".format(relative_progress / 100)) + "% Speed: " + print_speed(speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
@@ -291,6 +290,8 @@ class HashcatCracker:
         if task['usePrince']:
             return self.prince_keyspace(task, chunk)
         full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
+        if 'useBrain' in task and task['useBrain']:
+            full_cmd += " -S"
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:

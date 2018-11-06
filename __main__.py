@@ -82,6 +82,7 @@ def run_health_check():
     logging.info("Health check completed successfully!")
 
 
+# Sets up the logging to stdout and to file with different styles and with the level as set in the config if available
 def init_logging():
     global CONFIG
 
