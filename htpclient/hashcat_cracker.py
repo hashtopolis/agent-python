@@ -283,7 +283,7 @@ class HashcatCracker:
                     msg = escape_ansi(line.replace(b"\r\n", b"\n").decode('utf-8')).strip()
                     if msg and str(msg) != '^C':  # this is maybe not the fanciest way, but as ctrl+c is sent to the underlying process it reports it to stderr
                         logging.error("HC error: " + msg)
-                        send_error(msg, self.config.get_value('token'), task['taskId'])
+                        send_error(msg, self.config.get_value('token'), task['taskId'], chunk['chunkId'])
                         sleep(0.1)  # we set a minimal sleep to avoid overreaction of the client sending a huge number of errors, but it should not be slowed down too much, in case the errors are not critical and the agent can continue
 
     def measure_keyspace(self, task, chunk):
@@ -299,7 +299,7 @@ class HashcatCracker:
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measure: " + str(e))
-            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
             sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
@@ -324,7 +324,7 @@ class HashcatCracker:
             output = subprocess.check_output(full_cmd, shell=True, cwd="prince")
         except subprocess.CalledProcessError:
             logging.error("Error during PRINCE keyspace measure")
-            send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'])
+            send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
             sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
@@ -412,7 +412,7 @@ class HashcatCracker:
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
             logging.error("Error during speed benchmark, return code: " + str(e.returncode))
-            send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'])
+            send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)
             return 0
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         benchmark_sum = [0, 0]

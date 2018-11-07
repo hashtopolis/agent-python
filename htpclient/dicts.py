@@ -107,6 +107,7 @@ dict_clientError = MappingProxyType(
     {'action': 'clientError',
      'token': '',
      'taskId': '',
+     'chunkId': None,
      'message': ''})
 
 dict_getHashlist = MappingProxyType(

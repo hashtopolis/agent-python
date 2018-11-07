@@ -45,9 +45,10 @@ def kill_hashcat(pid, get_os):
         subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=pid))
 
 
-def send_error(error, token, task_id):
+def send_error(error, token, task_id, chunk_id):
     query = copy_and_set_token(dict_clientError, token)
     query['message'] = error
+    query['chunkId'] = chunk_id
     query['taskId'] = task_id
     req = JsonRequest(query)
     req.execute()
