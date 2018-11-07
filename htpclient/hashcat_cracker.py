@@ -36,6 +36,7 @@ class HashcatCracker:
         self.progressVal = 0
         self.statusCount = 0
         self.last_update = 0
+        self.uses_slow_hash_flag = False
         self.wasStopped = False
 
     def build_command(self, task, chunk):
@@ -53,6 +54,8 @@ class HashcatCracker:
         else:  # remove should only be used if we run without brain
             args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + " " + task['cmdpars']
+        if args.find(" -S") is not -1:
+            self.uses_slow_hash_flag = True
         return self.callPath + args
 
     def build_pipe_command(self, task, chunk):
@@ -172,7 +175,7 @@ class HashcatCracker:
 
                         # test if we have a low utility
                         # not allowed if brain is used
-                        if enable_piping and ('useBrain' not in task or task['useBrain']) and 'slowHash' in task and task['slowHash'] and not self.usePipe:
+                        if enable_piping and not self.uses_slow_hash_flag and ('useBrain' not in task or not task['useBrain']) and 'slowHash' in task and task['slowHash'] and not self.usePipe:
                             if task['files'] and not task['usePrince'] and 1 < self.statusCount < 10 and status.get_util() != -1 and status.get_util() < piping_threshold:
                                 # we need to try piping -> kill the process and then wait for issuing the chunk again
                                 self.usePipe = True
