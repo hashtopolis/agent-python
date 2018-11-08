@@ -4,6 +4,7 @@
 
 * Agent checks if there is already an agent running in the same directory.
 * Agent cleans up old hashcat PID files on startup.
+* Outfile names can be unique if configured.
 
 ## v0.2.0 -> v0.3.0
 

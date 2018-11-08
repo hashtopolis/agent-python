@@ -103,9 +103,12 @@ class HashcatCracker:
         self.wasStopped = False
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        # clear old found file - earlier we deleted them, but just in case, we just move it to a unique filename
+        # clear old found file - earlier we deleted them, but just in case, we just move it to a unique filename if configured so
         if os.path.exists("hashlists/" + str(task['hashlistId']) + ".out"):
-            os.rename("hashlists/" + str(task['hashlistId']) + ".out", "hashlists/" + str(task['hashlistId']) + "_" + str(time.time()) + ".out")
+            if self.config.get_value('outfile-history'):
+                os.rename("hashlists/" + str(task['hashlistId']) + ".out", "hashlists/" + str(task['hashlistId']) + "_" + str(time.time()) + ".out")
+            else:
+                os.unlink("hashlists/" + str(task['hashlistId']) + ".out")
         # create zap folder
         if not os.path.exists("hashlist_" + str(task['hashlistId'])):
             os.mkdir("hashlist_" + str(task['hashlistId']))
