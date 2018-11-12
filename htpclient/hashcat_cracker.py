@@ -51,6 +51,8 @@ class HashcatCracker:
             args += " --brain-client --brain-host " + task['brainHost']
             args += " --brain-port " + str(task['brainPort'])
             args += " --brain-password " + task['brainPass']
+            if 'brainFeatures' in task:
+                args += " --brain-client-features " + str(task['brainFeatures'])
         else:  # remove should only be used if we run without brain
             args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + " " + task['cmdpars']
