@@ -62,7 +62,7 @@ When you run the client for the first time it will ask automatically for all the
 
 ```
 {
-  "url": "https://coray.org/htp-test/src/api/server.php", 
+  "url": "https://example.org/hashtopolis/api/server.php", 
   "token": "7RNDqtnPxm",
   "uuid": "49dcd31c-3637-4f2a-8df1-b545202df5b3",
   "debug": true
