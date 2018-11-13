@@ -256,7 +256,7 @@ def loop():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hashtopolis Client v' + Initialize.get_version_number(), prog='python3 hashtopolis.zip')
-    parser.add_argument('--deregister', action='store_true', help='client should automatically deregister from server when quitting')
+    parser.add_argument('--de-register', action='store_true', help='client should automatically deregister from server when quitting')
     parser.add_argument('--version', action='store_true', help='show version information')
     parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logging.info("Exiting...")
 
-        if args.deregister:
+        if args.de_register:
             logging.info("De-registering client..")
             query = copy_and_set_token(dict_deregister, CONFIG.get_value('token'))
             req = JsonRequest(query)

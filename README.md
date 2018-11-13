@@ -30,14 +30,14 @@ Please note that the client does not correctly recognize the OS when you are run
 ### Command Line Arguments
 
 ```
-usage: python3 hashtopolis.zip [-h] [--deregister] [--version]
+usage: python3 hashtopolis.zip [-h] [--de-register] [--version]
                                [--voucher VOUCHER] [--url URL]
 
 Hashtopolis Client v0.3.0
 
 optional arguments:
   -h, --help         show this help message and exit
-  --deregister       client should automatically deregister from server when
+  --de-register      client should automatically deregister from server when
                      quitting
   --version          show version information
   --voucher VOUCHER  voucher to use to automatically register
