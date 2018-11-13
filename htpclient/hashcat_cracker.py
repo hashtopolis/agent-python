@@ -354,7 +354,7 @@ class HashcatCracker:
             return self.run_speed_benchmark(task)
 
         args = " --machine-readable --quiet --runtime=" + str(task['bench'])
-        args += " --restore-disable --potfile-disable --session=hashtopolis "
+        args += " --restore-disable --potfile-disable --session=hashtopolis -p \"" + str(chr(9)) + "\" "
         args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
         full_cmd = self.callPath + args
@@ -403,7 +403,7 @@ class HashcatCracker:
 
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
-        args += " --restore-disable --potfile-disable --session=hashtopolis "
+        args += " --restore-disable --potfile-disable --session=hashtopolis -p \"" + str(chr(9)) + "\" "
         if task['usePrince']:
             args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' '
             args += " example.dict" + ' ' + task['cmdpars']

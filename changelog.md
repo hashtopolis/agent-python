@@ -4,6 +4,10 @@
 
 * Agents can de-register from server automatically on quitting.
 
+### Bugfixes
+
+* Fixed benchmark commands for hashes with have salts separated from hash.
+
 ### Enhancements
 
 * Agent checks if there is already an agent running in the same directory.
