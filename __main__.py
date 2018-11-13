@@ -86,7 +86,7 @@ def run_health_check():
 
 
 # Sets up the logging to stdout and to file with different styles and with the level as set in the config if available
-def init_logging():
+def init_logging(args):
     global CONFIG
 
     log_format = '[%(asctime)s] [%(levelname)-5s] %(message)s'
@@ -98,6 +98,8 @@ def init_logging():
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     CONFIG = Config()
+    if args.debug:
+        CONFIG.set_value('debug', True)
     if CONFIG.get_value('debug'):
         log_level = logging.DEBUG
         logging.getLogger("requests").setLevel(logging.DEBUG)
@@ -259,6 +261,7 @@ if __name__ == "__main__":
     parser.add_argument('--de-register', action='store_true', help='client should automatically deregister from server when quitting')
     parser.add_argument('--version', action='store_true', help='show version information')
     parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
+    parser.add_argument('--debug', '-d', action='store_true', help='enforce debugging output')
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
     args = parser.parse_args()
@@ -271,7 +274,7 @@ if __name__ == "__main__":
         sys.exit()
 
     try:
-        init_logging()
+        init_logging(args)
 
         # check if there is a lock file and check if this pid is still running hashtopolis
         if os.path.exists("lock.pid") and os.path.isfile("lock.pid"):

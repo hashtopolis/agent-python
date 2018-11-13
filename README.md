@@ -31,7 +31,8 @@ Please note that the client does not correctly recognize the OS when you are run
 
 ```
 usage: python3 hashtopolis.zip [-h] [--de-register] [--version]
-                               [--voucher VOUCHER] [--url URL]
+                               [--number-only] [--debug] [--voucher VOUCHER]
+                               [--url URL]
 
 Hashtopolis Client v0.3.0
 
@@ -40,6 +41,8 @@ optional arguments:
   --de-register      client should automatically deregister from server when
                      quitting
   --version          show version information
+  --number-only      when using --version show only the number
+  --debug, -d        enforce debugging output
   --voucher VOUCHER  voucher to use to automatically register
   --url URL          URL to Hashtopolis client API
 ```
