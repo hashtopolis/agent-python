@@ -258,12 +258,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hashtopolis Client v' + Initialize.get_version_number(), prog='python3 hashtopolis.zip')
     parser.add_argument('--deregister', action='store_true', help='client should automatically deregister from server when quitting')
     parser.add_argument('--version', action='store_true', help='show version information')
+    parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
     args = parser.parse_args()
 
     if args.version:
-        print(Initialize.get_version())
+        if args.number_only:
+            print(Initialize.get_version_number())
+        else:
+            print(Initialize.get_version())
         sys.exit()
 
     try:

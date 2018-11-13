@@ -15,4 +15,3 @@ if [ ${count} \> 0 ];
 then
     sed -i -E 's/return "([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)"/return "\1.\2.\3"/g' htpclient/initialize.py
 fi;
-
