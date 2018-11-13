@@ -129,3 +129,7 @@ dict_getFile = MappingProxyType(
 dict_getFileStatus = MappingProxyType(
     {'action': 'getFileStatus',
      'token': ''})
+
+dict_deregister = MappingProxyType(
+    {'action': 'deregister',
+     'token': ''})

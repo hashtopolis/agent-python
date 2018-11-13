@@ -1,8 +1,11 @@
+import glob
+import shutil
 import sys
 import time
 from time import sleep
 
 import psutil as psutil
+import argparse
 
 from htpclient.binarydownload import BinaryDownload
 from htpclient.chunk import Chunk
@@ -127,7 +130,7 @@ def init():
         session.auth = (CONFIG.get_value('auth-user'), CONFIG.get_value('auth-password'))
 
     # connection initialization
-    Initialize().run()
+    Initialize().run(args)
     # download and updates
     binaryDownload = BinaryDownload()
     binaryDownload.run()
@@ -252,11 +255,18 @@ def loop():
 
 
 if __name__ == "__main__":
-    try:
-        if len(sys.argv) > 1 and sys.argv[1] == '--version':
-            print(Initialize.get_version())
-            sys.exit()
+    parser = argparse.ArgumentParser(description='Hashtopolis Client v' + Initialize.get_version_number(), prog='python3 hashtopolis.zip')
+    parser.add_argument('--deregister', action='store_true', help='client should automatically deregister from server when quitting')
+    parser.add_argument('--version', action='store_true', help='show version information')
+    parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
+    parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
+    args = parser.parse_args()
 
+    if args.version:
+        print(Initialize.get_version())
+        sys.exit()
+
+    try:
         init_logging()
 
         # check if there is a lock file and check if this pid is still running hashtopolis
@@ -284,6 +294,32 @@ if __name__ == "__main__":
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
+
+        if args.deregister:
+            logging.info("De-registering client..")
+            query = copy_and_set_token(dict_deregister, CONFIG.get_value('token'))
+            req = JsonRequest(query)
+            ans = req.execute()
+            if ans is None:
+                logging.error("De-registration failed!")
+            elif ans['response'] != 'SUCCESS':
+                logging.error("Error on de-registration: " + str(ans))
+            else:
+                logging.info("Successfully de-registered!")
+                # cleanup
+                dirs = ['crackers', 'prince', 'hashlists', 'files']
+                files = ['config.json', '7zr.exe', '7zr']
+                for file in files:
+                    if os.path.exists(file):
+                        os.unlink(file)
+                for directory in dirs:
+                    if os.path.exists(directory):
+                        shutil.rmtree(directory)
+                r = glob.glob('hashlist_*')
+                for i in r:
+                    shutil.rmtree(i)
+                logging.info("Cleanup finished!")
+
         # if lock file exists, remove
         if os.path.exists("lock.pid"):
             os.unlink("lock.pid")

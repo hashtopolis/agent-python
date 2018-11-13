@@ -27,6 +27,23 @@ settings/configurations are done via the config file, described in the following
 
 Please note that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
 
+### Command Line Arguments
+
+```
+usage: python3 hashtopolis.zip [-h] [--deregister] [--version]
+                               [--voucher VOUCHER] [--url URL]
+
+Hashtopolis Client v0.3.0
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --deregister       client should automatically deregister from server when
+                     quitting
+  --version          show version information
+  --voucher VOUCHER  voucher to use to automatically register
+  --url URL          URL to Hashtopolis client API
+```
+
 ### Config
 
 When you run the client for the first time it will ask automatically for all the requirement settings and then saves it automatically to a config file called `config.json`. This could for example look like this:
@@ -39,7 +56,7 @@ When you run the client for the first time it will ask automatically for all the
 }
 ```
 
-### Overview
+### Config Options
 
 | field                 | type    | default | description                                                                |
 |-----------------------|---------|---------|----------------------------------------------------------------------------|

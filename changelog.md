@@ -1,5 +1,9 @@
 ## v0.3.0 -> v0.x.x
 
+### Features
+
+* Agents can de-register from server automatically on quitting.
+
 ### Enhancements
 
 * Agent checks if there is already an agent running in the same directory.
