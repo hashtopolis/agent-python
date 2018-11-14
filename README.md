@@ -32,8 +32,8 @@ Please note:
 
 ```
 usage: python3 hashtopolis.zip [-h] [--de-register] [--version]
-                               [--number-only] [--debug] [--voucher VOUCHER]
-                               [--url URL]
+                               [--number-only] [--disable-update] [--debug]
+                               [--voucher VOUCHER] [--url URL]
 
 Hashtopolis Client v0.3.0
 
@@ -42,6 +42,8 @@ optional arguments:
   --de-register      client should automatically de-register from server now
   --version          show version information
   --number-only      when using --version show only the number
+  --disable-update   disable retrieving auto-updates of the client from the
+                     server
   --debug, -d        enforce debugging output
   --voucher VOUCHER  voucher to use to automatically register
   --url URL          URL to Hashtopolis client API

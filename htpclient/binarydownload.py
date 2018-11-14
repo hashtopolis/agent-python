@@ -12,9 +12,10 @@ from htpclient.dicts import *
 
 
 class BinaryDownload:
-    def __init__(self):
+    def __init__(self, args):
         self.config = Config()
         self.last_version = None
+        self.args = args
 
     def run(self):
         self.check_client_version()
@@ -24,6 +25,8 @@ class BinaryDownload:
         return self.last_version
 
     def check_client_version(self):
+        if self.args.disable_update:
+            return
         if os.path.isfile("old.zip"):
             os.unlink("old.zip")  # cleanup old version
         query = copy_and_set_token(dict_checkVersion, self.config.get_value('token'))

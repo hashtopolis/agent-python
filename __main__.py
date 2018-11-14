@@ -110,7 +110,7 @@ def init_logging(args):
     logging.getLogger().addHandler(file_handler)
 
 
-def init():
+def init(args):
     global CONFIG, binaryDownload
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
@@ -135,7 +135,7 @@ def init():
     # connection initialization
     Initialize().run(args)
     # download and updates
-    binaryDownload = BinaryDownload()
+    binaryDownload = BinaryDownload(args)
     binaryDownload.run()
 
     # if multicast is set to run, we need to start the daemon
@@ -290,6 +290,7 @@ if __name__ == "__main__":
     parser.add_argument('--de-register', action='store_true', help='client should automatically de-register from server now')
     parser.add_argument('--version', action='store_true', help='show version information')
     parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
+    parser.add_argument('--disable-update', action='store_true', help='disable retrieving auto-updates of the client from the server')
     parser.add_argument('--debug', '-d', action='store_true', help='enforce debugging output')
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
@@ -333,7 +334,7 @@ if __name__ == "__main__":
             f.write(str(os.getpid()))
             f.close()
 
-        init()
+        init(args)
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
