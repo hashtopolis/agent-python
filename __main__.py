@@ -1,5 +1,6 @@
 import glob
 import shutil
+import signal
 import sys
 import time
 from time import sleep
@@ -256,9 +257,37 @@ def loop():
         binaryDownload.check_client_version()
 
 
+def de_register():
+    global CONFIG
+
+    logging.info("De-registering client..")
+    query = copy_and_set_token(dict_deregister, CONFIG.get_value('token'))
+    req = JsonRequest(query)
+    ans = req.execute()
+    if ans is None:
+        logging.error("De-registration failed!")
+    elif ans['response'] != 'SUCCESS':
+        logging.error("Error on de-registration: " + str(ans))
+    else:
+        logging.info("Successfully de-registered!")
+        # cleanup
+        dirs = ['crackers', 'prince', 'hashlists', 'files']
+        files = ['config.json', '7zr.exe', '7zr']
+        for file in files:
+            if os.path.exists(file):
+                os.unlink(file)
+        for directory in dirs:
+            if os.path.exists(directory):
+                shutil.rmtree(directory)
+        r = glob.glob('hashlist_*')
+        for i in r:
+            shutil.rmtree(i)
+        logging.info("Cleanup finished!")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hashtopolis Client v' + Initialize.get_version_number(), prog='python3 hashtopolis.zip')
-    parser.add_argument('--de-register', action='store_true', help='client should automatically deregister from server when quitting')
+    parser.add_argument('--de-register', action='store_true', help='client should automatically de-register from server when quitting')
     parser.add_argument('--version', action='store_true', help='show version information')
     parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
     parser.add_argument('--debug', '-d', action='store_true', help='enforce debugging output')
@@ -272,6 +301,10 @@ if __name__ == "__main__":
         else:
             print(Initialize.get_version())
         sys.exit()
+
+    if args.de_register:
+        signal.signal(signal.SIGTERM, de_register)
+        signal.signal(signal.SIGINT, de_register)
 
     try:
         init_logging(args)
@@ -303,29 +336,7 @@ if __name__ == "__main__":
         logging.info("Exiting...")
 
         if args.de_register:
-            logging.info("De-registering client..")
-            query = copy_and_set_token(dict_deregister, CONFIG.get_value('token'))
-            req = JsonRequest(query)
-            ans = req.execute()
-            if ans is None:
-                logging.error("De-registration failed!")
-            elif ans['response'] != 'SUCCESS':
-                logging.error("Error on de-registration: " + str(ans))
-            else:
-                logging.info("Successfully de-registered!")
-                # cleanup
-                dirs = ['crackers', 'prince', 'hashlists', 'files']
-                files = ['config.json', '7zr.exe', '7zr']
-                for file in files:
-                    if os.path.exists(file):
-                        os.unlink(file)
-                for directory in dirs:
-                    if os.path.exists(directory):
-                        shutil.rmtree(directory)
-                r = glob.glob('hashlist_*')
-                for i in r:
-                    shutil.rmtree(i)
-                logging.info("Cleanup finished!")
+            deregister()
 
         # if lock file exists, remove
         if os.path.exists("lock.pid"):

@@ -24,7 +24,9 @@ wget/curl.
 
 To run the agent you simply need to call `python3 hashtopolis.zip`. The settings/configurations normally are done via the config file, described in one of the following sections.
 
-Please note that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
+Please note:
+- The client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
+- If you unpack the agent out of the .zip file, the automatic updating from the server won't work correctly.
 
 ### Command Line Arguments
 
