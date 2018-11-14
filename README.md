@@ -39,8 +39,7 @@ Hashtopolis Client v0.3.0
 
 optional arguments:
   -h, --help         show this help message and exit
-  --de-register      client should automatically deregister from server when
-                     quitting
+  --de-register      client should automatically de-register from server now
   --version          show version information
   --number-only      when using --version show only the number
   --debug, -d        enforce debugging output

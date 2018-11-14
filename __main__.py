@@ -287,7 +287,7 @@ def de_register():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hashtopolis Client v' + Initialize.get_version_number(), prog='python3 hashtopolis.zip')
-    parser.add_argument('--de-register', action='store_true', help='client should automatically de-register from server when quitting')
+    parser.add_argument('--de-register', action='store_true', help='client should automatically de-register from server now')
     parser.add_argument('--version', action='store_true', help='show version information')
     parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
     parser.add_argument('--debug', '-d', action='store_true', help='enforce debugging output')
@@ -300,11 +300,14 @@ if __name__ == "__main__":
             print(Initialize.get_version_number())
         else:
             print(Initialize.get_version())
-        sys.exit()
+        sys.exit(0)
 
     if args.de_register:
-        signal.signal(signal.SIGTERM, de_register)
-        signal.signal(signal.SIGINT, de_register)
+        init_logging(args)
+        session = Session(requests.Session()).s
+        session.headers.update({'User-Agent': Initialize.get_version()})
+        de_register()
+        sys.exit(0)
 
     try:
         init_logging(args)
@@ -334,10 +337,6 @@ if __name__ == "__main__":
         loop()
     except KeyboardInterrupt:
         logging.info("Exiting...")
-
-        if args.de_register:
-            deregister()
-
         # if lock file exists, remove
         if os.path.exists("lock.pid"):
             os.unlink("lock.pid")
