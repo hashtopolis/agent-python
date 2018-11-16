@@ -16,7 +16,7 @@ class Initialize:
 
     @staticmethod
     def get_version_number():
-        return "0.3.0"
+        return "0.4.0"
 
     def run(self, args):
         self.__check_url(args)
@@ -158,10 +158,10 @@ class Initialize:
             ans = req.execute()
             if ans is None:
                 logging.error("Request failed!")
-                self.__check_token()
+                self.__check_token(args)
             elif ans['response'] != 'SUCCESS' or not ans['token']:
                 logging.error("Registering failed: " + str(ans))
-                self.__check_token()
+                self.__check_token(args)
             else:
                 token = ans['token']
                 self.config.set_value('voucher', '')
