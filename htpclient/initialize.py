@@ -18,9 +18,9 @@ class Initialize:
     def get_version_number():
         return "0.3.0"
 
-    def run(self):
-        self.__check_url()
-        self.__check_token()
+    def run(self, args):
+        self.__check_url(args)
+        self.__check_token(args)
         self.__update_information()
         self.__login()
         self.__build_directories()
@@ -141,11 +141,13 @@ class Initialize:
             sleep(5)
             self.__update_information()
 
-    def __check_token(self):
+    def __check_token(self, args):
         if not self.config.get_value('token'):
             if self.config.get_value('voucher'):
                 # voucher is set in config and can be used to autoregister
                 voucher = self.config.get_value('voucher')
+            elif args.voucher:
+                voucher = args.voucher
             else:
                 voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
             name = platform.node()
@@ -166,10 +168,13 @@ class Initialize:
                 self.config.set_value('token', token)
                 logging.info("Successfully registered!")
 
-    def __check_url(self):
+    def __check_url(self, args):
         if not self.config.get_value('url'):
             # ask for url
-            url = input("Please enter the url to the API of your Hashtopolis installation:\n").strip()
+            if args.url is None:
+                url = input("Please enter the url to the API of your Hashtopolis installation:\n").strip()
+            else:
+                url = args.url
             logging.debug("Setting url to: " + url)
             self.config.set_value('url', url)
         else:
@@ -180,11 +185,11 @@ class Initialize:
         if ans is None:
             logging.error("Connection test failed!")
             self.config.set_value('url', '')
-            self.__check_url()
+            self.__check_url(args)
         elif ans['response'] != 'SUCCESS':
             logging.error("Connection test failed: " + str(ans))
             self.config.set_value('url', '')
-            self.__check_url()
+            self.__check_url(args)
         else:
             logging.debug("Connection test successful!")
 

@@ -13,6 +13,7 @@ You need python3 installed on your agent system.
 Following python packages are required:
 
 * requests
+* psutil
 
 ## Manual
 
@@ -21,10 +22,32 @@ wget/curl.
 
 ### Run
 
-To run the agent you simply need to call `python3 hashtopolis.zip`. There are no command line options accepted, all 
-settings/configurations are done via the config file, described in the following section.
+To run the agent you simply need to call `python3 hashtopolis.zip`. The settings/configurations normally are done via the config file, described in one of the following sections.
 
-Please note that the client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
+Please note:
+- The client does not correctly recognize the OS when you are running in Cygwin or similar on Windows. You need to run it in Windows command line.
+- If you unpack the agent out of the .zip file, the automatic updating from the server won't work correctly.
+
+### Command Line Arguments
+
+```
+usage: python3 hashtopolis.zip [-h] [--de-register] [--version]
+                               [--number-only] [--disable-update] [--debug]
+                               [--voucher VOUCHER] [--url URL]
+
+Hashtopolis Client v0.3.0
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --de-register      client should automatically de-register from server now
+  --version          show version information
+  --number-only      when using --version show only the number
+  --disable-update   disable retrieving auto-updates of the client from the
+                     server
+  --debug, -d        enforce debugging output
+  --voucher VOUCHER  voucher to use to automatically register
+  --url URL          URL to Hashtopolis client API
+```
 
 ### Config
 
@@ -38,7 +61,7 @@ When you run the client for the first time it will ask automatically for all the
 }
 ```
 
-### Overview
+### Config Options
 
 | field                 | type    | default | description                                                                |
 |-----------------------|---------|---------|----------------------------------------------------------------------------|
@@ -47,7 +70,7 @@ When you run the client for the first time it will ask automatically for all the
 | token                 | string  |         | The access token for the API (sent by server on registration)              |
 | uuid                  | string  |         | Unique identifier of the agent (generated on registration)                 |
 | debug                 | boolean | false   | Enables debug output                                                       |
-| allow-piping          | boolean | false   | Allows hashcat to read password candidates from stdin                      |
+| allow-piping          | boolean | true    | Allows hashcat to read password candidates from stdin                      |
 | piping-threshold      | integer | 95      | Restarts chunk in piping mode when GPU UTIL is below this value            |
 | rsync                 | boolean | false   | Enables download of wordlists and rules via rsync                          |
 | rsync-path            | string  |         | Remote path to hashtopolis files directory                                 |
@@ -56,13 +79,14 @@ When you run the client for the first time it will ask automatically for all the
 | file-deletion-interval| integer | 600     | Interval time in seconds in which the agent should check for deleted files |
 | proxies               | object  |         | Specify proxies e.g. `"proxies": {"https": "localhost:8433"}`              |
 | auth-user             | string  |         | HTTP Basic Auth user                                                       |
-| auth-password         | string  |         | HTTP Basic AUth password                                                   |
+| auth-password         | string  |         | HTTP Basic Auth password                                                   |
+| outfile-history       | boolean | false   | Keep old hashcat outfiles with founds and not getting them overwritten     |
 
 ### Debug example
 
 ```
 {
-  "url": "https://coray.org/htp-test/src/api/server.php", 
+  "url": "https://example.org/hashtopolis/api/server.php", 
   "token": "7RNDqtnPxm",
   "uuid": "49dcd31c-3637-4f2a-8df1-b545202df5b3",
   "debug": true
