@@ -56,7 +56,7 @@ class HashcatCracker:
         else:  # remove should only be used if we run without brain
             args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
         args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + " " + task['cmdpars']
-        if args.find(" -S") is not -1:
+        if args.find(" -S") != -1:
             self.uses_slow_hash_flag = True
         return self.callPath + args
 
