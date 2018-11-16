@@ -107,6 +107,7 @@ dict_clientError = MappingProxyType(
     {'action': 'clientError',
      'token': '',
      'taskId': '',
+     'chunkId': None,
      'message': ''})
 
 dict_getHashlist = MappingProxyType(
@@ -114,12 +115,21 @@ dict_getHashlist = MappingProxyType(
      'token': '',
      'hashlistId': ''})
 
-ditc_getFile = MappingProxyType(
+dict_getFound = MappingProxyType(
+    {'action': 'getFound',
+     'token': '',
+     'hashlistId': ''})
+
+dict_getFile = MappingProxyType(
     {'action': 'getFile',
      'token': '',
      'taskId': '',
      'file': ''})
 
-ditc_getFileStatus = MappingProxyType(
+dict_getFileStatus = MappingProxyType(
     {'action': 'getFileStatus',
+     'token': ''})
+
+dict_deregister = MappingProxyType(
+    {'action': 'deregister',
      'token': ''})

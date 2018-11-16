@@ -25,7 +25,7 @@ class Files:
             return
         elif self.last_check is not None and time.time() - self.last_check < self.check_interval:
             return
-        query = copy_and_set_token(ditc_getFileStatus, self.config.get_value('token'))
+        query = copy_and_set_token(dict_getFileStatus, self.config.get_value('token'))
         req = JsonRequest(query)
         ans = req.execute()
         self.last_check = time.time()
@@ -51,7 +51,7 @@ class Files:
     def check_files(self, files, task_id):
         for file in files:
             file_localpath = "files/" + file
-            query = copy_and_set_token(ditc_getFile, self.config.get_value('token'))
+            query = copy_and_set_token(dict_getFile, self.config.get_value('token'))
             query['taskId'] = task_id
             query['file'] = file
             req = JsonRequest(query)
