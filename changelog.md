@@ -24,6 +24,7 @@
 
 * Fixed benchmark results when having many GPUs in one agent.
 * Fixed sleep after finishing of task to avoid cracks not being caught.
+* Fixed sleep after finishing of task to avoid cracks not being caught.
 
 ### Enhancements
 
@@ -31,10 +32,6 @@
 * Using requests session
 * Added option for using proxies
 * Added HTTP Basic Auth support
-
-### Bugfixes
-
-* Fixed sleep after finishing of task to avoid cracks not being caught.
 
 ## v0.1.8 -> v0.2.0
 
