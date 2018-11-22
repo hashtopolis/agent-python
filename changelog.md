@@ -24,7 +24,6 @@
 
 * Fixed benchmark results when having many GPUs in one agent.
 * Fixed sleep after finishing of task to avoid cracks not being caught.
-* Fixed sleep after finishing of task to avoid cracks not being caught.
 
 ### Enhancements
 
