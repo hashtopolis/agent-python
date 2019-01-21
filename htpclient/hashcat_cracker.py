@@ -208,7 +208,7 @@ class HashcatCracker:
                         speed = status.get_speed()
                         initial = True
                         if status.get_state() == 4 or status.get_state() == 5:
-                            time.sleep(1)  # we wait for a second so all output is loaded from file
+                            time.sleep(5)  # we wait five seconds so all output is loaded from file
                             # reset piping stuff when a chunk is successfully finished
                             self.progressVal = 0
                             self.usePipe = False
