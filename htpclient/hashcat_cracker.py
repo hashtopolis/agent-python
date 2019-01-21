@@ -436,9 +436,9 @@ class HashcatCracker:
 
     def output_watcher(self, file_path, process):
         while not os.path.exists(file_path):
-            time.sleep(1)
             if process.poll() is not None:
                 return
+            time.sleep(1)
         file_handle = open(file_path, encoding="utf-8")
         end_count = 0
         while 1:
