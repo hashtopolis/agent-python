@@ -1,3 +1,13 @@
+## v0.4.0 -> v0.x.x
+
+### Enhancements
+
+* Adapt to path change of Hashcat which dropped pre-builds for 32-bit.
+
+### Bugfixes
+
+* Increased waiting time after full hashlist crack as hashcat quits too fast.
+
 ## v0.3.0 -> v0.4.0
 
 ### Features

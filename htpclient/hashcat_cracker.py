@@ -20,14 +20,23 @@ class HashcatCracker:
         self.config = Config()
         self.io_q = Queue()
 
-        # Build cracker executable name by taking basename and adding 32/64 plus extension
+        # Build cracker executable name by taking basename plus extension
         self.executable_name = binary_download.get_version()['executable']
         k = self.executable_name.rfind(".")
-        self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
+        self.executable_name = self.executable_name[:k] + "." + self.executable_name[k + 1:]
         self.cracker_path = "crackers/" + str(cracker_id) + "/"
         self.callPath = self.executable_name
         if Initialize.get_os() != 1:
             self.callPath = "./" + self.callPath
+
+        if not os.path.isfile(self.cracker_path + self.callPath):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
+            self.executable_name = binary_download.get_version()['executable']
+            k = self.executable_name.rfind(".")
+            self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
+            self.cracker_path = "crackers/" + str(cracker_id) + "/"
+            self.callPath = self.executable_name
+            if Initialize.get_os() != 1:
+                self.callPath = "./" + self.callPath
 
         self.lock = Lock()
         self.cracks = []
@@ -208,7 +217,7 @@ class HashcatCracker:
                         speed = status.get_speed()
                         initial = True
                         if status.get_state() == 4 or status.get_state() == 5:
-                            time.sleep(1)  # we wait for a second so all output is loaded from file
+                            time.sleep(5)  # we wait five seconds so all output is loaded from file
                             # reset piping stuff when a chunk is successfully finished
                             self.progressVal = 0
                             self.usePipe = False
@@ -436,9 +445,9 @@ class HashcatCracker:
 
     def output_watcher(self, file_path, process):
         while not os.path.exists(file_path):
-            time.sleep(1)
             if process.poll() is not None:
                 return
+            time.sleep(1)
         file_handle = open(file_path, encoding="utf-8")
         end_count = 0
         while 1:

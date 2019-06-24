@@ -9,3 +9,4 @@ hashlists
 __pycache__
 *.zip
 .idea
+venv

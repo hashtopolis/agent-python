@@ -44,7 +44,7 @@ class HashcatStatus:
             index += 2
             if line[index] == "UTIL":
                 index += 1
-                while len(line) - 1 > index: # -1 because the \r\n is also included in the split
+                while len(line) - 1 > index:  # -1 because the \r\n is also included in the split
                     self.util.append(int(line[index]))
                     index += 1
 
