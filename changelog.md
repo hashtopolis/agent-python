@@ -1,4 +1,4 @@
-## v0.4.0 -> v0.x.x
+## v0.4.0 -> v0.5.0
 
 ### Enhancements
 
@@ -33,7 +33,6 @@
 ### Bugfixes
 
 * Fixed benchmark results when having many GPUs in one agent.
-* Fixed sleep after finishing of task to avoid cracks not being caught.
 * Fixed sleep after finishing of task to avoid cracks not being caught.
 
 ### Enhancements
