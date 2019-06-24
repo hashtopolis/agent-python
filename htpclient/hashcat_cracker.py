@@ -29,7 +29,7 @@ class HashcatCracker:
         if Initialize.get_os() != 1:
             self.callPath = "./" + self.callPath
 
-        if not os.path.isfile(self.callPath):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
+        if not os.path.isfile(self.cracker_path + self.callPath):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
             self.executable_name = binary_download.get_version()['executable']
             k = self.executable_name.rfind(".")
             self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
