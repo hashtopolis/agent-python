@@ -20,14 +20,23 @@ class HashcatCracker:
         self.config = Config()
         self.io_q = Queue()
 
-        # Build cracker executable name by taking basename and adding 32/64 plus extension
+        # Build cracker executable name by taking basename plus extension
         self.executable_name = binary_download.get_version()['executable']
         k = self.executable_name.rfind(".")
-        self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
+        self.executable_name = self.executable_name[:k] + "." + self.executable_name[k + 1:]
         self.cracker_path = "crackers/" + str(cracker_id) + "/"
         self.callPath = self.executable_name
         if Initialize.get_os() != 1:
             self.callPath = "./" + self.callPath
+
+        if not os.path.isfile(self.callPath):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
+            self.executable_name = binary_download.get_version()['executable']
+            k = self.executable_name.rfind(".")
+            self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
+            self.cracker_path = "crackers/" + str(cracker_id) + "/"
+            self.callPath = self.executable_name
+            if Initialize.get_os() != 1:
+                self.callPath = "./" + self.callPath
 
         self.lock = Lock()
         self.cracks = []
