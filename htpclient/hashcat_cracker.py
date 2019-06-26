@@ -82,6 +82,7 @@ class HashcatCracker:
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         return self.callPath + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
+    # DEPRECATED
     def build_prince_command(self, task, chunk):
         binary = "../../prince/pp64."
         if Initialize.get_os() != 1:
@@ -99,13 +100,35 @@ class HashcatCracker:
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
+    
+    def build_preprocessor_command(self, task, chunk, preprocessor):
+        binary = "../../preprocessor/" + str(task['preprocessor']) + "/" + preprocessor['executable']
+        if Initialize.get_os() != 1:
+            binary = "./" + binary
+        if not os.path.isfile(binary):
+            split = binary.split(".")
+            binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
+          
+        pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
+        pre_args += update_files(task['preprocessorCommand'])
+        post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        post_args += " --status-timer " + str(task['statustimer'])
+        post_args += " --outfile-check-timer=" + str(task['statustimer'])
+        post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
+        post_args += " --remove-timer=" + str(task['statustimer'])
+        post_args += " ../../hashlists/" + str(task['hashlistId'])
+        post_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
-    def run_chunk(self, task, chunk):
+    def run_chunk(self, task, chunk, preprocessor):
         if 'enforcePipe' in task and task['enforcePipe']:
             logging.info("Enforcing pipe command because of task setting...")
             self.usePipe = True
-        if task['usePrince']:
+        if 'usePrince' in task and task['usePrince']:  # DEPRECATED
             full_cmd = self.build_prince_command(task, chunk)
+        elif 'usePreprocessor' in task and task['usePreprocessor']:
+            full_cmd = self.build_preprocessor_command(task, chunk, preprocessor)
         elif self.usePipe:
             full_cmd = self.build_pipe_command(task, chunk)
         else:
@@ -239,7 +262,7 @@ class HashcatCracker:
                             query = copy_and_set_token(dict_sendProgress, self.config.get_value('token'))
                             query['chunkId'] = chunk['chunkId']
                             query['keyspaceProgress'] = status.get_curku()
-                            if (self.usePipe or task['usePrince']) and status.get_curku() == 0:
+                            if (self.usePipe or 'usePrince' in task and task['usePrince'] or 'usePreprocessor' in task and task['usePreprocessor']) and status.get_curku() == 0:
                                 query['keyspaceProgress'] = chunk['skip']
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
@@ -304,8 +327,11 @@ class HashcatCracker:
                         sleep(0.1)  # we set a minimal sleep to avoid overreaction of the client sending a huge number of errors, but it should not be slowed down too much, in case the errors are not critical and the agent can continue
 
     def measure_keyspace(self, task, chunk):
-        if task['usePrince']:
-            return self.prince_keyspace(task, chunk)
+        if 'usePrince' in task.get_task() and task.get_task()['usePrince']:
+            return self.prince_keyspace(task.get_task(), chunk)
+        elif 'usePreprocessor' in task.get_task() and task.get_task()['usePreprocessor']:
+            return self.preprocessor_keyspace(task, chunk)
+        task = task.get_task()  # TODO: refactor this to be better code
         full_cmd = self.callPath + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
         if 'useBrain' in task and task['useBrain']:
             full_cmd += " -S"
@@ -327,6 +353,7 @@ class HashcatCracker:
             keyspace = line
         return chunk.send_keyspace(int(keyspace), task['taskId'])
 
+    # DEPRECATED
     def prince_keyspace(self, task, chunk):
         binary = "pp64."
         if Initialize.get_os() != 1:
@@ -355,6 +382,38 @@ class HashcatCracker:
         if int(keyspace) > 9000000000000000000:  # close to max size of a long long int
             return chunk.send_keyspace(-1, task['taskId'])
         return chunk.send_keyspace(int(keyspace), task['taskId'])
+    
+    def preprocessor_keyspace(self, task, chunk):
+        preprocessor = task.get_preprocessor()
+        binary = preprocessor['executable']
+        if Initialize.get_os() != 1:
+            binary = "./" + binary
+        if not os.path.isfile(binary):
+            split = binary.split(".")
+            binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
+        
+        full_cmd = binary + " --keyspace " + update_files(task.get_task()['preprocessorCommand'])
+        if Initialize.get_os() == 1:
+            full_cmd = full_cmd.replace("/", '\\')
+        try:
+            logging.debug("CALL: " + full_cmd)
+            output = subprocess.check_output(full_cmd, shell=True, cwd="preprocessor/" + str(task.get_task()['preprocessor']))
+        except subprocess.CalledProcessError:
+            logging.error("Error during preprocessor keyspace measure")
+            send_error("Preprocessor keyspace measure failed!", self.config.get_value('token'), task.get_task()['taskId'], None)
+            sleep(5)
+            return False
+        output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+        keyspace = "0"
+        for line in output:
+            if not line:
+                continue
+            keyspace = line
+        # as the keyspace of preprocessors can get very very large, we only save it in case it's small enough to fit in a long,
+        # otherwise we assume that the user will abort the task earlier anyway
+        if int(keyspace) > 9000000000000000000:  # close to max size of a long long int
+            return chunk.send_keyspace(-1, task.get_task()['taskId'])
+        return chunk.send_keyspace(int(keyspace), task.get_task()['taskId'])
 
     def run_benchmark(self, task):
         if task['benchType'] == 'speed':
@@ -412,11 +471,13 @@ class HashcatCracker:
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
         args += " --restore-disable --potfile-disable --session=hashtopolis -p \"" + str(chr(9)) + "\" "
-        if task['usePrince']:
+        if 'usePrince' in task and task['usePrince']:
             args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' '
             args += " example.dict" + ' ' + task['cmdpars']
         else:
             args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "../../hashlists/" + str(task['hashlistId'])) + ' ' + task['cmdpars']
+        if 'usePreprocessor' in task and task['usePreprocessor']:
+            args += " example.dict"
         if 'useBrain' in task and task['useBrain']:
             args += " -S"
         args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out"
