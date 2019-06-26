@@ -1,3 +1,9 @@
+## v0.5.0 -> v0.x.x
+
+### Features
+
+* Generic integration of preprocessors.
+
 ## v0.4.0 -> v0.5.0
 
 ### Enhancements

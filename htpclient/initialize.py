@@ -201,3 +201,5 @@ class Initialize:
             os.mkdir("files")
         if not os.path.isdir("hashlists"):
             os.mkdir("hashlists")
+        if not os.path.isdir("preprocessor"):
+            os.mkdir("preprocessor")

@@ -132,6 +132,45 @@ class BinaryDownload:
             os.rmdir("temp")
             logging.debug("PRINCE downloaded and extracted")
         return True
+    
+    def check_preprocessor(self, task):
+        logging.debug("Checking if requested preprocessor is present...")
+        path = "preprocessor/" + str(task.get_task()['preprocessor']) + "/"
+        query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
+        query['type'] = 'preprocessor'
+        query['preprocessorId'] = task.get_task()['preprocessor']
+        req = JsonRequest(query)
+        ans = req.execute()
+        if ans is None:
+            logging.error("Failed to load preprocessor settings!")
+            sleep(5)
+            return False
+        elif ans['response'] != 'SUCCESS' or not ans['url']:
+            logging.error("Getting preprocessor settings failed: " + str(ans))
+            sleep(5)
+            return False
+        else:
+            task.set_preprocessor(ans)
+            if os.path.isdir(path):  # if it already exists, we don't need to download it
+                logging.debug("Preprocessor is already downloaded")
+                return True
+            logging.debug("Preprocessor not found, download...")
+            if not Download.download(ans['url'], "temp.7z"):
+                logging.error("Download of preprocessor failed!")
+                sleep(5)
+                return False
+            if Initialize.get_os() == 1:
+                os.system("7zr" + Initialize.get_os_extension() + " x -otemp temp.7z")
+            else:
+                os.system("./7zr" + Initialize.get_os_extension() + " x -otemp temp.7z")
+            for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
+                if os.path.isdir("temp/" + name):
+                    os.rename("temp/" + name, path)
+                    break
+            os.unlink("temp.7z")
+            os.rmdir("temp")
+            logging.debug("Preprocessor downloaded and extracted")
+        return True
 
     def check_version(self, cracker_id):
         path = "crackers/" + str(cracker_id) + "/"

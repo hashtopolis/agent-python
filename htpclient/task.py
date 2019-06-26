@@ -11,6 +11,7 @@ class Task:
         self.taskId = 0
         self.task = None
         self.config = Config()
+        self.preprocessor = None
 
     def reset_task(self):
         self.task = None
@@ -46,3 +47,9 @@ class Task:
 
     def get_task_id(self):
         return self.taskId
+
+    def set_preprocessor(self, settings):
+        self.preprocessor = settings
+        
+    def get_preprocessor(self):
+        return self.preprocessor
