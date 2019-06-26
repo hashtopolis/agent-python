@@ -109,7 +109,7 @@ class HashcatCracker:
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
           
-        pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
+        pre_args = " " + preprocessor['skipCommand'] + " " + str(chunk['skip']) + " " + preprocessor['limitCommand'] + " " + str(chunk['length']) + ' '
         pre_args += update_files(task['preprocessorCommand'])
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
@@ -392,7 +392,7 @@ class HashcatCracker:
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
         
-        full_cmd = binary + " --keyspace " + update_files(task.get_task()['preprocessorCommand'])
+        full_cmd = binary + " " + preprocessor['keyspaceCommand'] + " " + update_files(task.get_task()['preprocessorCommand'])
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
