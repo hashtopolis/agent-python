@@ -109,8 +109,18 @@ class HashcatCracker:
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
           
-        pre_args = " " + preprocessor['skipCommand'] + " " + str(chunk['skip']) + " " + preprocessor['limitCommand'] + " " + str(chunk['length']) + ' '
-        pre_args += update_files(task['preprocessorCommand'])
+        # in case the skip or limit command are not available, we try to achieve the same with sed (the more chunks are run, the more inefficient it might be)
+        if preprocessor['skipCommand'] is not None and preprocessor['limitCommand'] is not None:
+            pre_args = " " + preprocessor['skipCommand'] + " " + str(chunk['skip']) + " " + preprocessor['limitCommand'] + " " + str(chunk['length']) + ' '
+        else:
+            pre_args = ""
+          
+        pre_args += ' ' + update_files(task['preprocessorCommand'])
+
+        # TODO: add support for windows as well (pre-built tools)
+        if preprocessor['skipCommand'] is None or preprocessor['limitCommand'] is None:
+            pre_args += " | head -n " + str(chunk['skip'] + chunk['length']) + " | tail -n " + str(chunk['length'])
+        
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -385,6 +395,9 @@ class HashcatCracker:
     
     def preprocessor_keyspace(self, task, chunk):
         preprocessor = task.get_preprocessor()
+        if preprocessor['keyspaceCommand'] is None:  # in case there is no keyspace flag, we just assume the task will be that large to run forever
+          return chunk.send_keyspace(-1, task.get_task()['taskId'])
+        
         binary = preprocessor['executable']
         if Initialize.get_os() != 1:
             binary = "./" + binary

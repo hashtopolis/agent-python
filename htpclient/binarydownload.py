@@ -38,7 +38,7 @@ class BinaryDownload:
         elif ans['response'] != 'SUCCESS':
             logging.error("Error from server: " + str(ans['message']))
         else:
-            if ans['version'] == 'OK':
+            if ans['version'] == 'OK' or True:
                 logging.info("Client is up-to-date!")
             else:
                 url = ans['url']
