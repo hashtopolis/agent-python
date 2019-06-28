@@ -109,7 +109,7 @@ class HashcatCracker:
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
           
-        # in case the skip or limit command are not available, we try to achieve the same with sed (the more chunks are run, the more inefficient it might be)
+        # in case the skip or limit command are not available, we try to achieve the same with head/tail (the more chunks are run, the more inefficient it might be)
         if preprocessor['skipCommand'] is not None and preprocessor['limitCommand'] is not None:
             pre_args = " " + preprocessor['skipCommand'] + " " + str(chunk['skip']) + " " + preprocessor['limitCommand'] + " " + str(chunk['length']) + ' '
         else:
