@@ -19,6 +19,7 @@ class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
         self.io_q = Queue()
+        self.version_string = ""
 
         # Build cracker executable name by taking basename plus extension
         self.executable_name = binary_download.get_version()['executable']
@@ -38,6 +39,16 @@ class HashcatCracker:
             if Initialize.get_os() != 1:
                 self.callPath = "./" + self.callPath
 
+        cmd = self.callPath + " --version"
+        output = ''
+        try:
+            logging.debug("CALL: " + cmd)
+            output = subprocess.check_output(cmd, shell=True, cwd=self.cracker_path)
+        except subprocess.CalledProcessError as e:
+            logging.error("Error during version detection: " + str(e))
+            sleep(5)
+        self.version_string = output.replace('v', '')
+
         self.lock = Lock()
         self.cracks = []
         self.first_status = False
@@ -48,12 +59,28 @@ class HashcatCracker:
         self.uses_slow_hash_flag = False
         self.wasStopped = False
 
+    def get_outfile_format(self):
+        if self.version_string.find('-') == -1:
+            return "15" # if we cannot determine the version, we will use the old format
+        split = self.version_string.split('-')
+        if len(split) < 2:
+            return "15" # something is wrong with the version string, go for old format
+        release = str(split[0]).split('.')
+        commit = split[1]
+        if int(release[0]) < 5:
+            return "15"
+        elif int(release[0]) == 5 and int(release[1]) < 1:
+            return "15"
+        elif int(release[0]) == 5 and int(release[1]) == 1 and int(release[2]) == 0 and int(commit) < 1618:
+            return "15"
+        return "1,2,3,4" # new outfile format
+
     def build_command(self, task, chunk):
         args = " --machine-readable --quiet --status --restore-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
         args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
+        args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         if 'useBrain' in task and task['useBrain']:  # when using brain we set the according parameters
@@ -77,7 +104,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         return self.callPath + pre_args + " | " + self.callPath + post_args + task['cmdpars']
@@ -95,7 +122,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
@@ -125,7 +152,7 @@ class HashcatCracker:
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
-        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=15 -p \"" + str(chr(9)) + "\""
+        post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
