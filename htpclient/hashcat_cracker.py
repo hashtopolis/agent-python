@@ -47,7 +47,7 @@ class HashcatCracker:
         except subprocess.CalledProcessError as e:
             logging.error("Error during version detection: " + str(e))
             sleep(5)
-        self.version_string = output.replace('v', '')
+        self.version_string = str(output).replace('v', '')
 
         self.lock = Lock()
         self.cracks = []
