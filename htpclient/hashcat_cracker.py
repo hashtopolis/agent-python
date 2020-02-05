@@ -66,12 +66,12 @@ class HashcatCracker:
         if len(split) < 2:
             return "15" # something is wrong with the version string, go for old format
         release = str(split[0]).split('.')
-        commit = split[1]
-        if int(release[0]) < 5:
+        commit = str(split[1])
+        if int(str(release[0])) < 5:
             return "15"
-        elif int(release[0]) == 5 and int(release[1]) < 1:
+        elif int(str(release[0])) == 5 and int(str(release[1])) < 1:
             return "15"
-        elif int(release[0]) == 5 and int(release[1]) == 1 and int(release[2]) == 0 and int(commit) < 1618:
+        elif int(str(release[0])) == 5 and int(str(release[1])) == 1 and int(str(release[2])) == 0 and int(commit) < 1618:
             return "15"
         return "1,2,3,4" # new outfile format
 
