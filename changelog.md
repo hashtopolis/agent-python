@@ -4,6 +4,10 @@
 
 * Generic integration of preprocessors.
 
+### Bugfixes
+
+* Fixed crash handling on generic cracker for invalid binary names
+
 ## v0.4.0 -> v0.5.0
 
 ### Enhancements
