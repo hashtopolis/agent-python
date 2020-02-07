@@ -542,6 +542,8 @@ class HashcatCracker:
             # we need to do a weighted sum of all the time outputs of the GPUs
             benchmark_sum[0] += int(line[1])
             benchmark_sum[1] += float(line[2])*int(line[1])
+        if benchmark_sum[0] == 0:
+            return 0  # in this case some error happened on the benchmark
         return str(benchmark_sum[0]) + ":" + str(float(benchmark_sum[1]) / benchmark_sum[0])
 
     def output_watcher(self, file_path, process):
