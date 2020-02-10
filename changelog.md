@@ -3,6 +3,7 @@
 ### Features
 
 * Generic integration of preprocessors.
+* Added compatibility for newer Hashcat versions with different outfile format specification.
 
 ### Bugfixes
 
