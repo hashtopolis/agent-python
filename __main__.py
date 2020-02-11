@@ -175,9 +175,14 @@ def loop():
             task_change = True
             task.reset_task()
             continue
-        # if prince is used, make sure it's downloaded
-        if task.get_task()['usePrince']:
-            binaryDownload.check_prince()
+        # if prince is used, make sure it's downloaded (deprecated, as preprocessors are integrated generally now)
+        if 'usePrince' in task.get_task() and task.get_task()['usePrince']:
+            if not binaryDownload.check_prince():
+                continue
+        # if preprocessor is used, make sure it's downloaded
+        if 'usePreprocessor' in task.get_task() and task.get_task()['usePreprocessor']:
+            if not binaryDownload.check_preprocessor(task):
+                continue
         # check if all required files are present
         if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
             task.reset_task()
@@ -204,7 +209,7 @@ def loop():
             continue
         elif chunk_resp == -1:
             # measure keyspace
-            if not cracker.measure_keyspace(task.get_task(), chunk):  # failure case
+            if not cracker.measure_keyspace(task, chunk):  # failure case
                 task.reset_task()
             continue
         elif chunk_resp == -3:
@@ -249,7 +254,7 @@ def loop():
 
         # run chunk
         logging.info("Start chunk...")
-        cracker.run_chunk(task.get_task(), chunk.chunk_data())
+        cracker.run_chunk(task.get_task(), chunk.chunk_data(), task.get_preprocessor())
         if cracker.agent_stopped():
             # if the chunk was aborted by a stop from the server, we need to ask for a task again first
             task.reset_task()

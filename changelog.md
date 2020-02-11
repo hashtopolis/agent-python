@@ -1,3 +1,14 @@
+## v0.5.0 -> v0.6.0
+
+### Features
+
+* Generic integration of preprocessors.
+* Added compatibility for newer Hashcat versions with different outfile format specification.
+
+### Bugfixes
+
+* Fixed crash handling on generic cracker for invalid binary names
+
 ## v0.4.0 -> v0.5.0
 
 ### Enhancements

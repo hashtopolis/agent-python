@@ -5,6 +5,7 @@ from threading import Thread
 
 from htpclient.config import Config
 from htpclient.generic_status import GenericStatus
+from htpclient.helpers import send_error
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 from htpclient.dicts import *
@@ -116,7 +117,12 @@ class GenericCracker:
         full_cmd = self.callPath + " keyspace " + task['attackcmd'].replace("-a " + task['hashlistAlias'] + " ", "")
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
-        output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+        try:
+            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+        except subprocess.CalledProcessError as e:
+            logging.error("Error during keyspace measurement: " + str(e))
+            send_error(str(e), self.config.get_value('token'), task['taskId'], chunk.chunk_data()['chunkId'])
+            return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
         for line in output:
