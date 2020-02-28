@@ -109,6 +109,7 @@ def clean_list(element_list):
     return element_list
 
 
+# the prince flag is deprecated
 def update_files(command, prince=False):
     split = command.split(" ")
     ret = []
