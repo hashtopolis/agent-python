@@ -1,3 +1,8 @@
+## v0.6.0 -> v0.6.x
+
+### Bugfixes
+* Fixed missing space with certain attack commands
+
 ## v0.5.0 -> v0.6.0
 
 ### Features
