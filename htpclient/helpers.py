@@ -125,7 +125,7 @@ def update_files(command, prince=False):
                 ret.append("../../" + path)
         else:
             ret.append(part)
-    return " ".join(ret)
+    return " %s " % " ".join(ret)
 
 
 def escape_ansi(line):
