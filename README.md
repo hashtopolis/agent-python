@@ -35,7 +35,7 @@ usage: python3 hashtopolis.zip [-h] [--de-register] [--version]
                                [--number-only] [--disable-update] [--debug]
                                [--voucher VOUCHER] [--url URL]
 
-Hashtopolis Client v0.3.0
+Hashtopolis Client v0.6.0
 
 optional arguments:
   -h, --help         show this help message and exit
