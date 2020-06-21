@@ -3,6 +3,7 @@
 ### Bugfixes
 * Fixed missing space with certain attack commands
 * Fixed crashing agent when hashcat benchmark output contained warnings
+* Fixed version detection on Hashcat release versions
 
 ## v0.5.0 -> v0.6.0
 

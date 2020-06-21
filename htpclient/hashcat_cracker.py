@@ -61,7 +61,10 @@ class HashcatCracker:
 
     def get_outfile_format(self):
         if self.version_string.find('-') == -1:
-            return "15" # if we cannot determine the version, we will use the old format
+            release = self.version_string.split('.')
+            if int(str(release[0])) >= 6:
+                return "1,2,3,4"
+            return "15" # if we cannot determine the version or if the release is older than 6.0.0, we will use the old format
         split = self.version_string.split('-')
         if len(split) < 2:
             return "15" # something is wrong with the version string, go for old format
