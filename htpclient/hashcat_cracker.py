@@ -127,7 +127,7 @@ class HashcatCracker:
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
-    
+
     def build_preprocessor_command(self, task, chunk, preprocessor):
         binary = "../../preprocessor/" + str(task['preprocessor']) + "/" + preprocessor['executable']
         if Initialize.get_os() != 1:
@@ -135,19 +135,19 @@ class HashcatCracker:
         if not os.path.isfile(binary):
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
-          
+
         # in case the skip or limit command are not available, we try to achieve the same with head/tail (the more chunks are run, the more inefficient it might be)
         if preprocessor['skipCommand'] is not None and preprocessor['limitCommand'] is not None:
             pre_args = " " + preprocessor['skipCommand'] + " " + str(chunk['skip']) + " " + preprocessor['limitCommand'] + " " + str(chunk['length']) + ' '
         else:
             pre_args = ""
-          
+
         pre_args += ' ' + update_files(task['preprocessorCommand'])
 
         # TODO: add support for windows as well (pre-built tools)
         if preprocessor['skipCommand'] is None or preprocessor['limitCommand'] is None:
             pre_args += " | head -n " + str(chunk['skip'] + chunk['length']) + " | tail -n " + str(chunk['length'])
-        
+
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -419,19 +419,19 @@ class HashcatCracker:
         if int(keyspace) > 9000000000000000000:  # close to max size of a long long int
             return chunk.send_keyspace(-1, task['taskId'])
         return chunk.send_keyspace(int(keyspace), task['taskId'])
-    
+
     def preprocessor_keyspace(self, task, chunk):
         preprocessor = task.get_preprocessor()
         if preprocessor['keyspaceCommand'] is None:  # in case there is no keyspace flag, we just assume the task will be that large to run forever
           return chunk.send_keyspace(-1, task.get_task()['taskId'])
-        
+
         binary = preprocessor['executable']
         if Initialize.get_os() != 1:
             binary = "./" + binary
         if not os.path.isfile(binary):
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
-        
+
         full_cmd = binary + " " + preprocessor['keyspaceCommand'] + " " + update_files(task.get_task()['preprocessorCommand'])
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -541,8 +541,11 @@ class HashcatCracker:
             if len(line) != 3:
                 continue
             # we need to do a weighted sum of all the time outputs of the GPUs
-            benchmark_sum[0] += int(line[1])
-            benchmark_sum[1] += float(line[2])*int(line[1])
+            try:
+                benchmark_sum[0] += int(line[1])
+                benchmark_sum[1] += float(line[2])*int(line[1])
+            except ValueError:
+                continue
         if benchmark_sum[0] == 0:
             return 0  # in this case some error happened on the benchmark
         return str(benchmark_sum[0]) + ":" + str(float(benchmark_sum[1]) / benchmark_sum[0])
