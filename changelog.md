@@ -1,5 +1,9 @@
 ## v0.6.0 -> v0.6.x
 
+### Features
+
+* Added monitoring of cpu utilization and sending to server.
+
 ### Bugfixes
 * Fixed missing space with certain attack commands
 * Fixed crashing agent when hashcat benchmark output contained warnings
