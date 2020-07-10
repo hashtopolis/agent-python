@@ -1,6 +1,7 @@
 import string
 import logging
 import subprocess
+import psutil
 from time import sleep
 from queue import Queue, Empty
 from threading import Thread, Lock
@@ -316,6 +317,7 @@ class HashcatCracker:
                                 query['gpuTemp'] = status.get_temps()
                             if status.get_all_util():
                                 query['gpuUtil'] = status.get_all_util()
+                            query['cpuUtil'] = [round(psutil.cpu_percent(), 1)]
                             req = JsonRequest(query)
 
                             logging.debug("Sending " + str(len(self.cracks)) + " cracks...")
