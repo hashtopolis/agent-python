@@ -28,6 +28,7 @@ binaryDownload = None
 
 def run_health_check():
     global CONFIG, binaryDownload
+
     logging.info("Health check requested by server!")
     logging.info("Retrieving health check settings...")
     query = copy_and_set_token(dict_getHealthCheck, CONFIG.get_value('token'))
@@ -65,7 +66,11 @@ def run_health_check():
         founds = file_get_contents("hashlists/health_check.out").replace("\r\n", "\n").split("\n")
     else:
         founds = []
-    num_gpus = len(states[0].get_temps())
+    if len(states) > 0:
+        num_gpus = len(states[0].get_temps())
+    else:
+        errors.append("Faild to retrieve one successful cracker state, most likely due to failing.")
+        num_gpus = 0
     query = copy_and_set_token(dict_sendHealthCheck, CONFIG.get_value('token'))
     query['checkId'] = check_id
     query['start'] = start
