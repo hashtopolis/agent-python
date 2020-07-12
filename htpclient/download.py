@@ -22,6 +22,7 @@ class Download:
                 head = session.head(url)
                 # not sure if we only should allow 200/302, but then it's present for sure
                 if head.status_code != 200 and head.status_code != 302:
+                    logging.error("File download header reported wrong status code: " + str(head.status_code))
                     return False
 
             with open(output, "wb") as file:

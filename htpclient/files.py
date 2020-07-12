@@ -67,8 +67,10 @@ class Files:
             else:
                 file_size = int(ans['filesize'])
                 if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size == file_size:
+                    logging.debug("File is present on agent and has matching file size.")
                     continue
                 elif self.config.get_value('multicast'):
+                    logging.debug("Multicast is enabled, need to wait until it was delivered!")
                     sleep(5)  # in case the file is not there yet (or not completely), we just wait some time and then try again
                     return False
                 # TODO: we might need a better check for this
@@ -77,6 +79,7 @@ class Files:
                 if self.config.get_value('rsync') and Initialize.get_os() != 1:
                     Download.rsync(self.config.get_value('rsync-path') + '/' + file, file_localpath)
                 else:
+                    logging.debug("Starting download of file from server...")
                     Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], file_localpath)
                 if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size != file_size:
                     logging.error("file size mismatch on file: %s" % file)
