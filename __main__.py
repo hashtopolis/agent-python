@@ -304,6 +304,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug', '-d', action='store_true', help='enforce debugging output')
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
+    parser.add_argument('--cert', type=str, required=False, help='Client TLS cert bundle for Hashtopolis client API')
     args = parser.parse_args()
 
     if args.version:
