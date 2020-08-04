@@ -19,6 +19,7 @@ class Initialize:
         return "0.6.0"
 
     def run(self, args):
+        self.__check_cert(args)
         self.__check_url(args)
         self.__check_token(args)
         self.__update_information()
@@ -167,6 +168,18 @@ class Initialize:
                 self.config.set_value('voucher', '')
                 self.config.set_value('token', token)
                 logging.info("Successfully registered!")
+
+    def __check_cert(self, args):
+        cert = self.config.get_value('cert')
+        if cert is None:
+            if args.cert is not None:
+                cert = os.path.abspath(args.cert)
+                logging.debug("Setting cert to: " + cert)
+                self.config.set_value('cert', cert)
+                
+        if cert is not None:
+            Session().s.cert = cert
+            logging.debug("Configuration session cert to: " + cert)
 
     def __check_url(self, args):
         if not self.config.get_value('url'):
