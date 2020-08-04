@@ -3,6 +3,7 @@
 ### Features
 
 * Added monitoring of cpu utilization and sending to server.
+* Allow setting a certs bundle using for the connections.
 
 ### Bugfixes
 * Fixed missing space with certain attack commands
