@@ -1,5 +1,6 @@
 import logging
 import subprocess
+from time import sleep
 from queue import Queue, Empty
 from threading import Thread
 
@@ -19,7 +20,7 @@ class GenericCracker:
         self.executable_name = binary_download.get_version()['executable']
         self.keyspace = 0
 
-    def run_chunk(self, task, chunk):
+    def run_chunk(self, task, chunk, preprocessor):
         args = " crack -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
@@ -114,14 +115,17 @@ class GenericCracker:
                     # TODO: send error and abort cracking
 
     def measure_keyspace(self, task, chunk):
+        task = task.get_task()
         full_cmd = self.callPath + " keyspace " + task['attackcmd'].replace("-a " + task['hashlistAlias'] + " ", "")
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
+            logging.debug("CALL: " + full_cmd)
             output = subprocess.check_output(full_cmd, shell=True, cwd='files')
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measurement: " + str(e))
-            send_error(str(e), self.config.get_value('token'), task['taskId'], chunk.chunk_data()['chunkId'])
+            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
+            sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
