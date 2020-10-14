@@ -118,6 +118,22 @@ class Initialize:
                 devices.append(line)
 
         else:  # OS X
+            logging.info("Check if Homebrew is installed...")
+            output = subprocess.check_output("type brew", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+            	line = line.rstrip("\r\n ")
+            	if "not found" in line:
+            		log_error_and_exit("Please install Homebrew first. Visit https://brew.sh for instructions.")
+            
+            logging.info("Check if hashcat is installed via Homebrew...")
+            output = subprocess.check_output("brew info hashcat", shell=True)
+            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            for line in output:
+            	line = line.rstrip("\r\n ")
+            	if line == "Not installed":
+            		log_error_and_exit("Please install hashcat via Homebrew first: brew install hashcat")
+            
             output = subprocess.check_output("system_profiler -detaillevel mini", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
