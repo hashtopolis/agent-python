@@ -32,13 +32,13 @@ class HashcatCracker:
             self.callPath = "./" + self.callPath
 
 		# Symlink hashcat.osx in macOS
-		if not os.path.isfile(self.cracker_path + "hashcat.osx"):
-			if Initialize.get_os() == 2: # macOS
-				try:
-					output = subprocess.check_output("ln -s $(which hashcat) hashcat.osx", shell=True, cwd=self.cracker_path)
-				except subprocess.CalledProcessError as e:
-					logging.error("Error during version detection: " + str(e))
-					sleep(5)
+        if not os.path.isfile(self.cracker_path + "hashcat.osx"):  # in case it's not the
+            if Initialize.get_os() == 2: # macOS
+                try:
+                    output = subprocess.check_output("ln -s $(which hashcat) hashcat.osx", shell=True, cwd=self.cracker_path)
+                except subprocess.CalledProcessError as e:
+                    logging.error("Error during version detection: " + str(e))
+                    sleep(5)
 		
         if not os.path.isfile(self.cracker_path + self.callPath):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
             self.executable_name = binary_download.get_version()['executable']
