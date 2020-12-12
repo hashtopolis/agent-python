@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [ -f hashtopolis.zip ]; then
-  rm hashtopolis.zip
+if [ -f hashtopolis.py ]; then
+  rm hashtopolis.py
 fi
 
 # write commit count since release into version number when compiling into zip
@@ -10,7 +10,7 @@ if [ ${count} \> 0 ];
 then
     sed -i -E 's/return "([0-9]+)\.([0-9]+)\.([0-9]+)"/return "\1.\2.\3.'$count'"/g' htpclient/initialize.py
 fi;
-zip -r hashtopolis.zip __main__.py htpclient -x "*__pycache__*"
+zip -r hashtopolis.py __main__.py htpclient -x "*__pycache__*"
 if [ ${count} \> 0 ];
 then
     sed -i -E 's/return "([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)"/return "\1.\2.\3"/g' htpclient/initialize.py
