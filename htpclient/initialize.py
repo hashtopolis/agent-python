@@ -118,7 +118,7 @@ class Initialize:
                 devices.append(line)
 
         else:  # OS X
-            output = subprocess.check_output("system_profiler -detaillevel mini", shell=True)
+            output = subprocess.check_output("system_profiler SPDisplaysDataType -detaillevel mini", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
                 line = line.rstrip("\r\n ")
