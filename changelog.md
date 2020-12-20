@@ -6,9 +6,10 @@
 * Allow setting a certs bundle using for the connections.
 
 ### Bugfixes
-* Fixed missing space with certain attack commands
-* Fixed crashing agent when hashcat benchmark output contained warnings
-* Fixed version detection on Hashcat release versions
+* Fixed missing space with certain attack commands.
+* Fixed crashing agent when hashcat benchmark output contained warnings.
+* Fixed version detection on Hashcat release versions.
+* Fixed parsing of hashcat status with no temp values.
 
 ## v0.5.0 -> v0.6.0
 
@@ -19,7 +20,7 @@
 
 ### Bugfixes
 
-* Fixed crash handling on generic cracker for invalid binary names
+* Fixed crash handling on generic cracker for invalid binary names.
 
 ## v0.4.0 -> v0.5.0
 
