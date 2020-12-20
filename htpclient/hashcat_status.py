@@ -39,6 +39,8 @@ class HashcatStatus:
             while line[index] != "REJECTED":
                 self.temp.append(int(line[index]))
                 index += 1
+        else:
+            index += 11
         self.rejected = int(line[index + 1])
         if len(line) > index + 2:
             index += 2
