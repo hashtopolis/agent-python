@@ -388,12 +388,16 @@ class HashcatCracker:
             sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-        keyspace = "0"
+        ks = 0
+        # try to parse each line as a keyspace result integer (normally only one line should be in output, but some warnings might show up)
         for line in output:
             if not line:
                 continue
-            keyspace = line
-        return chunk.send_keyspace(int(keyspace), task['taskId'])
+            try:
+                ks = int(line)
+            except ValueError:
+                pass
+        return chunk.send_keyspace(ks, task['taskId'])
 
     # DEPRECATED
     def prince_keyspace(self, task, chunk):
