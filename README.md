@@ -110,6 +110,8 @@ In order to use the multicast distribution for files, please make sure that the 
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 6.1.1
+* 6.1.0
 * 6.0.0
 * 5.1.0
 * 5.0.0
