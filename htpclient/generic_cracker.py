@@ -23,7 +23,7 @@ class GenericCracker:
     def run_chunk(self, task, chunk, preprocessor):
         args = " crack -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "-a ../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -136,7 +136,7 @@ class GenericCracker:
         ksp = self.keyspace
         if ksp == 0:
             ksp = task['keyspace']
-        args = task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args = task['attackcmd'].replace(task['hashlistAlias'], "-a ../hashlists/" + str(task['hashlistId']))
         full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
