@@ -159,7 +159,10 @@ class GenericCracker:
                 req = JsonRequest(query)
                 req.execute()
                 return 0
-            return float(last_valid_status.get_progress()) / 10000
+            if task['benchType'] == 'speed':
+                return str(last_valid_status.get_progress()) + ":" + str(last_valid_status.get_speed())
+            else:
+                return float(last_valid_status.get_progress()) / 10000
         else:
             query = copy_and_set_token(dict_clientError, self.config.get_value('token'))
             query['taskId'] = task['taskId']
