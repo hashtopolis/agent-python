@@ -96,14 +96,10 @@ class GenericCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
-                                if ans['zaps']:
-                                    with open("files/zap", "wb") as zapfile:  # need to check if we are in the main dir here
-                                        zapfile.write('\n'.join(ans['zaps']).encode())
-                                        zapfile.close()
                                 cracks = cracks_backup
                                 logging.info(
                                     "Progress: " + str(progress / 100) + "% Cracks: " + str(len(cracks)) +
-                                    " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(ans['zaps'])))
+                                    " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']))
                     else:
                         line = line.decode()
                         if ":" in line:
