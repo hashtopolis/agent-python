@@ -24,6 +24,8 @@ class GenericCracker:
         args = " crack -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         args += " " + task['attackcmd'].replace(task['hashlistAlias'], "-a ../hashlists/" + str(task['hashlistId']))
+        args += ' ' + task['cmdpars']
+
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -112,7 +114,7 @@ class GenericCracker:
 
     def measure_keyspace(self, task, chunk):
         task = task.get_task()
-        full_cmd = self.callPath + " keyspace " + task['attackcmd'].replace("-a " + task['hashlistAlias'] + " ", "")
+        full_cmd = self.callPath + " keyspace " + task['attackcmd'].replace("-a " + task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
@@ -137,7 +139,7 @@ class GenericCracker:
         if ksp == 0:
             ksp = task['keyspace']
         args = task['attackcmd'].replace(task['hashlistAlias'], "-a ../hashlists/" + str(task['hashlistId']))
-        full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])
+        full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])  + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
