@@ -45,6 +45,7 @@ class GenericCracker:
         process.wait()
         out_thread.join()
         err_thread.join()
+        main_thread.join()
         logging.info("finished chunk")
 
     def run_loop(self, process, chunk, task):
