@@ -1,8 +1,8 @@
 # Hashtopolis Python Agent
 
-[![CodeFactor](https://www.codefactor.io/repository/github/s3inlc/hashtopolis-agent-python/badge)](https://www.codefactor.io/repository/github/s3inlc/hashtopolis-agent-python)
-[![LoC](https://tokei.rs/b1/github/s3inlc/Hashtopolis-Agent-Python?category=code)](https://github.com/s3inlc/Hashtopolis-Agent-Python)
-[![Build Status](https://travis-ci.org/s3inlc/hashtopolis-agent-python.svg?branch=master)](https://travis-ci.org/s3inlc/hashtopolis-agent-python)
+[![CodeFactor](https://www.codefactor.io/repository/github/hashtopolis/agent-python/badge)](https://www.codefactor.io/repository/github/hashtopolis/agent-python)
+[![LoC](https://tokei.rs/b1/github/hashtopolis/agent-python?category=code)](https://github.com/hashtopolis/agent-python)
+[![Build Status](https://travis-ci.com/hashtopolis/agent-python.svg?branch=master)](https://travis-ci.com/hashtopolis/agent-python)
 
 This agent is used with [Hashtopolis](https://github.com/s3inlc/hashtopolis), read the wiki or create issues there, visit the [Forum](https://hashtopolis.org).
 This Hashtopolis agent is only compatible with Hashtopolis versions 0.5.0 and higher.
@@ -104,7 +104,7 @@ You need a user on the server which can automatically login (e.g. SSH keys) and 
 
 ### Multicast
 
-In order to use the multicast distribution for files, please make sure that the agents and server are prepared according to this:https://github.com/s3inlc/hashtopolis-runner
+In order to use the multicast distribution for files, please make sure that the agents and server are prepared according to this:https://github.com/hashtopolis/runner
 
 ## Hashcat Compatibility
 
@@ -123,4 +123,4 @@ The list contains all Hashcat versions with which the client was tested and is a
 
 ## Generic Crackers
 
-This client is able to run generic Hashtopolis cracker binaries which fulfill the minimal functionality requirements, described [here](https://github.com/s3inlc/hashtopolis/tree/master/doc/README.md). An example implementation can be found [here](https://github.com/s3inlc/hashtopolis-generic-cracker)
+This client is able to run generic Hashtopolis cracker binaries which fulfill the minimal functionality requirements, described [here](https://github.com/s3inlc/hashtopolis/tree/master/doc/README.md). An example implementation can be found [here](https://github.com/hashtopolis/generic-cracker)
