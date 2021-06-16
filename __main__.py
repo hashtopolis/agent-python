@@ -4,6 +4,7 @@ import signal
 import sys
 import time
 from time import sleep
+from os import system
 
 import psutil as psutil
 import argparse
@@ -131,6 +132,9 @@ def init(args):
     session = Session(requests.Session()).s
     session.headers.update({'User-Agent': Initialize.get_version()})
 
+    # Set the requests.session object to not verify SSL
+    session.verify = False
+
     if CONFIG.get_value('proxies'):
         session.proxies = CONFIG.get_value('proxies')
 
@@ -159,11 +163,13 @@ def loop():
     task_change = True
     last_task_id = 0
     cracker = None
+    last_active_start_time = time.time()
     while True:
         CONFIG.update()
         files.deletion_check()  # check if there are deletion orders from the server
         if task.get_task() is not None:
             last_task_id = task.get_task()['taskId']
+
         task.load_task()
         if task.get_task_id() == -1:  # get task returned to run a health check
             run_health_check()
@@ -171,8 +177,17 @@ def loop():
             continue
         elif task.get_task() is None:
             task_change = True
+            # Check for timeout
+            time_diff = time.time() -last_active_start_time
+            time_diff_hrs, time_diff_rem = divmod(time_diff, 3600)
+            time_diff_min, time_diff_sec = divmod(time_diff_rem, 60)
+            timeout = CONFIG.get_value('timeout')
+            # If the timeout span has been achieved
+            if time_diff_min >= int(timeout):
+                os.system("shutdown now")
             continue
         else:
+            last_active_start_time = time.time()
             if task.get_task()['taskId'] is not last_task_id:
                 task_change = True
         # try to download the needed cracker (if not already present)
