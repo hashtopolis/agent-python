@@ -337,11 +337,11 @@ if __name__ == "__main__":
         de_register()
         sys.exit(0)
 
-    CONFIG.set_value('timeout', args['timeout'])
+    
 
     try:
         init_logging(args)
-
+        CONFIG.set_value('timeout', args.timeout)
         # check if there is a lock file and check if this pid is still running hashtopolis
         if os.path.exists("lock.pid") and os.path.isfile("lock.pid"):
             pid = file_get_contents("lock.pid")
