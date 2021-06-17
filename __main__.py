@@ -320,6 +320,7 @@ if __name__ == "__main__":
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
     parser.add_argument('--cert', type=str, required=False, help='Client TLS cert bundle for Hashtopolis client API')
+    parser.add_argument('--timeout', type=str, required=False, default='5', help='Timeout (in minutes) for which the CUDA machine will shutdown.')
     args = parser.parse_args()
 
     if args.version:
@@ -335,6 +336,8 @@ if __name__ == "__main__":
         session.headers.update({'User-Agent': Initialize.get_version()})
         de_register()
         sys.exit(0)
+
+    CONFIG.set_value('timeout', args['timeout'])
 
     try:
         init_logging(args)
