@@ -1,4 +1,5 @@
 import uuid
+import locale
 from time import sleep
 
 from htpclient.dicts import *
@@ -102,15 +103,20 @@ class Initialize:
                 devices.append(line[2].strip())
 
         elif Initialize.get_os() == 1:  # windows
+            defaultlocale = locale.getdefaultlocale()
+            localEncoding = "uft-8";
+            if len(defaultlocale)  >= 2:
+                localEncoding = locale.getdefaultlocale()[1];
+                
             output = subprocess.check_output("wmic cpu get name", shell=True)
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            output = output.decode(encoding=localEncoding).replace("\r\n", "\n").split("\n")
             for line in output:
                 line = line.rstrip("\r\n ")
                 if line == "Name" or not line:
                     continue
                 devices.append(line)
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            output = output.decode(encoding=localEncoding).replace("\r\n", "\n").split("\n")
             for line in output:
                 line = line.rstrip("\r\n ")
                 if line == "Name" or not line:
