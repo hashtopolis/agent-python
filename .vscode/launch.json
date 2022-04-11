@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": ".",
+            "args": ["--url", "http://hashtopolis/api/server.php", "--debug", "--voucher", "devvoucher"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+version: "3"
+services:
+  hashtopolis-agent:
+    container_name: hashtopolis_agent
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      # This is where VS Code should expect to find your project's source code
+      # and the value of "workspaceFolder" in .devcontainer/devcontainer.json
+      - ..:/app/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+
+networks:
+  default:
+      external:
+        name: hashtopolis_dev
