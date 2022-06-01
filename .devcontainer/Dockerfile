@@ -1,7 +1,13 @@
 FROM nvidia/cuda:11.4.3-devel-ubuntu20.04
 
+ARG DEV_CONTAINER_USER_CMD
+
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
+
+# Check for and run optional user-supplied command to enable (advanced) customizations of the dev container
+RUN [ -n "${DEV_CONTAINER_USER_CMD}" ] \
+    && echo "${DEV_CONTAINER_USER_CMD}" | sh
 
 RUN groupadd vscode && useradd -rm -d /app -s /bin/bash -g vscode -u 1001 vscode
 
