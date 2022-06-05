@@ -11,3 +11,4 @@ __pycache__
 .idea
 venv
 lock.pid
+.env

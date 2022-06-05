@@ -1,0 +1,12 @@
+{
+	"name": "Hashtopolis-agent Devcontainer",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "hashtopolis-agent",
+
+	"workspaceFolder": "/app/src",
+
+	"extensions": [
+		"ms-python.python"
+	],
+	"remoteUser": "vscode"
+}
