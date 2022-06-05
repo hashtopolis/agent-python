@@ -98,8 +98,8 @@ class Initialize:
             for line in output:
                 if not line:
                     continue
-                line = line.split(":")
-                devices.append(line[2].strip())
+                line = ' '.join(line.split(' ')[1:]).split(':')
+                devices.append(line[1].strip())
 
         elif Initialize.get_os() == 1:  # windows
             output = subprocess.check_output("wmic cpu get name", shell=True)
