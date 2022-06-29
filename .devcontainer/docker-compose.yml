@@ -11,11 +11,6 @@ services:
       # This is where VS Code should expect to find your project's source code
       # and the value of "workspaceFolder" in .devcontainer/devcontainer.json
       - ..:/app/src
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
 
 networks:
   default:
