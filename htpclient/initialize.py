@@ -206,13 +206,12 @@ class Initialize:
         else:
             logging.debug("Connection test successful!")
 
-    @staticmethod
-    def __build_directories():
-        if not os.path.isdir("crackers"):
-            os.mkdir("crackers")
-        if not os.path.isdir("files"):
-            os.mkdir("files")
-        if not os.path.isdir("hashlists"):
-            os.mkdir("hashlists")
-        if not os.path.isdir("preprocessor"):
-            os.mkdir("preprocessor")
+    def __build_directories(self):
+        if not os.path.isdir(self.config.get_value('crackers-path')):
+            os.makedirs(self.config.get_value('crackers-path'))
+        if not os.path.isdir(self.config.get_value('files-path')):
+            os.makedirs(self.config.get_value('files-path'))
+        if not os.path.isdir(self.config.get_value('hashlists-path')):
+            os.makedirs(self.config.get_value('hashlists-path'))
+        if not os.path.isdir(self.config.get_value('preprocessors-path')):
+            os.makedirs(self.config.get_value('preprocessors-path'))

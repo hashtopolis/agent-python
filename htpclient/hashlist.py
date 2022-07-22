@@ -26,7 +26,7 @@ class Hashlist:
             sleep(5)
             return False
         else:
-            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "hashlists/" + str(hashlist_id), True)
+            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], self.config.get_value('hashlists-path') + "/" + str(hashlist_id), True)
             return True
 
     def load_found(self, hashlist_id, cracker_id):
@@ -44,5 +44,5 @@ class Hashlist:
             return False
         else:
             logging.info("Saving found hashes to hashcat potfile...")
-            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], "crackers/" + str(cracker_id) + "/hashcat.potfile", True)
+            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/hashcat.potfile", True)
             return True

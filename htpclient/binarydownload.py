@@ -135,7 +135,7 @@ class BinaryDownload:
     
     def check_preprocessor(self, task):
         logging.debug("Checking if requested preprocessor is present...")
-        path = "preprocessor/" + str(task.get_task()['preprocessor']) + "/"
+        path = self.config.get_value('preprocessors-path') + "/" + str(task.get_task()['preprocessor']) + "/"
         query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'preprocessor'
         query['preprocessorId'] = task.get_task()['preprocessor']
@@ -173,7 +173,7 @@ class BinaryDownload:
         return True
 
     def check_version(self, cracker_id):
-        path = "crackers/" + str(cracker_id) + "/"
+        path = self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/"
         query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'cracker'
         query['binaryVersionId'] = cracker_id
@@ -191,19 +191,19 @@ class BinaryDownload:
             self.last_version = ans
             if not os.path.isdir(path):
                 # we need to download the 7zip
-                if not Download.download(ans['url'], "crackers/" + str(cracker_id) + ".7z"):
+                if not Download.download(ans['url'], self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z"):
                     logging.error("Download of cracker binary failed!")
                     sleep(5)
                     return False
                 if Initialize.get_os() == 1:
-                    os.system("7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(cracker_id) + ".7z")
+                    os.system("7zr" + Initialize.get_os_extension() + " x -o'" + self.config.get_value('crackers-path') + "/temp' '" + self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z'")
                 else:
-                    os.system("./7zr" + Initialize.get_os_extension() + " x -ocrackers/temp crackers/" + str(cracker_id) + ".7z")
-                os.unlink("crackers/" + str(cracker_id) + ".7z")
-                for name in os.listdir("crackers/temp"):
-                    if os.path.isdir("crackers/temp/" + name):
-                        os.rename("crackers/temp/" + name, "crackers/" + str(cracker_id))
+                    os.system("./7zr" + Initialize.get_os_extension() + " x -o'" + self.config.get_value('crackers-path') + "/temp' '" + self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z'")
+                os.unlink(self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z")
+                for name in os.listdir(self.config.get_value('crackers-path') + "/temp"):
+                    if os.path.isdir(self.config.get_value('crackers-path') + "/temp/" + name):
+                        os.rename(self.config.get_value('crackers-path') + "/temp/" + name, self.config.get_value('crackers-path') + "/" + str(cracker_id))
                     else:
-                        os.rename("crackers/temp", "crackers/" + str(cracker_id))
+                        os.rename(self.config.get_value('crackers-path') + "/temp", self.config.get_value('crackers-path') + "/" + str(cracker_id))
                         break
         return True
