@@ -1,5 +1,9 @@
 ## v0.6.1 -> v0.x.x
 
+### Enhancements
+
+* Paths for files, crackers, hashlists, zaps and preprocessors can be set via command line args or config.
+
 ## v0.6.0 -> v0.6.1
 
 ### Features
