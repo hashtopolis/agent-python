@@ -324,6 +324,7 @@ class HashcatCracker:
                             ans = req.execute()
                             if ans is None:
                                 logging.error("Failed to send solve!")
+                                sleep(1)
                             elif ans['response'] != 'SUCCESS':
                                 self.wasStopped = True
                                 logging.error("Error from server on solve: " + str(ans))
