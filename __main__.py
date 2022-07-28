@@ -120,15 +120,15 @@ def init(args):
     global CONFIG, binaryDownload
 
     if len(CONFIG.get_value('files-path')) == 0:
-        CONFIG.set_value(os.path.abspath('files'))
+        CONFIG.set_value('files-path', os.path.abspath('files'))
     if len(CONFIG.get_value('crackers-path')) == 0:
-        CONFIG.set_value(os.path.abspath('crackers'))
+        CONFIG.set_value('crackers-path', os.path.abspath('crackers'))
     if len(CONFIG.get_value('hashlists-path')) == 0:
-        CONFIG.set_value(os.path.abspath('hashlists'))
+        CONFIG.set_value('hashlists-path', os.path.abspath('hashlists'))
     if len(CONFIG.get_value('zaps-path')) == 0:
-        CONFIG.set_value(os.path.abspath('.'))
+        CONFIG.set_value('zaps-path', os.path.abspath('.'))
     if len(CONFIG.get_value('preprocessors-path')) == 0:
-        CONFIG.set_value(os.path.abspath('preprocessors'))
+        CONFIG.set_value('preprocessors-path', os.path.abspath('preprocessors'))
 
     if args.files_path and len(args.files_path):
         CONFIG.set_value('files-path', os.path.abspath(args.files_path))
