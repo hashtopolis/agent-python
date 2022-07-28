@@ -67,7 +67,7 @@ class HashcatCracker:
                 if int(str(release[0])) >= 6:
                     return "1,2,3,4"
             except ValueError:
-                pass  # if there is a custom version, we assume it's using the new format
+                return "1,2,3,4"  # if there is a custom version, we assume it's using the new format
             return "15" # if we cannot determine the version or if the release is older than 6.0.0, we will use the old format
         split = self.version_string.split('-')
         if len(split) < 2:
