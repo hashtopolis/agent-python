@@ -1,5 +1,9 @@
 ## v0.6.1 -> v0.x.x
 
+### Bugfixes
+
+* Fixed crash occurring when a custom hashcat version tag is used which contains non-numerical parts.
+
 ## v0.6.0 -> v0.6.1
 
 ### Features
