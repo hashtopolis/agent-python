@@ -1,5 +1,9 @@
 ## v0.6.1 -> v0.x.x
 
+### Bugfixes
+
+* Introduced time delay to prevent spamming server with requests when connection is refused (issue #799).
+
 ## v0.6.0 -> v0.6.1
 
 ### Features
