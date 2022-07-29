@@ -41,27 +41,28 @@ class Initialize:
         return dict_ext[operating_system]
 
     def __login(self):
-        query = copy_and_set_token(dict_login, self.config.get_value('token'))
-        query['clientSignature'] = self.get_version()
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Login failed!")
-            sleep(5)
-            self.__login()
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Error from server: " + str(ans))
-            self.config.set_value('token', '')
-            self.__login()
-        else:
-            logging.info("Login successful!")
-            if 'server-version' in ans:
-                logging.info("Hashtopolis Server version: " + ans['server-version'])
-            if 'multicastEnabled' in ans and ans['multicastEnabled'] and self.get_os() == 0:  # currently only allow linux
-                logging.info("Multicast enabled!")
-                self.config.set_value('multicast', True)
-                if not os.path.isdir("multicast"):
-                    os.mkdir("multicast")
+        while True:
+            query = copy_and_set_token(dict_login, self.config.get_value('token'))
+            query['clientSignature'] = self.get_version()
+            req = JsonRequest(query)
+            ans = req.execute()
+            if ans is None:
+                logging.error("Login failed!")
+                sleep(5)
+            elif ans['response'] != 'SUCCESS':
+                logging.error("Error from server: " + str(ans))
+                self.config.set_value('token', '')
+                sleep(5)
+            else:
+                logging.info("Login successful!")
+                if 'server-version' in ans:
+                    logging.info("Hashtopolis Server version: " + ans['server-version'])
+                if 'multicastEnabled' in ans and ans['multicastEnabled'] and self.get_os() == 0:  # currently only allow linux
+                    logging.info("Multicast enabled!")
+                    self.config.set_value('multicast', True)
+                    if not os.path.isdir("multicast"):
+                        os.mkdir("multicast")
+                return
 
     def __update_information(self):
         if not self.config.get_value('uuid'):
@@ -127,47 +128,52 @@ class Initialize:
                 line = line.split(":")
                 devices.append(line[1].strip())
 
-        query = copy_and_set_token(dict_updateInformation, self.config.get_value('token'))
-        query['uid'] = self.config.get_value('uuid')
-        query['os'] = self.get_os()
-        query['devices'] = devices
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Information update failed!")
-            sleep(5)
-            self.__update_information()
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Error from server: " + str(ans))
-            sleep(5)
-            self.__update_information()
-
-    def __check_token(self, args):
-        if not self.config.get_value('token'):
-            if self.config.get_value('voucher'):
-                # voucher is set in config and can be used to autoregister
-                voucher = self.config.get_value('voucher')
-            elif args.voucher:
-                voucher = args.voucher
-            else:
-                voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
-            name = platform.node()
-            query = dict_register.copy()
-            query['voucher'] = voucher
-            query['name'] = name
+        while True:
+            query = copy_and_set_token(dict_updateInformation, self.config.get_value('token'))
+            query['uid'] = self.config.get_value('uuid')
+            query['os'] = self.get_os()
+            query['devices'] = devices
             req = JsonRequest(query)
             ans = req.execute()
             if ans is None:
-                logging.error("Request failed!")
-                self.__check_token(args)
-            elif ans['response'] != 'SUCCESS' or not ans['token']:
-                logging.error("Registering failed: " + str(ans))
-                self.__check_token(args)
+                logging.error("Information update failed!")
+                sleep(5)
+            elif ans['response'] != 'SUCCESS':
+                logging.error("Error from server: " + str(ans))
+                sleep(5)
             else:
-                token = ans['token']
-                self.config.set_value('voucher', '')
-                self.config.set_value('token', token)
-                logging.info("Successfully registered!")
+                return
+
+    def __check_token(self, args):
+        if not self.config.get_value('token'):
+            while True:
+                if self.config.get_value('voucher'):
+                    # voucher is set in config and can be used to autoregister
+                    voucher = self.config.get_value('voucher')
+                elif args.voucher:
+                    voucher = args.voucher
+                else:
+                    voucher = input("No token found! Please enter a voucher to register your agent:\n").strip()
+                name = platform.node()
+                query = dict_register.copy()
+                query['voucher'] = voucher
+                query['name'] = name
+                req = JsonRequest(query)
+                ans = req.execute()
+                if ans is None:
+                    logging.error("Request failed!")
+                    sleep(1)
+                elif ans['response'] != 'SUCCESS' or not ans['token']:
+                    if self.config.get_value('voucher'):
+                        self.config.set_value('voucher', ''):
+                    logging.error("Registering failed: " + str(ans))
+                    sleep(1)
+                else:
+                    token = ans['token']
+                    self.config.set_value('voucher', '')
+                    self.config.set_value('token', token)
+                    logging.info("Successfully registered!")
+                    return
 
     def __check_cert(self, args):
         cert = self.config.get_value('cert')
@@ -182,29 +188,32 @@ class Initialize:
             logging.debug("Configuration session cert to: " + cert)
 
     def __check_url(self, args):
-        if not self.config.get_value('url'):
-            # ask for url
-            if args.url is None:
-                url = input("Please enter the url to the API of your Hashtopolis installation:\n").strip()
+        while True:
+            if not self.config.get_value('url'):
+                # ask for url
+                if args.url is None:
+                    url = input("Please enter the url to the API of your Hashtopolis installation:\n").strip()
+                else:
+                    url = args.url
+                logging.debug("Setting url to: " + url)
+                self.config.set_value('url', url)
             else:
-                url = args.url
-            logging.debug("Setting url to: " + url)
-            self.config.set_value('url', url)
-        else:
-            return
-        query = dict_testConnection.copy()
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Connection test failed!")
-            self.config.set_value('url', '')
-            self.__check_url(args)
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Connection test failed: " + str(ans))
-            self.config.set_value('url', '')
-            self.__check_url(args)
-        else:
-            logging.debug("Connection test successful!")
+                return
+
+            query = dict_testConnection.copy()
+            req = JsonRequest(query)
+            ans = req.execute()
+            if ans is None:
+                logging.error("Connection test failed!")
+                self.config.set_value('url', '')
+                sleep(1)
+            elif ans['response'] != 'SUCCESS':
+                logging.error("Connection test failed: " + str(ans))
+                self.config.set_value('url', '')
+                sleep(1)
+            else:
+                logging.debug("Connection test successful!")
+                return
 
     @staticmethod
     def __build_directories():
