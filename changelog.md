@@ -1,5 +1,9 @@
 ## v0.6.1 -> v0.x.x
 
+### Bugfixes
+
+* Preventing stack overflows when server errors occur in the initialization of the agent (issue #691).
+
 ## v0.6.0 -> v0.6.1
 
 ### Features
