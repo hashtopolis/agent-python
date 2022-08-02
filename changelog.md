@@ -3,6 +3,7 @@
 ### Bugfixes
 
 * Introduced time delay to prevent spamming server with requests when connection is refused (issue #799).
+* Fixed crash occurring when a custom hashcat version tag is used which contains non-numerical parts.
 
 ## v0.6.0 -> v0.6.1
 
