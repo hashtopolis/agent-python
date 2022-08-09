@@ -196,7 +196,7 @@ class HashcatCracker:
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
         err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', process.stderr))
-        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=(self.config.get_value('hashlists-path') + "/hashlists/" + str(task['hashlistId']) + ".out", process))
+        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=(self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out", process))
         out_thread.start()
         err_thread.start()
         crk_thread.start()
