@@ -89,17 +89,19 @@ class Initialize:
 
             for line in sorted(set(pairs)):
                 devices.append(line.split(':', 1)[1].replace('\t', ' '))
-            try:
-                output = subprocess.check_output("lspci | grep -E 'VGA compatible controller|3D controller'", shell=True)
-            except subprocess.CalledProcessError:
-                # we silently ignore this case on machines where lspci is not present or architecture has no pci bus
-                output = b""
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-            for line in output:
-                if not line:
-                    continue
-                line = ' '.join(line.split(' ')[1:]).split(':')
-                devices.append(line[1].strip())
+
+            if not self.config.get_value('cpu-only'):
+                try:
+                    output = subprocess.check_output("lspci | grep -E 'VGA compatible controller|3D controller'", shell=True)
+                except subprocess.CalledProcessError:
+                    # we silently ignore this case on machines where lspci is not present or architecture has no pci bus
+                    output = b""
+                output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                for line in output:
+                    if not line:
+                        continue
+                    line = ' '.join(line.split(' ')[1:]).split(':')
+                    devices.append(line[1].strip())
 
         elif Initialize.get_os() == 1:  # windows
             output = subprocess.check_output("wmic cpu get name", shell=True)
@@ -155,6 +157,9 @@ class Initialize:
             query = dict_register.copy()
             query['voucher'] = voucher
             query['name'] = name
+            if self.config.get_value('cpu-only'):
+                query['cpu-only'] = True
+
             req = JsonRequest(query)
             ans = req.execute()
             if ans is None:
@@ -205,6 +210,10 @@ class Initialize:
             self.__check_url(args)
         else:
             logging.debug("Connection test successful!")
+
+        if args.cpu_only is not None and args.cpu_only:
+            logging.debug("Setting agent to be CPU only.."
+            self.config.set_value('cpu-only', True)
 
     @staticmethod
     def __build_directories():
