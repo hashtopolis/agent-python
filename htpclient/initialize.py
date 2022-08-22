@@ -212,7 +212,7 @@ class Initialize:
             logging.debug("Connection test successful!")
 
         if args.cpu_only is not None and args.cpu_only:
-            logging.debug("Setting agent to be CPU only.."
+            logging.debug("Setting agent to be CPU only..")
             self.config.set_value('cpu-only', True)
 
     @staticmethod
