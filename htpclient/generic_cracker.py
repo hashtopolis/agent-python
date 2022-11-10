@@ -23,7 +23,9 @@ class GenericCracker:
     def run_chunk(self, task, chunk, preprocessor):
         args = " crack -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "-a ../hashlists/" + str(task['hashlistId']))
+        args += ' ' + task['cmdpars']
+
         full_cmd = self.callPath + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -43,6 +45,7 @@ class GenericCracker:
         process.wait()
         out_thread.join()
         err_thread.join()
+        main_thread.join()
         logging.info("finished chunk")
 
     def run_loop(self, process, chunk, task):
@@ -96,14 +99,10 @@ class GenericCracker:
                             elif ans['response'] != 'SUCCESS':
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
-                                if ans['zaps']:
-                                    with open("files/zap", "wb") as zapfile:  # need to check if we are in the main dir here
-                                        zapfile.write('\n'.join(ans['zaps']).encode())
-                                        zapfile.close()
                                 cracks = cracks_backup
                                 logging.info(
                                     "Progress: " + str(progress / 100) + "% Cracks: " + str(len(cracks)) +
-                                    " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(ans['zaps'])))
+                                    " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']))
                     else:
                         line = line.decode()
                         if ":" in line:
@@ -116,7 +115,7 @@ class GenericCracker:
 
     def measure_keyspace(self, task, chunk):
         task = task.get_task()
-        full_cmd = self.callPath + " keyspace " + task['attackcmd'].replace("-a " + task['hashlistAlias'] + " ", "")
+        full_cmd = self.callPath + " keyspace " + task['attackcmd'].replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         try:
@@ -140,8 +139,8 @@ class GenericCracker:
         ksp = self.keyspace
         if ksp == 0:
             ksp = task['keyspace']
-        args = task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])
+        args = task['attackcmd'].replace(task['hashlistAlias'], "-a ../hashlists/" + str(task['hashlistId']))
+        full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])  + ' ' + task['cmdpars']
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
@@ -163,7 +162,10 @@ class GenericCracker:
                 req = JsonRequest(query)
                 req.execute()
                 return 0
-            return float(last_valid_status.get_progress()) / 10000
+            if task['benchType'] == 'speed':
+                return str(last_valid_status.get_progress()) + ":" + str(last_valid_status.get_speed())
+            else:
+                return float(last_valid_status.get_progress()) / 10000
         else:
             query = copy_and_set_token(dict_clientError, self.config.get_value('token'))
             query['taskId'] = task['taskId']
