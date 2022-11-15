@@ -333,6 +333,7 @@ if __name__ == "__main__":
     parser.add_argument('--hashlists-path', type=str, required=False, help='Use given folder path as hashlists location')
     parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
     parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
+    parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
     args = parser.parse_args()
 
     if args.version:

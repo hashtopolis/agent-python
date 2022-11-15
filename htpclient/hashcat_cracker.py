@@ -63,8 +63,11 @@ class HashcatCracker:
     def get_outfile_format(self):
         if self.version_string.find('-') == -1:
             release = self.version_string.split('.')
-            if int(str(release[0])) >= 6:
-                return "1,2,3,4"
+            try:
+                if int(str(release[0])) >= 6:
+                    return "1,2,3,4"
+            except ValueError:
+                return "1,2,3,4"  # if there is a custom version, we assume it's using the new format
             return "15" # if we cannot determine the version or if the release is older than 6.0.0, we will use the old format
         split = self.version_string.split('-')
         if len(split) < 2:
@@ -324,6 +327,7 @@ class HashcatCracker:
                             ans = req.execute()
                             if ans is None:
                                 logging.error("Failed to send solve!")
+                                sleep(1)
                             elif ans['response'] != 'SUCCESS':
                                 self.wasStopped = True
                                 logging.error("Error from server on solve: " + str(ans))

@@ -4,6 +4,15 @@
 
 * Paths for files, crackers, hashlists, zaps and preprocessors can be set via command line args or config.
 
+### Features
+
+* Allow the agent to register as CPU only on the server and sending only CPU information.
+
+### Bugfixes
+
+* Introduced time delay to prevent spamming server with requests when connection is refused (issue #799).
+* Fixed crash occurring when a custom hashcat version tag is used which contains non-numerical parts.
+
 ## v0.6.0 -> v0.6.1
 
 ### Features

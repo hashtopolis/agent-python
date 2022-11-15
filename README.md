@@ -32,7 +32,8 @@ Please note:
 
 ```
 usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT] [--files-path FILES_PATH]
-                               [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH]
+                               [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
+
 
 Hashtopolis Client v0.6.1
 
@@ -56,6 +57,7 @@ optional arguments:
                         Use given folder path as preprocessors location
   --zaps-path ZAPS_PATH
                         Use given folder path as zaps location
+  --cpu-only            Force client to register as CPU only and also only reading out CPU information
 ```
 
 ### Config
@@ -95,6 +97,7 @@ When you run the client for the first time it will ask automatically for all the
 | hashlists-path        | string  |         | Use given folder path as hashlists location                                |
 | preprocessors-path    | string  |         | Use given folder path as preprocessors location                            |
 | zaps-path             | string  |         | Use given folder path as zaps location                                     |
+| cpu-only              | boolean | false   | Only send CPU information about agent (for CPU only agents)                |
 
 ### Debug example
 
