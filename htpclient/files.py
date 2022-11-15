@@ -38,19 +38,19 @@ class Files:
             for filename in files:
                 if filename.find("/") != -1 or filename.find("\\") != -1:
                     continue  # ignore invalid file names
-                elif os.path.dirname("files/" + filename) != "files":
+                elif os.path.dirname(self.config.get_value('files-path') + "/" + filename) != "files":
                     continue  # ignore any case in which we would leave the files folder
-                elif os.path.exists("files/" + filename):
+                elif os.path.exists(self.config.get_value('files-path') + "/" + filename):
                     logging.info("Delete file '" + filename + "' as requested by server...")
-                    if os.path.splitext("files/" + filename)[1] == '.7z':
-                        if os.path.exists("files/" + filename.replace(".7z", ".txt")):
+                    if os.path.splitext(self.config.get_value('files-path') + "/" + filename)[1] == '.7z':
+                        if os.path.exists(self.config.get_value('files-path') + "/" + filename.replace(".7z", ".txt")):
                             logging.info("Also delete assumed wordlist from archive of same file...")
-                            os.unlink("files/" + filename.replace(".7z", ".txt"))
-                    os.unlink("files/" + filename)
+                            os.unlink(self.config.get_value('files-path') + "/" + filename.replace(".7z", ".txt"))
+                    os.unlink(self.config.get_value('files-path') + "/" + filename)
 
     def check_files(self, files, task_id):
         for file in files:
-            file_localpath = "files/" + file
+            file_localpath = self.config.get_value('files-path') + "/" + file
             query = copy_and_set_token(dict_getFile, self.config.get_value('token'))
             query['taskId'] = task_id
             query['file'] = file
@@ -85,10 +85,10 @@ class Files:
                     logging.error("file size mismatch on file: %s" % file)
                     sleep(5)
                     return False
-                if os.path.splitext("files/" + file)[1] == '.7z' and not os.path.isfile("files/" + file.replace(".7z", ".txt")):
+                if os.path.splitext(self.config.get_value('files-path') + "/" + file)[1] == '.7z' and not os.path.isfile(self.config.get_value('files-path') + "/" + file.replace(".7z", ".txt")):
                     # extract if needed
                     if Initialize.get_os() != 1:
-                        os.system("./7zr" + Initialize.get_os_extension() + " x -aoa -ofiles/ -y files/" + file)
+                        os.system("./7zr" + Initialize.get_os_extension() + " x -aoa -o'" + self.config.get_value('files-path') + "/' -y '" + self.config.get_value('files-path') + "/" + file + "'")
                     else:
-                        os.system("7zr" + Initialize.get_os_extension() + " x -aoa -ofiles/ -y files/" + file)
+                        os.system("7zr" + Initialize.get_os_extension() + " x -aoa -o'" + self.config.get_value('files-path') + "/' -y '" + self.config.get_value('files-path') + "/" + file + "'")
         return True

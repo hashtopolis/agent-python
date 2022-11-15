@@ -11,6 +11,7 @@ import subprocess
 
 from htpclient.dicts import copy_and_set_token, dict_clientError
 from htpclient.jsonRequest import JsonRequest
+from htpclient.config import Config
 
 
 def log_error_and_exit(message):
@@ -70,7 +71,7 @@ def start_uftpd(os_extension, config):
         cmd += "-I " + config.get_value('multicast-device') + ' '
     else:
         cmd += "-I eth0 "  # wild guess as default
-    cmd += "-D " + os.path.abspath("files/") + ' '
+    cmd += "-D " + os.path.abspath(config.get_value('files-path') + "/") + ' '
     cmd += "-L " + os.path.abspath("multicast/" + str(time.time()) + ".log")
     logging.debug("CALL: " + cmd)
     subprocess.check_output(cmd, shell=True)
@@ -111,18 +112,17 @@ def clean_list(element_list):
 
 # the prince flag is deprecated
 def update_files(command, prince=False):
+    config = Config()
+
     split = command.split(" ")
     ret = []
     for part in split:
         # test if file exists
         if not part:
             continue
-        path = "files/" + part
+        path = config.get_value('files-path') + "/" + part
         if os.path.exists(path):
-            if prince:
-                ret.append("../" + path)
-            else:
-                ret.append("../../" + path)
+            ret.append(f"'{path}'")
         else:
             ret.append(part)
     return " %s " % " ".join(ret)

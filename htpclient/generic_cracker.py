@@ -16,19 +16,20 @@ class GenericCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
         self.io_q = Queue()
-        self.callPath = "../crackers/" + str(cracker_id) + "/" + binary_download.get_version()['executable']
+        self.callPath = self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/" + binary_download.get_version()['executable']
         self.executable_name = binary_download.get_version()['executable']
         self.keyspace = 0
 
     def run_chunk(self, task, chunk, preprocessor):
         args = " crack -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
-        args += " " + task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
-        full_cmd = self.callPath + args
+        hl_path = self.config.get_value('hashlists-path') + "/" + str(task['hashlistId'])
+        args += " " + task['attackcmd'].replace(task['hashlistAlias'], f"'{hl_path}'")
+        full_cmd = f"'{self.callPath}'" + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
-        process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd='files')
+        process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.config.get_value('files-path'))
 
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
@@ -97,7 +98,7 @@ class GenericCracker:
                                 logging.error("Error from server on solve: " + str(ans))
                             else:
                                 if ans['zaps']:
-                                    with open("files/zap", "wb") as zapfile:  # need to check if we are in the main dir here
+                                    with open(self.config.get_value('files-path') + "/zap", "wb") as zapfile:  # need to check if we are in the main dir here
                                         zapfile.write('\n'.join(ans['zaps']).encode())
                                         zapfile.close()
                                 cracks = cracks_backup
@@ -121,7 +122,7 @@ class GenericCracker:
             full_cmd = full_cmd.replace("/", '\\')
         try:
             logging.debug("CALL: " + full_cmd)
-            output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+            output = subprocess.check_output(full_cmd, shell=True, cwd=self.config.get_value('files-path'))
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measurement: " + str(e))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
@@ -140,12 +141,13 @@ class GenericCracker:
         ksp = self.keyspace
         if ksp == 0:
             ksp = task['keyspace']
-        args = task['attackcmd'].replace(task['hashlistAlias'], "../hashlists/" + str(task['hashlistId']))
+        hl_path = self.config.get_value('hashlists-path') + "/" + str(task['hashlistId'])
+        args = task['attackcmd'].replace(task['hashlistAlias'], f"'{hl_path}'")
         full_cmd = self.callPath + " crack " + args + " -s 0 -l " + str(ksp) + " --timeout=" + str(task['bench'])
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
-        output = subprocess.check_output(full_cmd, shell=True, cwd='files')
+        output = subprocess.check_output(full_cmd, shell=True, cwd=self.config.get_value('files-path'))
         if output:
             output = output.replace(b"\r\n", b"\n").decode('utf-8')
             output = output.split('\n')

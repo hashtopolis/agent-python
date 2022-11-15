@@ -31,21 +31,33 @@ Please note:
 ### Command Line Arguments
 
 ```
-usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT] [--cpu-only]
+usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT] [--files-path FILES_PATH]
+                               [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
+
 
 Hashtopolis Client v0.6.1
 
 optional arguments:
-  -h, --help         show this help message and exit
-  --de-register      client should automatically de-register from server now
-  --version          show version information
-  --number-only      when using --version show only the number
-  --disable-update   disable retrieving auto-updates of the client from the server
-  --debug, -d        enforce debugging output
-  --voucher VOUCHER  voucher to use to automatically register
-  --url URL          URL to Hashtopolis client API
-  --cert CERT        Client TLS cert bundle for Hashtopolis client API
-  --cpu-only         Force client to register as CPU only and also only reading out CPU information
+  -h, --help            show this help message and exit
+  --de-register         client should automatically de-register from server now
+  --version             show version information
+  --number-only         when using --version show only the number
+  --disable-update      disable retrieving auto-updates of the client from the server
+  --debug, -d           enforce debugging output
+  --voucher VOUCHER     voucher to use to automatically register
+  --url URL             URL to Hashtopolis client API
+  --cert CERT           Client TLS cert bundle for Hashtopolis client API
+  --files-path FILES_PATH
+                        Use given folder path as files location
+  --crackers-path CRACKERS_PATH
+                        Use given folder path as crackers location
+  --hashlists-path HASHLISTS_PATH
+                        Use given folder path as hashlists location
+  --preprocessors-path PREPROCESSORS_PATH
+                        Use given folder path as preprocessors location
+  --zaps-path ZAPS_PATH
+                        Use given folder path as zaps location
+  --cpu-only            Force client to register as CPU only and also only reading out CPU information
 ```
 
 ### Config
@@ -80,6 +92,11 @@ When you run the client for the first time it will ask automatically for all the
 | auth-user             | string  |         | HTTP Basic Auth user                                                       |
 | auth-password         | string  |         | HTTP Basic Auth password                                                   |
 | outfile-history       | boolean | false   | Keep old hashcat outfiles with founds and not getting them overwritten     |
+| files-path            | string  |         | Use given folder path as files location                                    |
+| crackers-path         | string  |         | Use given folder path as crackers location                                 |
+| hashlists-path        | string  |         | Use given folder path as hashlists location                                |
+| preprocessors-path    | string  |         | Use given folder path as preprocessors location                            |
+| zaps-path             | string  |         | Use given folder path as zaps location                                     |
 | cpu-only              | boolean | false   | Only send CPU information about agent (for CPU only agents)                |
 
 ### Debug example
@@ -110,6 +127,7 @@ In order to use the multicast distribution for files, please make sure that the 
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 6.2.5
 * 6.2.4
 * 6.2.3
 * 6.2.2

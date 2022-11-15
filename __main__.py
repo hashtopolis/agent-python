@@ -2,6 +2,7 @@ import glob
 import shutil
 import signal
 import sys
+import os
 import time
 from time import sleep
 
@@ -47,13 +48,13 @@ def run_health_check():
     logging.info("Starting check ID " + str(check_id))
 
     # write hashes to file
-    hash_file = open("hashlists/health_check.txt", "w")
+    hash_file = open(CONFIG.get_value('hashlists-path') + "/health_check.txt", "w")
     hash_file.write("\n".join(ans['hashes']))
     hash_file.close()
 
     # delete old file if necessary
-    if os.path.exists("hashlists/health_check.out"):
-        os.unlink("hashlists/health_check.out")
+    if os.path.exists(CONFIG.get_value('hashlists-path') + "/health_check.out"):
+        os.unlink(CONFIG.get_value('hashlists-path') + "/health_check.out")
 
     # run task
     cracker = HashcatCracker(ans['crackerBinaryId'], binaryDownload)
@@ -62,8 +63,8 @@ def run_health_check():
     end = int(time.time())
 
     # read results
-    if os.path.exists("hashlists/health_check.out"):
-        founds = file_get_contents("hashlists/health_check.out").replace("\r\n", "\n").split("\n")
+    if os.path.exists(CONFIG.get_value('hashlists-path') + "/health_check.out"):
+        founds = file_get_contents(CONFIG.get_value('hashlists-path') + "/health_check.out").replace("\r\n", "\n").split("\n")
     else:
         founds = []
     if len(states) > 0:
@@ -118,15 +119,37 @@ def init_logging(args):
 def init(args):
     global CONFIG, binaryDownload
 
+    if len(CONFIG.get_value('files-path')) == 0:
+        CONFIG.set_value('files-path', os.path.abspath('files'))
+    if len(CONFIG.get_value('crackers-path')) == 0:
+        CONFIG.set_value('crackers-path', os.path.abspath('crackers'))
+    if len(CONFIG.get_value('hashlists-path')) == 0:
+        CONFIG.set_value('hashlists-path', os.path.abspath('hashlists'))
+    if len(CONFIG.get_value('zaps-path')) == 0:
+        CONFIG.set_value('zaps-path', os.path.abspath('.'))
+    if len(CONFIG.get_value('preprocessors-path')) == 0:
+        CONFIG.set_value('preprocessors-path', os.path.abspath('preprocessors'))
+
+    if args.files_path and len(args.files_path):
+        CONFIG.set_value('files-path', os.path.abspath(args.files_path))
+    if args.crackers_path and len(args.crackers_path):
+        CONFIG.set_value('crackers-path', os.path.abspath(args.crackers_path))
+    if args.hashlists_path and len(args.hashlists_path):
+        CONFIG.set_value('hashlists-path', os.path.abspath(args.hashlists_path))
+    if args.zaps_path and len(args.zaps_path):
+        CONFIG.set_value('zaps-path', os.path.abspath(args.zaps_path))
+    if args.preprocessors_path and len(args.preprocessors_path):
+        CONFIG.set_value('preprocessors-path', os.path.abspath(args.preprocessors_path))
+
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
     # check if there are running hashcat.pid files around (as we assume that nothing is running anymore if the client gets newly started)
-    if os.path.exists("crackers"):
-        for root, dirs, files in os.walk("crackers"):
+    if os.path.exists(CONFIG.get_value('crackers-path')):
+        for root, dirs, files in os.walk(CONFIG.get_value('crackers-path')):
             for folder in dirs:
-                if folder.isdigit() and os.path.exists("crackers/" + folder + "/hashtopolis.pid"):
-                    logging.info("Cleaning hashcat PID file from crackers/" + folder)
-                    os.unlink("crackers/" + folder + "/hashtopolis.pid")
+                if folder.isdigit() and os.path.exists(CONFIG.get_value('crackers-path') + "/" + folder + "/hashtopolis.pid"):
+                    logging.info("Cleaning hashcat PID file from " + CONFIG.get_value('crackers-path') + "/" + folder)
+                    os.unlink(CONFIG.get_value('crackers-path') + "/" + folder + "/hashtopolis.pid")
 
     session = Session(requests.Session()).s
     session.headers.update({'User-Agent': Initialize.get_version()})
@@ -281,7 +304,7 @@ def de_register():
     else:
         logging.info("Successfully de-registered!")
         # cleanup
-        dirs = ['crackers', 'prince', 'hashlists', 'files']
+        dirs = [CONFIG.get_value('crackers-path'), CONFIG.get_value('preprocessors-path'), CONFIG.get_value('hashlists-path'), CONFIG.get_value('files-path')]
         files = ['config.json', '7zr.exe', '7zr']
         for file in files:
             if os.path.exists(file):
@@ -289,7 +312,7 @@ def de_register():
         for directory in dirs:
             if os.path.exists(directory):
                 shutil.rmtree(directory)
-        r = glob.glob('hashlist_*')
+        r = glob.glob(CONFIG.get_value('zaps-path') + '/hashlist_*')
         for i in r:
             shutil.rmtree(i)
         logging.info("Cleanup finished!")
@@ -305,6 +328,11 @@ if __name__ == "__main__":
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
     parser.add_argument('--cert', type=str, required=False, help='Client TLS cert bundle for Hashtopolis client API')
+    parser.add_argument('--files-path', type=str, required=False, help='Use given folder path as files location')
+    parser.add_argument('--crackers-path', type=str, required=False, help='Use given folder path as crackers location')
+    parser.add_argument('--hashlists-path', type=str, required=False, help='Use given folder path as hashlists location')
+    parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
+    parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
     parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
     args = parser.parse_args()
 
