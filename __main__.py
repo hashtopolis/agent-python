@@ -305,6 +305,7 @@ if __name__ == "__main__":
     parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
     parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
     parser.add_argument('--cert', type=str, required=False, help='Client TLS cert bundle for Hashtopolis client API')
+    parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
     args = parser.parse_args()
 
     if args.version:

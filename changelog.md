@@ -1,5 +1,9 @@
 ## v0.6.1 -> v0.x.x
 
+### Features
+
+* Allow the agent to register as CPU only on the server and sending only CPU information.
+
 ### Bugfixes
 
 * Introduced time delay to prevent spamming server with requests when connection is refused (issue #799).

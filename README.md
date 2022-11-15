@@ -31,22 +31,21 @@ Please note:
 ### Command Line Arguments
 
 ```
-usage: python3 hashtopolis.zip [-h] [--de-register] [--version]
-                               [--number-only] [--disable-update] [--debug]
-                               [--voucher VOUCHER] [--url URL]
+usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT] [--cpu-only]
 
-Hashtopolis Client v0.6.0
+Hashtopolis Client v0.6.1
 
 optional arguments:
   -h, --help         show this help message and exit
   --de-register      client should automatically de-register from server now
   --version          show version information
   --number-only      when using --version show only the number
-  --disable-update   disable retrieving auto-updates of the client from the
-                     server
+  --disable-update   disable retrieving auto-updates of the client from the server
   --debug, -d        enforce debugging output
   --voucher VOUCHER  voucher to use to automatically register
   --url URL          URL to Hashtopolis client API
+  --cert CERT        Client TLS cert bundle for Hashtopolis client API
+  --cpu-only         Force client to register as CPU only and also only reading out CPU information
 ```
 
 ### Config
@@ -81,6 +80,7 @@ When you run the client for the first time it will ask automatically for all the
 | auth-user             | string  |         | HTTP Basic Auth user                                                       |
 | auth-password         | string  |         | HTTP Basic Auth password                                                   |
 | outfile-history       | boolean | false   | Keep old hashcat outfiles with founds and not getting them overwritten     |
+| cpu-only              | boolean | false   | Only send CPU information about agent (for CPU only agents)                |
 
 ### Debug example
 
