@@ -15,6 +15,8 @@ from htpclient.jsonRequest import JsonRequest, os
 from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi
 from htpclient.dicts import *
 
+SEP = os.path.sep
+
 
 class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
@@ -26,7 +28,7 @@ class HashcatCracker:
         self.executable_name = binary_download.get_version()['executable']
         k = self.executable_name.rfind(".")
         self.executable_name = self.executable_name[:k] + "." + self.executable_name[k + 1:]
-        self.cracker_path = self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/"
+        self.cracker_path = self.config.get_value('crackers-path') + SEP + str(cracker_id) + SEP
         self.callPath = self.executable_name
         if Initialize.get_os() != 1:
             self.callPath = "./" + self.callPath
@@ -35,12 +37,12 @@ class HashcatCracker:
             self.executable_name = binary_download.get_version()['executable']
             k = self.executable_name.rfind(".")
             self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
-            self.cracker_path = self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/"
+            self.cracker_path = self.config.get_value('crackers-path') + SEP + str(cracker_id) + SEP
             self.callPath = self.executable_name
             if Initialize.get_os() != 1:
                 self.callPath = "./" + self.callPath
 
-        cmd = "'" + self.callPath + "' --version"
+        cmd = '"' + self.callPath + '" --version'
         output = ''
         try:
             logging.debug("CALL: " + cmd)
@@ -86,8 +88,8 @@ class HashcatCracker:
         args = " --machine-readable --quiet --status --restore-disable --session=hashtopolis"
         args += " --status-timer " + str(task['statustimer'])
         args += " --outfile-check-timer=" + str(task['statustimer'])
-        args += " --outfile-check-dir='" + self.config.get_value('zaps-path') + "/hashlist_" + str(task['hashlistId']) + "'"
-        args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out' --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
+        args += ' --outfile-check-dir="' + self.config.get_value('zaps-path') + SEP + "hashlist_" + str(task['hashlistId']) + '"'
+        args += ' -o "' + self.config.get_value('hashlists-path') + SEP + str(task['hashlistId']) + '.out" --outfile-format=' + self.get_outfile_format() + ' -p "0x09"'
         args += " -s " + str(chunk['skip'])
         args += " -l " + str(chunk['length'])
         if 'useBrain' in task and task['useBrain']:  # when using brain we set the according parameters
@@ -98,7 +100,7 @@ class HashcatCracker:
                 args += " --brain-client-features " + str(task['brainFeatures'])
         else:  # remove should only be used if we run without brain
             args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
-        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "'" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "' ") + task['cmdpars']
+        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], '"' + self.config.get_value('hashlists-path') + SEP + str(task['hashlistId']) + '" ') + task['cmdpars']
         if args.find(" -S") != -1:
             self.uses_slow_hash_flag = True
         return self.callPath + args
@@ -524,18 +526,18 @@ class HashcatCracker:
 
     def run_speed_benchmark(self, task):
         args = " --machine-readable --quiet --progress-only"
-        args += " --restore-disable --potfile-disable --session=hashtopolis -p \"" + str(chr(9)) + "\" "
+        args += " --restore-disable --potfile-disable --session=hashtopolis -p \"0x09\" "
         if 'usePrince' in task and task['usePrince']:
             args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], "'" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "' ")
             args += " example.dict" + ' ' + task['cmdpars']
         else:
-            args += update_files(task['attackcmd']).replace(task['hashlistAlias'], "'" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "' ") + task['cmdpars']
+            args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '"' + self.config.get_value('hashlists-path') + SEP + str(task['hashlistId']) + '" ') + task['cmdpars']
         if 'usePreprocessor' in task and task['usePreprocessor']:
             args += " example.dict"
         if 'useBrain' in task and task['useBrain']:
             args += " -S"
-        args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out'"
-        full_cmd = f"'{self.callPath}'" + args
+        args += ' -o "' + self.config.get_value('hashlists-path') + SEP + str(task['hashlistId']) + '.out"'
+        full_cmd = f'"{self.callPath}"' + args
         output = b''
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
@@ -595,8 +597,8 @@ class HashcatCracker:
     def run_health_check(self, attack, hashlist_alias):
         args = " --machine-readable --quiet"
         args += " --restore-disable --potfile-disable --session=health "
-        args += update_files(attack).replace(hashlist_alias, "'" + self.config.get_value('hashlists-path') + "/health_check.txt'")
-        args += " -o '" + self.config.get_value('hashlists-path') + "/health_check.out'"
+        args += update_files(attack).replace(hashlist_alias, "'" + self.config.get_value('hashlists-path') + SEP + "health_check.txt'")
+        args += " -o '" + self.config.get_value('hashlists-path') + SEP + "health_check.out'"
         full_cmd = f"'{self.callPath}'" + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')

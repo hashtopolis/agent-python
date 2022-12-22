@@ -10,6 +10,8 @@ from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 from htpclient.dicts import *
 
+SEP = os.path.sep
+
 
 class BinaryDownload:
     def __init__(self, args):
@@ -98,7 +100,7 @@ class BinaryDownload:
 
     def check_prince(self):
         logging.debug("Checking if PRINCE is present...")
-        path = "prince/"
+        path = "prince" + SEP
         if os.path.isdir(path):  # if it already exists, we don't need to download it
             logging.debug("PRINCE is already downloaded")
             return True
@@ -125,8 +127,8 @@ class BinaryDownload:
             else:
                 os.system("./7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
-                if os.path.isdir("temp/" + name):
-                    os.rename("temp/" + name, "prince")
+                if os.path.isdir("temp" + SEP + name):
+                    os.rename("temp" + SEP + name, "prince")
                     break
             os.unlink("prince.7z")
             os.rmdir("temp")
@@ -135,7 +137,7 @@ class BinaryDownload:
     
     def check_preprocessor(self, task):
         logging.debug("Checking if requested preprocessor is present...")
-        path = self.config.get_value('preprocessors-path') + "/" + str(task.get_task()['preprocessor']) + "/"
+        path = self.config.get_value('preprocessors-path') + SEP + str(task.get_task()['preprocessor']) + SEP
         query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'preprocessor'
         query['preprocessorId'] = task.get_task()['preprocessor']
@@ -164,8 +166,8 @@ class BinaryDownload:
             else:
                 os.system("./7zr" + Initialize.get_os_extension() + " x -otemp temp.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
-                if os.path.isdir("temp/" + name):
-                    os.rename("temp/" + name, path)
+                if os.path.isdir("temp" + SEP + name):
+                    os.rename("temp" + SEP + name, path)
                     break
             os.unlink("temp.7z")
             os.rmdir("temp")
@@ -173,7 +175,7 @@ class BinaryDownload:
         return True
 
     def check_version(self, cracker_id):
-        path = self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/"
+        path = self.config.get_value('crackers-path') + SEP + str(cracker_id) + SEP
         query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'cracker'
         query['binaryVersionId'] = cracker_id
@@ -191,19 +193,19 @@ class BinaryDownload:
             self.last_version = ans
             if not os.path.isdir(path):
                 # we need to download the 7zip
-                if not Download.download(ans['url'], self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z"):
+                if not Download.download(ans['url'], self.config.get_value('crackers-path') + SEP + str(cracker_id) + ".7z"):
                     logging.error("Download of cracker binary failed!")
                     sleep(5)
                     return False
                 if Initialize.get_os() == 1:
-                    os.system("7zr" + Initialize.get_os_extension() + " x -o'" + self.config.get_value('crackers-path') + "/temp' '" + self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z'")
+                    os.system("7zr" + Initialize.get_os_extension() + ' x -o"' + self.config.get_value('crackers-path') + SEP + 'temp" "' + self.config.get_value('crackers-path') + SEP + str(cracker_id) + '.7z"')
                 else:
-                    os.system("./7zr" + Initialize.get_os_extension() + " x -o'" + self.config.get_value('crackers-path') + "/temp' '" + self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z'")
-                os.unlink(self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z")
-                for name in os.listdir(self.config.get_value('crackers-path') + "/temp"):
-                    if os.path.isdir(self.config.get_value('crackers-path') + "/temp/" + name):
-                        os.rename(self.config.get_value('crackers-path') + "/temp/" + name, self.config.get_value('crackers-path') + "/" + str(cracker_id))
+                    os.system("./7zr" + Initialize.get_os_extension() + ' x -o"' + self.config.get_value('crackers-path') + SEP + 'temp" "' + self.config.get_value('crackers-path') + SEP + str(cracker_id) + '.7z"')
+                os.unlink(self.config.get_value('crackers-path') + SEP + str(cracker_id) + ".7z")
+                for name in os.listdir(self.config.get_value('crackers-path') + SEP + "temp"):
+                    if os.path.isdir(self.config.get_value('crackers-path') + SEP + "temp" + SEP + name):
+                        os.rename(self.config.get_value('crackers-path') + SEP + "temp" + SEP + name, self.config.get_value('crackers-path') + SEP + str(cracker_id))
                     else:
-                        os.rename(self.config.get_value('crackers-path') + "/temp", self.config.get_value('crackers-path') + "/" + str(cracker_id))
+                        os.rename(self.config.get_value('crackers-path') + SEP + "temp", self.config.get_value('crackers-path') + SEP + str(cracker_id))
                         break
         return True

@@ -13,6 +13,8 @@ from htpclient.dicts import copy_and_set_token, dict_clientError
 from htpclient.jsonRequest import JsonRequest
 from htpclient.config import Config
 
+SEP = os.path.sep
+
 
 def log_error_and_exit(message):
     logging.error(message)
@@ -120,7 +122,7 @@ def update_files(command, prince=False):
         # test if file exists
         if not part:
             continue
-        path = config.get_value('files-path') + "/" + part
+        path = config.get_value('files-path') + SEP + part
         if os.path.exists(path):
             ret.append(f"'{path}'")
         else:
