@@ -1,12 +1,13 @@
 FROM ubuntu:20.04
 
-ARG DEV_CONTAINER_USER_CMD
+ARG DEV_CONTAINER_USER_CMD_PRE
+ARG DEV_CONTAINER_USER_CMD_POST
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Check for and run optional user-supplied command to enable (advanced) customizations of the dev container
-RUN if [ -n "${DEV_CONTAINER_USER_CMD}" ]; then echo "${DEV_CONTAINER_USER_CMD}" | sh ; fi
+RUN if [ -n "${DEV_CONTAINER_USER_CMD_PRE}" ]; then echo "${DEV_CONTAINER_USER_CMD_PRE}" | sh ; fi
 
 RUN groupadd vscode && useradd -rm -d /app -s /bin/bash -g vscode -u 1001 vscode
 
@@ -42,6 +43,9 @@ WORKDIR /app
 USER vscode
 COPY requirements.txt /app/src/
 RUN /usr/bin/pip3 install -r src/requirements.txt
+
+# Check for and run optional user-supplied command to enable (advanced) customizations of the dev container
+RUN if [ -n "${DEV_CONTAINER_USER_CMD_POST}" ]; then echo "${DEV_CONTAINER_USER_CMD_POST}" | sh ; fi
 
 # Preventing container from exiting
 CMD tail -f /dev/null

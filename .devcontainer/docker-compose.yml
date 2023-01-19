@@ -6,7 +6,8 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
       args:
-        - DEV_CONTAINER_USER_CMD
+        - DEV_CONTAINER_USER_CMD_PRE
+        - DEV_CONTAINER_USER_CMD_POST
     volumes:
       # This is where VS Code should expect to find your project's source code
       # and the value of "workspaceFolder" in .devcontainer/devcontainer.json
