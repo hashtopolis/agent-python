@@ -4,7 +4,9 @@
 	"service": "hashtopolis-agent",
 
 	"workspaceFolder": "/app/src",
-
+	"remoteEnv": {
+		"NODE_OPTIONS": "--use-openssl-ca",
+	},
 	"extensions": [
 		"ms-python.python"
 	],
