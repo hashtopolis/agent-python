@@ -5,7 +5,7 @@ can be extended.
 
 1. Start the development container for the server, make sure you use the branch: feature/apiv2
 2. Start the development container for the agent
-3. Start the agent once to setup the config.json file
+3. Start the agent once to setup the config.json file (Run -> Start Debugging)
 4. You should be able to run the tests with `python3 -m pytest` or run them directly from 'Testing' in VSCode
 
 ## Limitations
