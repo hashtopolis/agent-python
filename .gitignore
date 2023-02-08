@@ -2,6 +2,7 @@
 *.exe
 *.log
 *.json
+!/tests/*.json
 crackers
 prince
 files
