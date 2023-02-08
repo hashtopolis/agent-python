@@ -89,8 +89,6 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         hashlist.load_hashlist(task.get_task()['hashlistId'])
         hashlist_id = task.get_task()['hashlistId']
         hashlists_path = config.get_value('hashlists-path')
-        
-        chunk.get_chunk(task.get_task()['taskId'])
 
         cracker.measure_keyspace(task, chunk)
         mock_check_output.assert_called_with(
@@ -118,6 +116,7 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         req.execute()
 
         # cracking
+        chunk.get_chunk(task.get_task()['taskId'])
         cracker.run_chunk(task.get_task(), chunk.chunk_data(), task.get_preprocessor())
         zaps_path = config.get_value('zaps-path')
         zaps_dir = f"hashlist_{hashlist_id}"
