@@ -29,15 +29,17 @@ from tests.hashtopolis import Task as Task_v2
 # test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://example.com/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
 
 class HashcatCrackerTestLinux(unittest.TestCase):
+    @mock.patch('subprocess.Popen', side_effect=subprocess.Popen)
     @mock.patch('subprocess.check_output', side_effect=subprocess.check_output)
     @mock.patch('os.unlink', side_effect=os.unlink)
     @mock.patch('os.system', side_effect=os.system)
-    def test_correct_flow(self, mock_system, mock_unlink, mock_check_output):
+    def test_correct_flow(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         # Clean up cracker folder
         if os.path.exists('crackers/1'):
             shutil.rmtree('crackers/1')
 
         #TODO: Delete tasks / hashlist to ensure clean
+        #TODO: Verify setup agent
 
         # Setup session object
         session = Session(requests.Session()).s
@@ -85,11 +87,14 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         hashlist = Hashlist()
 
         hashlist.load_hashlist(task.get_task()['hashlistId'])
-        chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
+        hashlist_id = task.get_task()['hashlistId']
+        hashlists_path = config.get_value('hashlists-path')
+        
+        chunk.get_chunk(task.get_task()['taskId'])
 
         cracker.measure_keyspace(task, chunk)
         mock_check_output.assert_called_with(
-            "'./hashcat.bin' --keyspace --quiet  -a3 ?l?l?l?l?l?l   --hash-type=0 ",
+            "'./hashcat.bin' --keyspace --quiet  -a3 ?l?l?l?l   --hash-type=0 ",
             shell=True,
             cwd=f"{Path(crackers_path, str(cracker_id))}/",
             stderr=-2
@@ -98,10 +103,33 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         # benchmark
         result = cracker.run_benchmark(task.get_task())
         mock_check_output.assert_called_with(
-            "'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  '/app/src/hashlists/1'  -a3 ?l?l?l?l?l?l  --hash-type=0  -o '/app/src/hashlists/1.out'",
+            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  '{Path(hashlists_path, str(hashlist_id))}'  -a3 ?l?l?l?l  --hash-type=0  -o '{Path(hashlists_path, str(hashlist_id))}.out'",
             shell=True,
             cwd=f"{Path(crackers_path, str(cracker_id))}/",
             stderr=-2
+        )
+
+        # Sending benchmark to server
+        query = copy_and_set_token(dict_sendBenchmark, config.get_value('token'))
+        query['taskId'] = task.get_task()['taskId']
+        query['result'] = result
+        query['type'] = task.get_task()['benchType']
+        req = JsonRequest(query)
+        req.execute()
+
+        # cracking
+        cracker.run_chunk(task.get_task(), chunk.chunk_data(), task.get_preprocessor())
+        zaps_path = config.get_value('zaps-path')
+        zaps_dir = f"hashlist_{hashlist_id}"
+        skip = str(chunk.chunk_data()['skip'])
+        limit = str(chunk.chunk_data()['length'])
+        mock_Popen.assert_called_with(
+            f"./hashcat.bin --machine-readable --quiet --status --restore-disable --session=hashtopolis --status-timer 5 --outfile-check-timer=5 --outfile-check-dir='{Path(zaps_path, zaps_dir)}' -o '{Path(hashlists_path, str(hashlist_id))}.out' --outfile-format=1,2,3,4 -p \"\t\" -s {skip} -l {limit} --potfile-disable --remove --remove-timer=5  '{Path(hashlists_path, str(hashlist_id))}'  -a3 ?l?l?l?l  --hash-type=0 ",
+            shell=True,
+            stdout=-1,
+            stderr=-1,
+            cwd=f"{Path(crackers_path, str(cracker_id))}/",
+            preexec_fn=mock.ANY
         )
 
         # Cleanup

@@ -1,5 +1,5 @@
 {
-    "attackCmd": "#HL#  -a 0 ad a1",
+    "attackCmd": "#HL# -a3 ?l?l?l?l",
     "chunkSize": 1000,
     "chunkTime": 600,
     "color": "7C6EFF",
@@ -8,16 +8,16 @@
     "forcePipe": true,
     "files": [],
     "isArchived": false,
-    "isCpuTask": false,
+    "isCpuTask": true,
     "isSmall": false,
     "maxAgents": 112,
     "notes": "example-note",
-    "preprocessorCommand": "this-is-prepressor",
+    "preprocessorCommand": "",
     "priority": 10,
     "skipKeyspace": 500,
     "staticChunks": 2,
     "statusTimer": 5,
     "taskName": "Example - Rijmen and Daemen",
     "useNewBench": true,
-    "usePreprocessor": true
+    "usePreprocessor": false
 }
