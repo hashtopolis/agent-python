@@ -76,7 +76,7 @@ class HashcatCrackerTestLinux(unittest.TestCase):
 
         # --version
         cracker = HashcatCracker(1, binaryDownload)
-        mock_check_output.assert_called_with("'./hashcat.bin' --version", shell=True, cwd=str(Path(crackers_path, str(cracker_id))))
+        mock_check_output.assert_called_with("'./hashcat.bin' --version", shell=True, cwd=f"{Path(crackers_path, str(cracker_id))}/")
 
         # --keyspace
         chunk = Chunk()
@@ -90,6 +90,15 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         cracker.measure_keyspace(task, chunk)
         mock_check_output.assert_called_with(
             "'./hashcat.bin' --keyspace --quiet  -a3 ?l?l?l?l?l?l   --hash-type=0 ",
+            shell=True,
+            cwd=f"{Path(crackers_path, str(cracker_id))}/",
+            stderr=-2
+        )
+
+        # benchmark
+        result = cracker.run_benchmark(task.get_task())
+        mock_check_output.assert_called_with(
+            "'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  '/app/src/hashlists/1'  -a3 ?l?l?l?l?l?l  --hash-type=0  -o '/app/src/hashlists/1.out'",
             shell=True,
             cwd=f"{Path(crackers_path, str(cracker_id))}/",
             stderr=-2
