@@ -15,8 +15,15 @@ from htpclient.binarydownload import BinaryDownload
 from htpclient.session import Session
 from htpclient.config import Config
 from htpclient.initialize import Initialize
+from htpclient.chunk import Chunk
+from htpclient.hashlist import Hashlist
+from htpclient.task import Task
+from htpclient.dicts import copy_and_set_token
+from htpclient.dicts import dict_sendBenchmark
+from htpclient.jsonRequest import JsonRequest
 
-from tests.hashtopolis import Hashlist, Task
+from tests.hashtopolis import Hashlist as Hashlist_v2
+from tests.hashtopolis import Task as Task_v2
 
 # The default cmdparameters, some objects need those. Maybe move to a common helper so other tests can include this aswell.
 # test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://example.com/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
@@ -30,6 +37,8 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         if os.path.exists('crackers/1'):
             shutil.rmtree('crackers/1')
 
+        #TODO: Delete tasks / hashlist to ensure clean
+
         # Setup session object
         session = Session(requests.Session()).s
         session.headers.update({'User-Agent': Initialize.get_version()})
@@ -37,14 +46,14 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         # Create hashlist
         p = Path(__file__).parent.joinpath('create_hashlist_001.json')
         payload = json.loads(p.read_text('UTF-8'))
-        hashlist = Hashlist(**payload)
-        hashlist.save()
+        hashlist_v2 = Hashlist_v2(**payload)
+        hashlist_v2.save()
 
         # Create Task
         for p in sorted(Path(__file__).parent.glob('create_task_001.json')):
             payload = json.loads(p.read_text('UTF-8'))
-            payload['hashlistId'] = int(hashlist._id)
-            obj = Task(**payload)
+            payload['hashlistId'] = int(hashlist_v2._id)
+            obj = Task_v2(**payload)
             obj.save()
 
         # Cmd parameters setup
@@ -65,13 +74,30 @@ class HashcatCrackerTestLinux(unittest.TestCase):
 
         mock_system.assert_called_with(f"{zip_binary} x -o'{crackers_temp}' '{cracker_zip}'")
 
-        # 
-        hashcat = HashcatCracker(1, binaryDownload)
-        mock_check_output.assert_called_with("'./hashcat.bin' --version", shell=True, cwd='/app/src/crackers/1/')
+        # --version
+        cracker = HashcatCracker(1, binaryDownload)
+        mock_check_output.assert_called_with("'./hashcat.bin' --version", shell=True, cwd=str(Path(crackers_path, str(cracker_id))))
+
+        # --keyspace
+        chunk = Chunk()
+        task = Task()
+        task.load_task()
+        hashlist = Hashlist()
+
+        hashlist.load_hashlist(task.get_task()['hashlistId'])
+        chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
+
+        cracker.measure_keyspace(task, chunk)
+        mock_check_output.assert_called_with(
+            "'./hashcat.bin' --keyspace --quiet  -a3 ?l?l?l?l?l?l   --hash-type=0 ",
+            shell=True,
+            cwd=f"{Path(crackers_path, str(cracker_id))}/",
+            stderr=-2
+        )
 
         # Cleanup
         obj.delete()
-        hashlist.delete()
+        hashlist_v2.delete()
 
 if __name__ == '__main__':
     unittest.main()
