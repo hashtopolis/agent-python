@@ -100,6 +100,7 @@ class HashcatCrackerTestLinux(unittest.TestCase):
 
         # benchmark
         result = cracker.run_benchmark(task.get_task())
+        assert result != 0
         mock_check_output.assert_called_with(
             f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  '{Path(hashlists_path, str(hashlist_id))}'  -a3 ?l?l?l?l  --hash-type=0  -o '{Path(hashlists_path, str(hashlist_id))}.out'",
             shell=True,
