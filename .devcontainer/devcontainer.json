@@ -5,10 +5,14 @@
 
 	"workspaceFolder": "/app/src",
 	"remoteEnv": {
-		"NODE_OPTIONS": "--use-openssl-ca",
+		"NODE_OPTIONS": "--use-openssl-ca"
 	},
-	"extensions": [
-		"ms-python.python"
-	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python"
+			]
+		}
+	},
 	"remoteUser": "vscode"
 }
