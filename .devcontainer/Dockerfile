@@ -18,7 +18,7 @@ RUN apt-get update \
 
 # Install Intel OpenCL Runtime
 RUN cd /tmp \
-    && apt install wget lsb-core libnuma-dev pciutils -y \
+    && apt install wget lsb-core libnuma-dev pciutils clinfo -y \
     && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/15532/l_opencl_p_18.1.0.015.tgz \
     && tar xzvf l_opencl_p_18.1.0.015.tgz \
     && cd l_opencl_p_18.1.0.015 \
