@@ -81,15 +81,35 @@ class HashtopolisConnector(object):
         }
 
 
-    def get_all(self):
+    def filter(self, filter):
         self.authenticate()
-
         uri = self._api_endpoint + self._model_uri
         headers = self._headers
-        payload = {}
+
+        filter_list = []
+        cast = {
+            '__gt': '>',
+            '__gte': '>=',
+            '__lt': '<',
+            '__lte': '<=', 
+        }
+        for k,v in filter.items():
+            l = None
+            for k2,v2 in cast.items():
+                if k.endswith(k2):
+                    l = f'{k[:-len(k2)]}{v2}{v}'
+                    break
+            # Default to equal assignment
+            if l == None:
+                l = f'{k}={v}'
+            filter_list.append(l)                  
+
+        payload = {'filter': filter_list}
 
         r = requests.get(uri, headers=headers, data=json.dumps(payload))
-        return r.json()['values']
+        if r.status_code != 201:
+            logger.exception("Filter failed: %s", r.text)
+        return r.json().get('values')
 
     def patch_one(self, obj):
         if not obj.has_changed():
@@ -166,16 +186,8 @@ class ManagerBase(type):
         Retrieve all backend objects
         TODO: Make iterator supporting loading of objects via pages
         """
-        # Get all objects
-        api_objs = cls.get_conn().get_all()
+        return cls.filter()
 
-
-        # Convert into class
-        objs = []
-        for api_obj in api_objs:
-            new_obj = cls._model(**api_obj)
-            objs.append(new_obj)
-        return objs
 
     @classmethod
     def patch(cls, obj):
@@ -197,6 +209,25 @@ class ManagerBase(type):
         TODO: Request object with limit parameter instead
         """
         return cls.all()[0]
+
+    @classmethod
+    def get(cls, **kwargs):
+        objs = cls.filter(**kwargs)
+        assert(len(objs) == 1)
+        return objs[0]
+
+    @classmethod
+    def filter(cls, **kwargs):              
+        # Get all objects
+        api_objs = cls.get_conn().filter(kwargs)
+
+        # Convert into class
+        objs = []
+        if api_objs:
+            for api_obj in api_objs:
+                new_obj = cls._model(**api_obj)
+                objs.append(new_obj)
+        return objs
 
 # Build Django ORM style 'ModelName.objects' interface
 class ModelBase(type):
@@ -257,6 +288,10 @@ class Model(metaclass=ModelBase):
     def serialize(self):
         return [x for x in vars(self) if not x.startswith('_')]
 
+    @property
+    def id(self):
+        return self._id
+
 
 class Task(Model, uri="/ui/tasks"):
     def __repr__(self):
@@ -264,5 +299,13 @@ class Task(Model, uri="/ui/tasks"):
 
 
 class Hashlist(Model, uri="/ui/hashlists"):
+    def __repr__(self):
+        return self._self
+
+class Cracker(Model, uri="/ui/crackers"):
+    def __repr__(self):
+        return self._self
+
+class CrackerType(Model, uri="/ui/crackertypes"):
     def __repr__(self):
         return self._self
