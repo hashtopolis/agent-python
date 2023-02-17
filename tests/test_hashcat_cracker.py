@@ -9,6 +9,7 @@ import requests
 import json
 from pathlib import Path
 from argparse import Namespace
+import sys
 
 from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.binarydownload import BinaryDownload
@@ -34,6 +35,8 @@ class HashcatCrackerTestLinux(unittest.TestCase):
     @mock.patch('os.unlink', side_effect=os.unlink)
     @mock.patch('os.system', side_effect=os.system)
     def test_correct_flow(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
+        if sys.platform != 'linux':
+            return
         # Clean up cracker folder
         if os.path.exists('crackers/1'):
             shutil.rmtree('crackers/1')
@@ -135,6 +138,46 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         # Cleanup
         obj.delete()
         hashlist_v2.delete()
+
+class HashcatCrackerTestWindows(unittest.TestCase):
+    def test_correct_flow(self):
+        if sys.platform != 'win32':
+            return
+
+        # Clean up cracker folder
+        if os.path.exists('crackers/1'):
+            shutil.rmtree('crackers/1')
+
+        #TODO: Delete tasks / hashlist to ensure clean
+        #TODO: Verify setup agent
+
+        # Setup session object
+        session = Session(requests.Session()).s
+        session.headers.update({'User-Agent': Initialize.get_version()})
+
+        # Create hashlist
+        p = Path(__file__).parent.joinpath('create_hashlist_001.json')
+        payload = json.loads(p.read_text('UTF-8'))
+        hashlist_v2 = Hashlist_v2(**payload)
+        hashlist_v2.save()
+
+        # Create Task
+        for p in sorted(Path(__file__).parent.glob('create_task_001.json')):
+            payload = json.loads(p.read_text('UTF-8'))
+            payload['hashlistId'] = int(hashlist_v2._id)
+            obj = Task_v2(**payload)
+            obj.save()
+
+        # Cmd parameters setup
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+
+        # Try to download cracker 1
+        cracker_id = 1
+        config = Config()
+        crackers_path = config.get_value('crackers-path')
+
+        binaryDownload = BinaryDownload(test_args)
+        binaryDownload.check_version(cracker_id)
 
 if __name__ == '__main__':
     unittest.main()
