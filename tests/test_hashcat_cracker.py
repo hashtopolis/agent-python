@@ -140,7 +140,11 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         hashlist_v2.delete()
 
 class HashcatCrackerTestWindows(unittest.TestCase):
-    def test_correct_flow(self):
+    @mock.patch('subprocess.Popen', side_effect=subprocess.Popen)
+    @mock.patch('subprocess.check_output', side_effect=subprocess.check_output)
+    @mock.patch('os.unlink', side_effect=os.unlink)
+    @mock.patch('os.system', side_effect=os.system)
+    def test_correct_flow(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         if sys.platform != 'win32':
             return
 
@@ -178,6 +182,73 @@ class HashcatCrackerTestWindows(unittest.TestCase):
 
         binaryDownload = BinaryDownload(test_args)
         binaryDownload.check_version(cracker_id)
+
+        cracker_zip = Path(crackers_path, f'{cracker_id}.7z')
+        crackers_temp = Path(crackers_path, 'temp')
+        zip_binary = '7zr.exe'
+        mock_unlink.assert_called_with(cracker_zip)
+
+        mock_system.assert_called_with(f'{zip_binary} x -o"{crackers_temp}" "{cracker_zip}"')
+
+        executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.exe')
+
+        # --version
+        cracker = HashcatCracker(1, binaryDownload)
+        mock_check_output.assert_called_with([str(executeable_path), '--version'], cwd=Path(crackers_path, str(cracker_id)))
+
+        # --keyspace
+        chunk = Chunk()
+        task = Task()
+        task.load_task()
+        hashlist = Hashlist()
+
+        hashlist.load_hashlist(task.get_task()['hashlistId'])
+        hashlist_id = task.get_task()['hashlistId']
+        hashlists_path = config.get_value('hashlists-path')
+
+        cracker.measure_keyspace(task, chunk)
+
+        full_cmd = [str(executeable_path), '--keyspace', '--quiet', '-a3', '?l?l?l?l', '--hash-type=0']
+        mock_check_output.assert_called_with(
+            full_cmd,
+            cwd=Path(crackers_path, str(cracker_id)),
+            stderr=-2
+        )
+
+        # benchmark
+        hashlist_path = Path(hashlists_path, str(hashlist_id))
+        hashlist_out_path = Path(hashlists_path, f'{hashlist_id}.out')
+        result = cracker.run_benchmark(task.get_task())
+        assert result != 0
+        mock_check_output.assert_called_with(
+            [
+                str(executeable_path),
+                '--machine-readable',
+                '--quiet',
+                '--progress-only',
+                '--restore-disable',
+                '--potfile-disable',
+                '--session=hashtopolis',
+                '-p',
+                '0x09',
+                str(hashlist_path),
+                '-a3',
+                '?l?l?l?l',
+                '--hash-type=0',
+                '-o',
+                str(hashlist_out_path)
+            ],
+            cwd=Path(crackers_path, str(cracker_id)),
+            stderr=-2
+        )
+
+        # Sending benchmark to server
+        query = copy_and_set_token(dict_sendBenchmark, config.get_value('token'))
+        query['taskId'] = task.get_task()['taskId']
+        query['result'] = result
+        query['type'] = task.get_task()['benchType']
+        req = JsonRequest(query)
+        req.execute()
 
 if __name__ == '__main__':
     unittest.main()
