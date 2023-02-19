@@ -1,5 +1,6 @@
 import logging
 import os.path
+from pathlib import Path
 import stat
 import sys
 from time import sleep
@@ -173,7 +174,7 @@ class BinaryDownload:
         return True
 
     def check_version(self, cracker_id):
-        path = self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/"
+        path = Path(self.config.get_value('crackers-path'), str(cracker_id))
         query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'cracker'
         query['binaryVersionId'] = cracker_id
@@ -195,15 +196,28 @@ class BinaryDownload:
                     logging.error("Download of cracker binary failed!")
                     sleep(5)
                     return False
+
+                # we need to extract the 7zip
+                temp_folder = Path(self.config.get_value('crackers-path'), 'temp')
+                zip_file = Path(self.config.get_value('crackers-path'), f'{cracker_id}.7z')
+
                 if Initialize.get_os() == 1:
-                    os.system("7zr" + Initialize.get_os_extension() + " x -o'" + self.config.get_value('crackers-path') + "/temp' '" + self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z'")
+                    # Windows
+                    cmd = f'7zr{Initialize.get_os_extension()} x -o"{temp_folder}" "{zip_file}"'
                 else:
-                    os.system("./7zr" + Initialize.get_os_extension() + " x -o'" + self.config.get_value('crackers-path') + "/temp' '" + self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z'")
-                os.unlink(self.config.get_value('crackers-path') + "/" + str(cracker_id) + ".7z")
-                for name in os.listdir(self.config.get_value('crackers-path') + "/temp"):
-                    if os.path.isdir(self.config.get_value('crackers-path') + "/temp/" + name):
-                        os.rename(self.config.get_value('crackers-path') + "/temp/" + name, self.config.get_value('crackers-path') + "/" + str(cracker_id))
+                    # Linux
+                    cmd = f"./7zr{Initialize.get_os_extension()} x -o'{temp_folder}' '{zip_file}'"
+                os.system(cmd)
+                
+                # Clean up 7zip
+                os.unlink(zip_file)
+
+                # Workaround for a 7zip containing a folder name or already the contents of a cracker
+                for name in os.listdir(temp_folder):
+                    to_check_path = Path(temp_folder, name)
+                    if os.path.isdir(to_check_path):
+                        os.rename(to_check_path, path)
                     else:
-                        os.rename(self.config.get_value('crackers-path') + "/temp", self.config.get_value('crackers-path') + "/" + str(cracker_id))
+                        os.rename(temp_folder, path)
                         break
         return True

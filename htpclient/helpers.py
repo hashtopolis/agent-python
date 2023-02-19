@@ -5,6 +5,7 @@ import platform
 import logging
 import time
 from types import MappingProxyType
+from pathlib import Path
 
 import os
 import subprocess
@@ -88,13 +89,13 @@ def get_wordlist(command):
     return ''
 
 
-def get_rules_and_hl(command, alias):
-    split = clean_list(command.split(" "))
+def get_rules_and_hl(command_list, alias):
+    # split = clean_list(command.split(" "))
     rules = []
-    for index, part in enumerate(split):
-        if index > 0 and (split[index - 1] == '-r' or split[index - 1] == '--rules-file'):
-            rules.append(split[index - 1])
-            rules.append(split[index - 0])
+    for index, part in enumerate(command_list):
+        if index > 0 and (command_list[index - 1] == '-r' or command_list[index - 1] == '--rules-file'):
+            rules.append(command_list[index - 1])
+            rules.append(command_list[index - 0])
         if part == alias:
             rules.append(part)
     return " ".join(rules)
@@ -120,12 +121,13 @@ def update_files(command, prince=False):
         # test if file exists
         if not part:
             continue
-        path = config.get_value('files-path') + "/" + part
+        path = Path(config.get_value('files-path'), part)
+
         if os.path.exists(path):
-            ret.append(f"'{path}'")
+            ret.append(path)
         else:
             ret.append(part)
-    return " %s " % " ".join(ret)
+    return ret
 
 
 def escape_ansi(line):
