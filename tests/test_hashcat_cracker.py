@@ -284,5 +284,49 @@ class HashcatCrackerTestWindows(unittest.TestCase):
         req = JsonRequest(query)
         req.execute()
 
+        # cracking
+        chunk.get_chunk(task.get_task()['taskId'])
+        cracker.run_chunk(task.get_task(), chunk.chunk_data(), task.get_preprocessor())
+        zaps_path = config.get_value('zaps-path')
+        zaps_dir = f"hashlist_{hashlist_id}"
+        skip = str(chunk.chunk_data()['skip'])
+        limit = str(chunk.chunk_data()['length'])
+
+        full_cmd = [
+            '"hashcat.exe"',
+            '--machine-readable',
+            '--quiet',
+            '--status',
+            '--restore-disable',
+            '--session=hashtopolis',
+            '--status-timer 5',
+            '--outfile-check-timer=5',
+            f'--outfile-check-dir="{Path(zaps_path, zaps_dir)}"',
+            f'-o "{Path(hashlists_path, str(hashlist_id))}.out"',
+            '--outfile-format=1,2,3,4',
+            f'-p 0x09',
+            f'-s {skip} -l {limit}',
+            '--potfile-disable',
+            '--remove',
+            '--remove-timer=5 ',
+            f'"{Path(hashlists_path, str(hashlist_id))}"',
+            '-a3 ?l?l?l?l ',
+            ' --hash-type=0 ',
+        ]
+        
+        full_cmd = ' '.join(full_cmd)
+
+        mock_Popen.assert_called_with(
+            full_cmd,
+            shell=True,
+            stdout=-1,
+            stderr=-1,
+            cwd=Path(crackers_path, str(cracker_id)),
+        )
+
+        # Cleanup
+        obj.delete()
+        hashlist_v2.delete()
+
 if __name__ == '__main__':
     unittest.main()

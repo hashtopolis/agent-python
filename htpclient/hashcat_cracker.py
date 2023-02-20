@@ -34,12 +34,13 @@ class HashcatCracker:
             self.executable_name = binary_download.get_version()['executable']
             k = self.executable_name.rfind(".")
             self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
-            
-        self.callPath = self.executable_name
-        # Not windows
-        # TODO: Maybe remove?
-        if Initialize.get_os() != 1:
-            self.callPath = f"./{self.callPath}"
+
+        if Initialize.get_os() == 1:
+            # Windows
+            self.callPath = f'"{self.executable_name}"'
+        else:
+            # Linux / Mac
+            self.callPath = f"./{self.executable_name}"
 
         cmd = [str(self.executable_path), "--version"]
         
@@ -84,25 +85,52 @@ class HashcatCracker:
         return "1,2,3,4" # new outfile format
 
     def build_command(self, task, chunk):
-        args = " --machine-readable --quiet --status --restore-disable --session=hashtopolis"
-        args += " --status-timer " + str(task['statustimer'])
-        args += " --outfile-check-timer=" + str(task['statustimer'])
-        args += " --outfile-check-dir='" + self.config.get_value('zaps-path') + "/hashlist_" + str(task['hashlistId']) + "'"
-        args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out' --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
-        args += " -s " + str(chunk['skip'])
-        args += " -l " + str(chunk['length'])
+        args = []
+
+        zaps_file = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
+        output_file = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}.out")
+        hashlist_file = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
+        args.append('--machine-readable')
+        args.append('--quiet')
+        args.append('--status')
+        args.append('--restore-disable')
+        args.append('--session=hashtopolis')
+        args.append(f"--status-timer {task['statustimer']}")
+        args.append(f"--outfile-check-timer={task['statustimer']}")
+        args.append(f'--outfile-check-dir="{zaps_file}"')
+        args.append(f'-o "{output_file}"')
+        args.append(f'--outfile-format={self.get_outfile_format()}')
+        args.append('-p 0x09')
+        args.append(f"-s {chunk['skip']}")
+        args.append(f"-l {chunk['length']}")
+        
         if 'useBrain' in task and task['useBrain']:  # when using brain we set the according parameters
-            args += " --brain-client --brain-host " + task['brainHost']
-            args += " --brain-port " + str(task['brainPort'])
-            args += " --brain-password " + task['brainPass']
+            args.append('--brain-client')
+            args.append(f"--brain-host {task['brainHost']}")
+            args.append(f"--brain-port {task['brainPort']}")
+            args.append(f"--brain-password {task['brainPass']}")
+            
             if 'brainFeatures' in task:
-                args += " --brain-client-features " + str(task['brainFeatures'])
+                args.append(f"--brain-client-features {task['brainFeatures']}")
         else:  # remove should only be used if we run without brain
-            args += " --potfile-disable --remove --remove-timer=" + str(task['statustimer'])
-        args += " " + update_files(task['attackcmd']).replace(task['hashlistAlias'], "'" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "' ") + task['cmdpars']
-        if args.find(" -S") != -1:
+            args.append('--potfile-disable')
+            args.append('--remove')
+            args.append(f"--remove-timer={task['statustimer']}")
+        
+        files = update_files(task['attackcmd'])
+        files = files.replace(task['hashlistAlias'], f'"{hashlist_file}"')
+        args.append(files)
+        args.append(task['cmdpars'])
+
+        
+        
+        full_cmd = ' '.join(args)
+        full_cmd = f'{self.callPath} {full_cmd}'
+
+        if ' -S ' in full_cmd:
             self.uses_slow_hash_flag = True
-        return self.callPath + args
+
+        return full_cmd
 
     def build_pipe_command(self, task, chunk):
         # call the command with piping
@@ -180,17 +208,24 @@ class HashcatCracker:
             full_cmd = self.build_command(task, chunk)
         self.statusCount = 0
         self.wasStopped = False
-        if Initialize.get_os() == 1:
-            full_cmd = full_cmd.replace("/", '\\')
+        
+        # Set paths
+        outfile_path = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}.out")
+        outfile_backup_path = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}_{time.time()}.out")
+        zapfile_path = Path(self.config.get_value('zaps-path'), f"/hashlist_{task['hashlistId']}")
+        
         # clear old found file - earlier we deleted them, but just in case, we just move it to a unique filename if configured so
-        if os.path.exists(self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out"):
+        if os.path.exists(outfile_path):
             if self.config.get_value('outfile-history'):
-                os.rename(self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out", self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "_" + str(time.time()) + ".out")
+                os.rename(outfile_path, outfile_backup_path)
             else:
-                os.unlink(self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out")
+                os.unlink(outfile_path)
+    
         # create zap folder
-        if not os.path.exists(self.config.get_value('zaps-path') + "/hashlist_" + str(task['hashlistId'])):
-            os.mkdir(self.config.get_value('zaps-path') + "/hashlist_" + str(task['hashlistId']))
+        if not os.path.exists(zapfile_path):
+            os.mkdir(zapfile_path)
+        
+        # Call command
         logging.debug("CALL: " + full_cmd)
         if Initialize.get_os() != 1:
             process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
@@ -200,7 +235,7 @@ class HashcatCracker:
         logging.debug("started cracking")
         out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
         err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', process.stderr))
-        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=(self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out", process))
+        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=(outfile_path, process))
         out_thread.start()
         err_thread.start()
         crk_thread.start()
@@ -219,6 +254,8 @@ class HashcatCracker:
         logging.info("finished chunk")
 
     def run_loop(self, proc, chunk, task):
+        zap_path = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
+
         self.cracks = []
         piping_threshold = 95
         enable_piping = False
@@ -355,7 +392,7 @@ class HashcatCracker:
                                 if zaps:
                                     logging.debug("Writing zaps")
                                     zap_output = "\tFF\n".join(zaps) + '\tFF\n'
-                                    f = open(self.config.get_value('zaps-path') + "/hashlist_" + str(task['hashlistId']) + "/" + str(time.time()), 'a')
+                                    f = open(Path(zap_path) / str(time.time()), 'a')
                                     f.write(zap_output)
                                     f.close()
                                 logging.info("Progress:" + str("{:6.2f}".format(relative_progress / 100)) + "% Speed: " + print_speed(speed) + " Cracks: " + str(cracks_count) + " Accepted: " + str(ans['cracked']) + " Skips: " + str(ans['skipped']) + " Zaps: " + str(len(zaps)))
@@ -381,15 +418,8 @@ class HashcatCracker:
         task = task.get_task()  # TODO: refactor this to be better code
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'] + " ", "")
-        
-        if Initialize.get_os() == 1:
-            # Windows
-            full_cmd = f'"{self.callPath}"'
-        else:
-            # Linux / Mac
-            full_cmd = f"'{self.callPath}'"
-        
-        full_cmd = f"{full_cmd} --keyspace --quiet {files} {task['cmdpars']}"
+               
+        full_cmd = f"{self.callPath} --keyspace --quiet {files} {task['cmdpars']}"
         
         if 'useBrain' in task and task['useBrain']:
             full_cmd = f"{full_cmd} -S"
@@ -509,12 +539,7 @@ class HashcatCracker:
 
         full_cmd = ' '.join(args)
 
-        if Initialize.get_os() == 1:
-            # Windows
-            full_cmd = f'"{self.callPath}" {full_cmd}'
-        else:
-            # Linux / Mac
-            full_cmd = f"'{self.callPath}' {full_cmd}"
+        full_cmd = f"{self.callPath} {full_cmd}"
       
         logging.debug(f"CALL: {full_cmd}")
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
@@ -599,13 +624,7 @@ class HashcatCracker:
         args.append(f'"{hashlist_out_path}"')
         
         full_cmd = ' '.join(args)
-
-        if Initialize.get_os() == 1:
-            # Windows
-            full_cmd = f'"{self.callPath}" {full_cmd}'
-        else:
-            # Linux / Mac
-            full_cmd = f"'{self.callPath}' {full_cmd}"
+        full_cmd = f"{self.callPath} {full_cmd}"
 
         output = b''
         try:
