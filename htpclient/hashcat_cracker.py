@@ -380,21 +380,24 @@ class HashcatCracker:
             return self.preprocessor_keyspace(task, chunk)
         task = task.get_task()  # TODO: refactor this to be better code
         files = update_files(task['attackcmd'])
+        files = files.replace(task['hashlistAlias'] + " ", "")
         
-        if task['hashlistAlias'] in files:
-            files.remove(task['hashlistAlias'])
-        # full_cmd = f"'{self.callPath}'" + " --keyspace --quiet " + update_files(task['attackcmd']).replace(task['hashlistAlias'] + " ", "") + ' ' + task['cmdpars']
-        full_cmd = [str(self.executable_path), '--keyspace', '--quiet']
-        full_cmd.extend(files)
-        full_cmd.append(task['cmdpars'].strip())
-
+        if Initialize.get_os() == 1:
+            # Windows
+            full_cmd = f'"{self.callPath}"'
+        else:
+            # Linux / Mac
+            full_cmd = f"'{self.callPath}'"
+        
+        full_cmd = f"{full_cmd} --keyspace --quiet {files} {task['cmdpars']}"
+        
         if 'useBrain' in task and task['useBrain']:
-            full_cmd.append
+            full_cmd = f"{full_cmd} -S"
 
         output = b''
         try:
-            logging.debug(f"CALL: {''.join(full_cmd)}")
-            output = subprocess.check_output(full_cmd, cwd=self.cracker_path, stderr=subprocess.STDOUT)
+            logging.debug(f"CALL: {full_cmd}")
+            output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measure: " + str(e) + " Output: " + output.decode(encoding='utf-8'))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
@@ -490,25 +493,31 @@ class HashcatCracker:
         args.append('--potfile-disable')
         args.append('--session=hashtopolis')
         args.append('-p')
-        args.append(f'"{chr(9)}"')
+        args.append('0x09')
         
-        files = update_files(task['attackcmd'])
         
-        if task['hashlistAlias'] in files:
-            files.remove(task['hashlistAlias'])
-        
+      
         hashlist_path = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), f"{str(task['hashlistId'])}.out")
-        args.append(str(hashlist_path))
-        args.append(task['cmdpars'].strip())
-        args.append('-o')
-        args.append(str(hashlist_out_path))
 
-        full_cmd = [str(self.executable_path)]
-        full_cmd.extend(args)
-        
-        logging.debug(f"CALL: {''.join(full_cmd)}")
-        proc = subprocess.Popen(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
+        files = update_files(task['attackcmd'])
+        files = files.replace(task['hashlistAlias'], f'"{hashlist_path}"')
+
+        args.append(task['cmdpars'])
+        args.append('-o')
+        args.append(f'"{hashlist_out_path}"')
+
+        full_cmd = ' '.join(args)
+
+        if Initialize.get_os() == 1:
+            # Windows
+            full_cmd = f'"{self.callPath}" {full_cmd}'
+        else:
+            # Linux / Mac
+            full_cmd = f"'{self.callPath}' {full_cmd}"
+      
+        logging.debug(f"CALL: {full_cmd}")
+        proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
         output, error = proc.communicate()
         logging.debug("started benchmark")
         proc.wait()  # wait until done
@@ -559,11 +568,6 @@ class HashcatCracker:
         args.append('--session=hashtopolis')
         args.append('-p')
         args.append('0x09')
-
-        files = update_files(task['attackcmd'])
-        
-        if task['hashlistAlias'] in files:
-            files.remove(task['hashlistAlias'])
         
         hashlist_path = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), f"{str(task['hashlistId'])}.out")
@@ -571,36 +575,42 @@ class HashcatCracker:
         if 'usePrince' in task and task['usePrince']:
             attackcmd = get_rules_and_hl(update_files(task['attackcmd']))
             # Replace #HL# with the real hashlist
-            attackcmd[:] = [str(hashlist_path) if x== task['hashlistAlias'] else x for x in attackcmd]
+            attackcmd = attackcmd.replace(task['hashlistAlias'], f'"{hashlist_path}"')
             
-            args.extend(attackcmd)
+            args.append(attackcmd)
 
             # This dict is purely used for benchmarking with prince
             args.append('example.dict')
-            args.append(task['cmdpars'].strip())
+            args.append(task['cmdpars'])
         else:
             attackcmd = update_files(task['attackcmd'])
 
             # Replace #HL# with the real hashlist
-            attackcmd[:] = [str(hashlist_path) if x== task['hashlistAlias'] else x for x in attackcmd]
+            attackcmd = attackcmd.replace(task['hashlistAlias'], f'"{hashlist_path}"')
 
-            args.extend(attackcmd)
-            args.append(task['cmdpars'].strip())
+            args.append(attackcmd)
+            args.append(task['cmdpars'])
         if 'usePreprocessor' in task and task['usePreprocessor']:
             args.append('example.dict')
         if 'useBrain' in task and task['useBrain']:
             args.append('-S')
 
         args.append('-o')
-        args.append(str(hashlist_out_path))
+        args.append(f'"{hashlist_out_path}"')
         
-        full_cmd = [str(self.executable_path)]
-        full_cmd.extend(args)
+        full_cmd = ' '.join(args)
+
+        if Initialize.get_os() == 1:
+            # Windows
+            full_cmd = f'"{self.callPath}" {full_cmd}'
+        else:
+            # Linux / Mac
+            full_cmd = f"'{self.callPath}' {full_cmd}"
 
         output = b''
         try:
             logging.debug(f"CALL: {''.join(full_cmd)}")
-            output = subprocess.check_output(full_cmd, cwd=self.cracker_path, stderr=subprocess.STDOUT)
+            output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             logging.error("Error during speed benchmark, return code: " + str(e.returncode) + " Output: " + output.decode(encoding='utf-8'))
             send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)

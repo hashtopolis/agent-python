@@ -208,9 +208,10 @@ class HashcatCrackerTestWindows(unittest.TestCase):
 
         cracker.measure_keyspace(task, chunk)
 
-        full_cmd = [str(executeable_path), '--keyspace', '--quiet', '-a3', '?l?l?l?l', '--hash-type=0']
+        full_cmd = f'"hashcat.exe" --keyspace --quiet  -a3 ?l?l?l?l   --hash-type=0 '
         mock_check_output.assert_called_with(
             full_cmd,
+            shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
         )
@@ -220,24 +221,30 @@ class HashcatCrackerTestWindows(unittest.TestCase):
         hashlist_out_path = Path(hashlists_path, f'{hashlist_id}.out')
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
+        
+        full_cmd = [
+            '"hashcat.exe"',
+            '--machine-readable',
+            '--quiet',
+            '--progress-only',
+            '--restore-disable',
+            '--potfile-disable',
+            '--session=hashtopolis',
+            '-p',
+            '0x09',
+            f' "{hashlist_path}"',
+            '-a3',
+            '?l?l?l?l',
+            '  --hash-type=0 ',
+            '-o',
+            f'"{hashlist_out_path}"'
+        ]
+        
+        full_cmd = ' '.join(full_cmd)
+
         mock_check_output.assert_called_with(
-            [
-                str(executeable_path),
-                '--machine-readable',
-                '--quiet',
-                '--progress-only',
-                '--restore-disable',
-                '--potfile-disable',
-                '--session=hashtopolis',
-                '-p',
-                '0x09',
-                str(hashlist_path),
-                '-a3',
-                '?l?l?l?l',
-                '--hash-type=0',
-                '-o',
-                str(hashlist_out_path)
-            ],
+            full_cmd,
+            shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
         )
