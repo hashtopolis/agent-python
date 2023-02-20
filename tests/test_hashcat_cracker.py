@@ -68,20 +68,22 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         cracker_id = 1
         config = Config()
         crackers_path = config.get_value('crackers-path')
-
+        
+        executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
+        
         binaryDownload = BinaryDownload(test_args)
         binaryDownload.check_version(cracker_id)
         
         cracker_zip = Path(crackers_path, f'{cracker_id}.7z')
         crackers_temp = Path(crackers_path, 'temp')
         zip_binary = './7zr'
-        mock_unlink.assert_called_with(str(cracker_zip))
+        mock_unlink.assert_called_with(cracker_zip)
 
         mock_system.assert_called_with(f"{zip_binary} x -o'{crackers_temp}' '{cracker_zip}'")
 
         # --version
         cracker = HashcatCracker(1, binaryDownload)
-        mock_check_output.assert_called_with("'./hashcat.bin' --version", shell=True, cwd=f"{Path(crackers_path, str(cracker_id))}/")
+        mock_check_output.assert_called_with([str(executeable_path), '--version'], cwd=Path(crackers_path, str(cracker_id)))
 
         # --keyspace
         chunk = Chunk()
@@ -97,7 +99,7 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         mock_check_output.assert_called_with(
             "'./hashcat.bin' --keyspace --quiet  -a3 ?l?l?l?l   --hash-type=0 ",
             shell=True,
-            cwd=f"{Path(crackers_path, str(cracker_id))}/",
+            cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
         )
 
@@ -105,9 +107,9 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
         mock_check_output.assert_called_with(
-            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  '{Path(hashlists_path, str(hashlist_id))}'  -a3 ?l?l?l?l  --hash-type=0  -o '{Path(hashlists_path, str(hashlist_id))}.out'",
+            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p 0x09  \"{Path(hashlists_path, str(hashlist_id))}\" -a3 ?l?l?l?l   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
             shell=True,
-            cwd=f"{Path(crackers_path, str(cracker_id))}/",
+            cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
         )
 
@@ -126,12 +128,37 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         zaps_dir = f"hashlist_{hashlist_id}"
         skip = str(chunk.chunk_data()['skip'])
         limit = str(chunk.chunk_data()['length'])
+
+        full_cmd = [
+            './hashcat.bin',
+            '--machine-readable',
+            '--quiet',
+            '--status',
+            '--restore-disable',
+            '--session=hashtopolis',
+            '--status-timer 5',
+            '--outfile-check-timer=5',
+            f'--outfile-check-dir="{Path(zaps_path, zaps_dir)}"',
+            f'-o "{Path(hashlists_path, str(hashlist_id))}.out"',
+            '--outfile-format=1,2,3,4',
+            f'-p 0x09',
+            f'-s {skip} -l {limit}',
+            '--potfile-disable',
+            '--remove',
+            '--remove-timer=5 ',
+            f'"{Path(hashlists_path, str(hashlist_id))}"',
+            ' -a3 ?l?l?l?l ',
+            '--hash-type=0 ',
+        ]
+        
+        full_cmd = ' '.join(full_cmd)
+
         mock_Popen.assert_called_with(
-            f"./hashcat.bin --machine-readable --quiet --status --restore-disable --session=hashtopolis --status-timer 5 --outfile-check-timer=5 --outfile-check-dir='{Path(zaps_path, zaps_dir)}' -o '{Path(hashlists_path, str(hashlist_id))}.out' --outfile-format=1,2,3,4 -p \"\t\" -s {skip} -l {limit} --potfile-disable --remove --remove-timer=5  '{Path(hashlists_path, str(hashlist_id))}'  -a3 ?l?l?l?l  --hash-type=0 ",
+            full_cmd,
             shell=True,
             stdout=-1,
             stderr=-1,
-            cwd=f"{Path(crackers_path, str(cracker_id))}/",
+            cwd=Path(crackers_path, str(cracker_id)),
             preexec_fn=mock.ANY
         )
 
