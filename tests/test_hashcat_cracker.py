@@ -130,7 +130,7 @@ class HashcatCrackerTestLinux(unittest.TestCase):
         limit = str(chunk.chunk_data()['length'])
 
         full_cmd = [
-            './hashcat.bin',
+            "'./hashcat.bin'",
             '--machine-readable',
             '--quiet',
             '--status',
@@ -147,8 +147,8 @@ class HashcatCrackerTestLinux(unittest.TestCase):
             '--remove',
             '--remove-timer=5 ',
             f'"{Path(hashlists_path, str(hashlist_id))}"',
-            ' -a3 ?l?l?l?l ',
-            '--hash-type=0 ',
+            '-a3 ?l?l?l?l ',
+            ' --hash-type=0 ',
         ]
         
         full_cmd = ' '.join(full_cmd)

@@ -40,7 +40,7 @@ class HashcatCracker:
             self.callPath = f'"{self.executable_name}"'
         else:
             # Linux / Mac
-            self.callPath = f"./{self.executable_name}"
+            self.callPath = f"'./{self.executable_name}'"
 
         cmd = [str(self.executable_path), "--version"]
         
@@ -212,7 +212,7 @@ class HashcatCracker:
         # Set paths
         outfile_path = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}.out")
         outfile_backup_path = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}_{time.time()}.out")
-        zapfile_path = Path(self.config.get_value('zaps-path'), f"/hashlist_{task['hashlistId']}")
+        zapfile_path = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
         
         # clear old found file - earlier we deleted them, but just in case, we just move it to a unique filename if configured so
         if os.path.exists(outfile_path):
