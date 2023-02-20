@@ -533,6 +533,7 @@ class HashcatCracker:
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'], f'"{hashlist_path}"')
 
+        args.append(files)
         args.append(task['cmdpars'])
         args.append('-o')
         args.append(f'"{hashlist_out_path}"')
