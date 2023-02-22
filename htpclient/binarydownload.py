@@ -136,7 +136,7 @@ class BinaryDownload:
     
     def check_preprocessor(self, task):
         logging.debug("Checking if requested preprocessor is present...")
-        path = self.config.get_value('preprocessors-path') + "/" + str(task.get_task()['preprocessor']) + "/"
+        path = Path(self.config.get_value('preprocessors-path'), str(task.get_task()['preprocessor']))
         query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
         query['type'] = 'preprocessor'
         query['preprocessorId'] = task.get_task()['preprocessor']
@@ -161,12 +161,12 @@ class BinaryDownload:
                 sleep(5)
                 return False
             if Initialize.get_os() == 1:
-                os.system("7zr" + Initialize.get_os_extension() + " x -otemp temp.7z")
+                os.system(f"7zr{Initialize.get_os_extension()} x -otemp temp.7z")
             else:
-                os.system("./7zr" + Initialize.get_os_extension() + " x -otemp temp.7z")
+                os.system(f"./7zr{Initialize.get_os_extension()} x -otemp temp.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
-                if os.path.isdir("temp/" + name):
-                    os.rename("temp/" + name, path)
+                if os.path.isdir(Path('temp', name)):
+                    os.rename(Path('temp', name), path)
                     break
             os.unlink("temp.7z")
             os.rmdir("temp")

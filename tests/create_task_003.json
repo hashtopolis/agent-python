@@ -1,5 +1,5 @@
 {
-    "attackCmd": "#HL# -a3 ?l?l?l?l",
+    "attackCmd": "#HL#",
     "chunkSize": 1000,
     "chunkTime": 600,
     "color": "7C6EFF",
@@ -12,12 +12,12 @@
     "isSmall": false,
     "maxAgents": 112,
     "notes": "example-note",
-    "preprocessorCommand": "",
+    "preprocessorCommand": "--pw-min=1 --pw-max=2 ../../crackers/1/example.dict",
     "priority": 10,
     "skipKeyspace": 500,
     "staticChunks": 2,
     "statusTimer": 5,
-    "taskName": "Example - Rijmen and Daemen",
+    "taskName": "Example - preprocessor",
     "useNewBench": true,
-    "preprocessorId": 0
+    "preprocessorId": 1
 }

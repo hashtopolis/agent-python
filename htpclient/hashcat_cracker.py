@@ -165,34 +165,62 @@ class HashcatCracker:
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
 
     def build_preprocessor_command(self, task, chunk, preprocessor):
-        binary = self.config.get_value('preprocessors-path') + "/" + str(task['preprocessor']) + "/" + preprocessor['executable']
-        if Initialize.get_os() != 1:
-            binary = "./" + binary
-        if not os.path.isfile(binary):
+        binary_path = Path(self.config.get_value('preprocessors-path'), str(task['preprocessor']))
+        binary = preprocessor['executable']
+
+        if not os.path.isfile(binary_path / binary):
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
+        binary = binary_path / binary
+
+        pre_args = []
 
         # in case the skip or limit command are not available, we try to achieve the same with head/tail (the more chunks are run, the more inefficient it might be)
         if preprocessor['skipCommand'] is not None and preprocessor['limitCommand'] is not None:
-            pre_args = " " + preprocessor['skipCommand'] + " " + str(chunk['skip']) + " " + preprocessor['limitCommand'] + " " + str(chunk['length']) + ' '
-        else:
-            pre_args = ""
+            pre_args.extend([preprocessor['skipCommand'], str(chunk['skip'])])
+            pre_args.extend([preprocessor['limitCommand'], str(chunk['length'])])
 
-        pre_args += ' ' + update_files(task['preprocessorCommand'])
+        pre_args.append(update_files(task['preprocessorCommand']))
 
         # TODO: add support for windows as well (pre-built tools)
         if preprocessor['skipCommand'] is None or preprocessor['limitCommand'] is None:
-            pre_args += " | head -n " + str(chunk['skip'] + chunk['length']) + " | tail -n " + str(chunk['length'])
+            skip_length = chunk['skip'] + chunk['length']
+            pre_args.append(f"| head -n {skip_length}")
+            pre_args.append(f"| tail -n {chunk['length']}")
+        
+        zaps_file = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
+        output_file = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}.out")
+        hashlist_file = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
 
-        post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
-        post_args += " --status-timer " + str(task['statustimer'])
-        post_args += " --outfile-check-timer=" + str(task['statustimer'])
-        post_args += " --outfile-check-dir='" + self.config.get_value('zaps-path') + "hashlist_" + str(task['hashlistId']) + "'"
-        post_args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out' --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
-        post_args += " --remove-timer=" + str(task['statustimer'])
-        post_args += " '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "'"
-        post_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
-        return f"'{binary}'" + pre_args + " | " + f"'{self.callPath}'" + post_args + task['cmdpars']
+        post_args = []
+        post_args.append('--machine-readable')
+        post_args.append('--quiet')
+        post_args.append('--status')
+        post_args.append('--remove')
+        post_args.append('--restore-disable')
+        post_args.append('--potfile-disable')
+        post_args.append('--session=hashtopolis')
+        post_args.append(f"--status-timer {task['statustimer']}")
+
+        post_args.append(f"--outfile-check-timer={task['statustimer']}")
+        post_args.append(f'--outfile-check-dir="{zaps_file}"')
+        post_args.append(f'-o "{output_file}"')
+        post_args.append(f'--outfile-format={self.get_outfile_format()}')
+        post_args.append('-p 0x09')
+        post_args.append(f"--remove-timer={task['statustimer']}")
+        post_args.append(f'"{hashlist_file}"')
+
+        files = update_files(task['attackcmd'])
+        files = files.replace(task['hashlistAlias'] + " ", "")
+        post_args.append(files)
+        post_args.append(task['cmdpars'])
+
+        pre_args = ' '.join(pre_args)
+        post_args = ' '.join(post_args)
+
+        full_cmd = f'"{binary}" {pre_args} | {self.callPath} {post_args}'
+
+        return full_cmd
 
     def run_chunk(self, task, chunk, preprocessor):
         if 'enforcePipe' in task and task['enforcePipe']:
@@ -477,22 +505,32 @@ class HashcatCracker:
 
     def preprocessor_keyspace(self, task, chunk):
         preprocessor = task.get_preprocessor()
+        preprocessors_path = self.config.get_value('preprocessors-path')
         if preprocessor['keyspaceCommand'] is None:  # in case there is no keyspace flag, we just assume the task will be that large to run forever
           return chunk.send_keyspace(-1, task.get_task()['taskId'])
 
         binary = preprocessor['executable']
-        if Initialize.get_os() != 1:
-            binary = "./" + binary
         if not os.path.isfile(binary):
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
-
-        full_cmd = f"'{binary}'" + " " + preprocessor['keyspaceCommand'] + " " + update_files(task.get_task()['preprocessorCommand'])
+        
         if Initialize.get_os() == 1:
-            full_cmd = full_cmd.replace("/", '\\')
+            # Windows
+            binary = f'"{binary}"'
+        else:
+            # Mac / Linux
+            binary = f'"./{binary}"'
+        
+        args = []
+        args.append(preprocessor['keyspaceCommand'])
+        args.append(update_files(task.get_task()['preprocessorCommand']))
+
+        full_cmd = ' '.join(args)
+        full_cmd = f"{binary} {full_cmd}"
+
         try:
             logging.debug("CALL: " + full_cmd)
-            output = subprocess.check_output(full_cmd, shell=True, cwd=self.config.get_value('preprocessors-path') + "/" + str(task.get_task()['preprocessor']))
+            output = subprocess.check_output(full_cmd, shell=True, cwd=Path(preprocessors_path, str(task.get_task()['preprocessor'])))
         except subprocess.CalledProcessError:
             logging.error("Error during preprocessor keyspace measure")
             send_error("Preprocessor keyspace measure failed!", self.config.get_value('token'), task.get_task()['taskId'], None)
