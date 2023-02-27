@@ -45,7 +45,7 @@ class HashcatCracker:
         cmd = [str(self.executable_path), "--version"]
         
         try:
-            logging.debug(f"CALL: {''.join(cmd)}")
+            logging.debug(f"CALL: {' '.join(cmd)}")
             output = subprocess.check_output(cmd, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
             logging.error("Error during version detection: " + str(e))
