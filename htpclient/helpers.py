@@ -123,7 +123,7 @@ def update_files(command, prince=False):
             continue
         path = Path(config.get_value('files-path'), part)
         if os.path.exists(path):
-            ret.append(f"'{path}'")
+            ret.append(f'"{path}"')
         else:
             ret.append(str(part))
     return " %s " % " ".join(ret)
