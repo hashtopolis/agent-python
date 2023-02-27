@@ -1,3 +1,11 @@
+## v0.7.0 -> v0.7.1
+
+### Bugfixes
+
+* Agent working again on Windows, all paths have been converted to Pathlib.Path and using the correct quoting of arguments.
+* 7z wordlist not extracting correctly on Windows.
+* preprocessor not working correctly on both Windows and Linux.
+
 ## v0.6.1 -> v0.7.0
 
 ### Enhancements
