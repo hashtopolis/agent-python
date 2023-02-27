@@ -139,7 +139,7 @@ class HashcatFiles7z(unittest.TestCase):
 
         cracker.measure_keyspace(task, chunk)
         mock_check_output.assert_called_with(
-            f"'./hashcat.bin' --keyspace --quiet  -a0 '{wordlist_path}'   --hash-type=0 ",
+            f"'./hashcat.bin' --keyspace --quiet  -a0 \"{wordlist_path}\"   --hash-type=0 ",
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
@@ -149,7 +149,7 @@ class HashcatFiles7z(unittest.TestCase):
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
         mock_check_output.assert_called_with(
-            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p 0x09  \"{Path(hashlists_path, str(hashlist_id))}\" -a0 '{wordlist_path}'   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
+            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p 0x09  \"{Path(hashlists_path, str(hashlist_id))}\" -a0 \"{wordlist_path}\"   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
@@ -189,7 +189,7 @@ class HashcatFiles7z(unittest.TestCase):
             '--remove',
             '--remove-timer=5 ',
             f'"{Path(hashlists_path, str(hashlist_id))}"',
-            f"-a0 '{wordlist_path}' ",
+            f'-a0 "{wordlist_path}" ',
             ' --hash-type=0 ',
         ]
         
