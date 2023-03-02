@@ -100,7 +100,7 @@ class HashcatCracker:
         args.append(f'--outfile-check-dir="{zaps_file}"')
         args.append(f'-o "{output_file}"')
         args.append(f'--outfile-format={self.get_outfile_format()}')
-        args.append('-p 0x09')
+        args.append('-p "\t"')
         args.append(f"-s {chunk['skip']}")
         args.append(f"-l {chunk['length']}")
         
@@ -206,7 +206,7 @@ class HashcatCracker:
         post_args.append(f'--outfile-check-dir="{zaps_file}"')
         post_args.append(f'-o "{output_file}"')
         post_args.append(f'--outfile-format={self.get_outfile_format()}')
-        post_args.append('-p 0x09')
+        post_args.append('-p "\t"')
         post_args.append(f"--remove-timer={task['statustimer']}")
         post_args.append(f'"{hashlist_file}"')
 
@@ -561,7 +561,7 @@ class HashcatCracker:
         args.append('--potfile-disable')
         args.append('--session=hashtopolis')
         args.append('-p')
-        args.append('0x09')
+        args.append('"\t"')
         
         
       
@@ -631,7 +631,7 @@ class HashcatCracker:
         args.append('--potfile-disable')
         args.append('--session=hashtopolis')
         args.append('-p')
-        args.append('0x09')
+        args.append('"\t"')
         
         hashlist_path = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), f"{str(task['hashlistId'])}.out")

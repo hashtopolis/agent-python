@@ -149,7 +149,7 @@ class HashcatFiles7z(unittest.TestCase):
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
         mock_check_output.assert_called_with(
-            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p 0x09  \"{Path(hashlists_path, str(hashlist_id))}\" -a0 \"{wordlist_path}\"   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
+            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  \"{Path(hashlists_path, str(hashlist_id))}\" -a0 \"{wordlist_path}\"   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
@@ -183,7 +183,7 @@ class HashcatFiles7z(unittest.TestCase):
             f'--outfile-check-dir="{Path(zaps_path, zaps_dir)}"',
             f'-o "{Path(hashlists_path, str(hashlist_id))}.out"',
             '--outfile-format=1,2,3,4',
-            f'-p 0x09',
+            f'-p "\t"',
             f'-s {skip} -l {limit}',
             '--potfile-disable',
             '--remove',
@@ -326,7 +326,7 @@ class HashcatFiles7z(unittest.TestCase):
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
         mock_check_output.assert_called_with(
-            f'"hashcat.exe" --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p 0x09  \"{Path(hashlists_path, str(hashlist_id))}\" -a0 "{wordlist_path}"   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"',
+            f'"hashcat.exe" --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  \"{Path(hashlists_path, str(hashlist_id))}\" -a0 "{wordlist_path}"   --hash-type=0  -o \"{Path(hashlists_path, str(hashlist_id))}.out\"',
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
@@ -360,7 +360,7 @@ class HashcatFiles7z(unittest.TestCase):
             f'--outfile-check-dir="{Path(zaps_path, zaps_dir)}"',
             f'-o "{Path(hashlists_path, str(hashlist_id))}.out"',
             '--outfile-format=1,2,3,4',
-            f'-p 0x09',
+            f'-p "\t"',
             f'-s {skip} -l {limit}',
             '--potfile-disable',
             '--remove',

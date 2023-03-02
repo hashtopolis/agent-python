@@ -106,7 +106,7 @@ class HashcatRuntime(unittest.TestCase):
             '--potfile-disable',
             '--session=hashtopolis',
             '-p',
-            '0x09',
+            '"\t"',
             f' "{hashlist_path}"',
             '-a3 ?l?l?l?l',
             '  --hash-type=0 ',

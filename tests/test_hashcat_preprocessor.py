@@ -103,7 +103,7 @@ class HashcatPreprocessor(unittest.TestCase):
         result = cracker.run_benchmark(task.get_task())
         assert int(result.split(':')[0]) > 0
         mock_check_output.assert_called_with(
-            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p 0x09  \"{Path(hashlists_path, str(hashlist_id))}\"   --hash-type=0  example.dict -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
+            f"'./hashcat.bin' --machine-readable --quiet --progress-only --restore-disable --potfile-disable --session=hashtopolis -p \"\t\"  \"{Path(hashlists_path, str(hashlist_id))}\"   --hash-type=0  example.dict -o \"{Path(hashlists_path, str(hashlist_id))}.out\"",
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
             stderr=-2
@@ -145,7 +145,7 @@ class HashcatPreprocessor(unittest.TestCase):
             f'--outfile-check-dir="{Path(zaps_path, zaps_dir)}"',
             f'-o "{Path(hashlists_path, str(hashlist_id))}.out"',
             '--outfile-format=1,2,3,4',
-            f'-p 0x09',
+            f'-p "\t"',
             '--remove-timer=5',
             f'"{Path(hashlists_path, str(hashlist_id))}"',
             '   --hash-type=0 ',
@@ -249,7 +249,7 @@ class HashcatPreprocessor(unittest.TestCase):
             '--potfile-disable',
             '--session=hashtopolis',
             '-p',
-            '0x09',
+            '"\t"',
             f' "{hashlist_path}"',
             '  --hash-type=0 ',
             'example.dict',
@@ -302,7 +302,7 @@ class HashcatPreprocessor(unittest.TestCase):
             f'--outfile-check-dir="{Path(zaps_path, zaps_dir)}"',
             f'-o "{Path(hashlists_path, str(hashlist_id))}.out"',
             '--outfile-format=1,2,3,4',
-            f'-p 0x09',
+            f'-p "\t"',
             '--remove-timer=5',
             f'"{Path(hashlists_path, str(hashlist_id))}"',
             '   --hash-type=0 ',
