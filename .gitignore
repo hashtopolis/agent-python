@@ -1,8 +1,11 @@
 *.iml
 *.exe
+7zr
 *.log
 *.json
+!/tests/*.json
 crackers
+preprocessors
 prince
 files
 hashlists

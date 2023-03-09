@@ -43,7 +43,9 @@ ENV DEBIAN_FRONTEND=dialog
 WORKDIR /app
 USER vscode
 COPY requirements.txt /app/src/
+COPY requirements-tests.txt /app/src/
 RUN /usr/bin/pip3 install -r src/requirements.txt
+RUN /usr/bin/pip3 install -r src/requirements-tests.txt
 
 # Check for and run optional user-supplied command to enable (advanced) customizations of the dev container
 RUN if [ -n "${DEV_CONTAINER_USER_CMD_POST}" ]; then echo "${DEV_CONTAINER_USER_CMD_POST}" | sh ; fi

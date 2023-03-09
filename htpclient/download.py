@@ -14,8 +14,6 @@ class Download:
     def download(url, output, no_header=False):
         try:
             session = Session().s
-            if Initialize.get_os() == 1:
-                output = output.replace("/", '\\')
 
             # Check header
             if not no_header:

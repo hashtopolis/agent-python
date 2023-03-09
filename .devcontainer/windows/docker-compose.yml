@@ -1,0 +1,9 @@
+version: "3"
+services:
+  hashtopolis-agent-windows:
+    container_name: hashtopolis_agent_windows
+    build:
+      context: ../..
+      dockerfile: .devcontainer/windows/Dockerfile
+    volumes:
+      - ../..:C:\App\

@@ -5,6 +5,7 @@ import platform
 import logging
 import time
 from types import MappingProxyType
+from pathlib import Path
 
 import os
 import subprocess
@@ -120,11 +121,11 @@ def update_files(command, prince=False):
         # test if file exists
         if not part:
             continue
-        path = config.get_value('files-path') + "/" + part
+        path = Path(config.get_value('files-path'), part)
         if os.path.exists(path):
-            ret.append(f"'{path}'")
+            ret.append(f'"{path}"')
         else:
-            ret.append(part)
+            ret.append(str(part))
     return " %s " % " ".join(ret)
 
 

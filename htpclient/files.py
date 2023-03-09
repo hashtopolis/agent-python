@@ -1,6 +1,7 @@
 import logging
 import time
 from time import sleep
+from pathlib import Path
 
 import os
 
@@ -36,26 +37,33 @@ class Files:
         else:
             files = ans['filenames']
             for filename in files:
+                file_path = Path(self.config.get_value('files-path'), filename)
                 if filename.find("/") != -1 or filename.find("\\") != -1:
                     continue  # ignore invalid file names
-                elif os.path.dirname(self.config.get_value('files-path') + "/" + filename) != "files":
+                elif os.path.dirname(file_path) != "files":
                     continue  # ignore any case in which we would leave the files folder
-                elif os.path.exists(self.config.get_value('files-path') + "/" + filename):
+                elif os.path.exists(file_path):
                     logging.info("Delete file '" + filename + "' as requested by server...")
-                    if os.path.splitext(self.config.get_value('files-path') + "/" + filename)[1] == '.7z':
-                        if os.path.exists(self.config.get_value('files-path') + "/" + filename.replace(".7z", ".txt")):
+                    # When we get the delete requests, this function will check if the <filename>.7z maybe as
+                    # an extracted text file. That file will also be deleted.
+                    if os.path.splitext(file_path)[1] == '.7z':
+                        txt_file = Path(f"{os.path.splitext(file_path)[0]}.txt")
+                        if os.path.exists(txt_file):
                             logging.info("Also delete assumed wordlist from archive of same file...")
-                            os.unlink(self.config.get_value('files-path') + "/" + filename.replace(".7z", ".txt"))
-                    os.unlink(self.config.get_value('files-path') + "/" + filename)
+                            os.unlink(txt_file)
+                    os.unlink(file_path)
 
     def check_files(self, files, task_id):
         for file in files:
-            file_localpath = self.config.get_value('files-path') + "/" + file
+            file_localpath = Path(self.config.get_value('files-path'), file)
+            txt_file = Path(f"{os.path.splitext(file_localpath)[0]}.txt")
             query = copy_and_set_token(dict_getFile, self.config.get_value('token'))
             query['taskId'] = task_id
             query['file'] = file
             req = JsonRequest(query)
             ans = req.execute()
+
+            # Process request
             if ans is None:
                 logging.error("Failed to get file!")
                 sleep(5)
@@ -65,30 +73,44 @@ class Files:
                 sleep(5)
                 return False
             else:
+                # Filesize is OK
                 file_size = int(ans['filesize'])
                 if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size == file_size:
                     logging.debug("File is present on agent and has matching file size.")
                     continue
+                
+                # Multicasting configured
                 elif self.config.get_value('multicast'):
                     logging.debug("Multicast is enabled, need to wait until it was delivered!")
                     sleep(5)  # in case the file is not there yet (or not completely), we just wait some time and then try again
                     return False
+                
                 # TODO: we might need a better check for this
-                if os.path.isfile(file_localpath.replace(".7z", ".txt")):
+                if os.path.isfile(txt_file):
                     continue
+                
+                # Rsync
                 if self.config.get_value('rsync') and Initialize.get_os() != 1:
-                    Download.rsync(self.config.get_value('rsync-path') + '/' + file, file_localpath)
+                    Download.rsync(Path(self.config.get_value('rsync-path'), file), file_localpath) 
                 else:
                     logging.debug("Starting download of file from server...")
                     Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], file_localpath)
+
+                # Mismatch filesize
                 if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size != file_size:
                     logging.error("file size mismatch on file: %s" % file)
                     sleep(5)
                     return False
-                if os.path.splitext(self.config.get_value('files-path') + "/" + file)[1] == '.7z' and not os.path.isfile(self.config.get_value('files-path') + "/" + file.replace(".7z", ".txt")):
+                
+                # 7z extraction, check if the <filename>.txt does exist.
+                if os.path.splitext(file_localpath)[1] == '.7z' and not os.path.isfile(txt_file):
                     # extract if needed
-                    if Initialize.get_os() != 1:
-                        os.system("./7zr" + Initialize.get_os_extension() + " x -aoa -o'" + self.config.get_value('files-path') + "/' -y '" + self.config.get_value('files-path') + "/" + file + "'")
+                    files_path = Path(self.config.get_value('files-path'))
+                    if Initialize.get_os() == 1:
+                        # Windows
+                        cmd = f'7zr{Initialize.get_os_extension()} x -aoa -o"{files_path}" -y "{file_localpath}"'
                     else:
-                        os.system("7zr" + Initialize.get_os_extension() + " x -aoa -o'" + self.config.get_value('files-path') + "/' -y '" + self.config.get_value('files-path') + "/" + file + "'")
+                        # Linux
+                        cmd = f"./7zr{Initialize.get_os_extension()} x -aoa -o'{files_path}' -y '{file_localpath}'"
+                    os.system(cmd)
         return True

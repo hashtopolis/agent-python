@@ -1,0 +1,4 @@
+pytest
+confidence
+tuspy
+py7zr
