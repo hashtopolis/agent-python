@@ -35,7 +35,7 @@ usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] 
                                [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
 
 
-Hashtopolis Client v0.7.0
+Hashtopolis Client v0.7.1
 
 optional arguments:
   -h, --help            show this help message and exit
