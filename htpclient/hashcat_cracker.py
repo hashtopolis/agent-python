@@ -29,11 +29,11 @@ class HashcatCracker:
         self.executable_name = self.executable_name[:k] + "." + self.executable_name[k + 1:]
         self.cracker_path = Path(self.config.get_value('crackers-path'), str(cracker_id))
 
-        self.executable_path = Path(self.cracker_path, self.executable_name)
-        if not os.path.isfile(self.executable_path):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
+        if not os.path.isfile(Path(self.cracker_path, self.executable_name)):  # in case it's not the new hashcat filename, try the old one (hashcat<bit>.<ext>)
             self.executable_name = binary_download.get_version()['executable']
             k = self.executable_name.rfind(".")
             self.executable_name = self.executable_name[:k] + get_bit() + "." + self.executable_name[k + 1:]
+        self.executable_path = Path(self.cracker_path, self.executable_name)
 
         if Initialize.get_os() == 1:
             # Windows
