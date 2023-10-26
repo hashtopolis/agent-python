@@ -143,7 +143,7 @@ class HashcatCracker:
         post_args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out' --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "'"
-        return f"'{self.callPath}'" + pre_args + " | " + f"'{self.callPath}'" + post_args + task['cmdpars']
+        return f"{self.callPath} {pre_args} | {self.callPath} {post_args} {task['cmdpars']}"
 
     # DEPRECATED
     def build_prince_command(self, task, chunk):
@@ -724,7 +724,7 @@ class HashcatCracker:
         args += " --restore-disable --potfile-disable --session=health "
         args += update_files(attack).replace(hashlist_alias, "'" + self.config.get_value('hashlists-path') + "/health_check.txt'")
         args += " -o '" + self.config.get_value('hashlists-path') + "/health_check.out'"
-        full_cmd = f"'{self.callPath}'" + args
+        full_cmd = f"{self.callPath} {args}"
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug(f"CALL: {''.join(full_cmd)}")

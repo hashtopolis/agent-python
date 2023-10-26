@@ -25,7 +25,7 @@ class GenericCracker:
         args += " -l " + str(chunk['length'])
         hl_path = self.config.get_value('hashlists-path') + "/" + str(task['hashlistId'])
         args += " " + task['attackcmd'].replace(task['hashlistAlias'], f"'{hl_path}'")
-        full_cmd = f"'{self.callPath}'" + args
+        full_cmd = f"{self.callPath} {args}"
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug("CALL: " + full_cmd)
