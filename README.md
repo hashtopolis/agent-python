@@ -123,6 +123,37 @@ You need a user on the server which can automatically login (e.g. SSH keys) and 
 
 In order to use the multicast distribution for files, please make sure that the agents and server are prepared according to this:https://github.com/hashtopolis/runner
 
+### Run as service
+It is possible to run Hashtopolis Agent as a services
+
+1. `mkdir -p /opt/hashtopolis-agent/`
+2. `cd /opt/hashtopolis-agent/`
+3. `wget http://<server url>/agents.php?download=1 -O hashtopolis.zip`
+4. Create /etc/systemd/system/hashtopolis-agent.service
+
+```
+[Unit]
+Description=Hashtopolis Agent
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+User=root
+ExecStart=/usr/bin/python3 <path>/hashtopolis.zip
+StandardInput=tty-force
+WorkingDirectory=<path>
+
+[Install]
+WantedBy=multi-user.target
+```
+
+5. `systemctl daemon-reload`
+6. `systemctl enable hashtopolis-agent.service`
+7. `systemctl start hashtopolis-agent.service`
+
 ## Hashcat Compatibility
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
