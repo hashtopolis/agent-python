@@ -28,8 +28,7 @@ class BinaryDownload:
     def check_client_version(self):
         if self.args.disable_update:
             return
-        if os.path.isfile("old.zip"):
-            os.unlink("old.zip")  # cleanup old version
+        Path("old.zip").unlink(missing_ok=True)  # cleanup old version
         query = copy_and_set_token(dict_checkVersion, self.config.get_value('token'))
         query['version'] = Initialize.get_version_number()
         req = JsonRequest(query)
@@ -47,17 +46,14 @@ class BinaryDownload:
                     logging.warning("Got empty URL for client update!")
                 else:
                     logging.info("New client version available!")
-                    if os.path.isfile("update.zip"):
-                        os.unlink("update.zip")
+                    Path("update.zip").unlink(missing_ok=True)
                     Download.download(url, "update.zip")
                     if os.path.isfile("update.zip") and os.path.getsize("update.zip"):
-                        if os.path.isfile("old.zip"):
-                            os.unlink("old.zip")
-                        os.rename("hashtopolis.zip", "old.zip")
-                        os.rename("update.zip", "hashtopolis.zip")
+                        Path("old.zip").unlink(missing_ok=True)
+                        Path("hashtopolis.zip").unlink(missing_ok=True)
+                        Path("update.zip").rename("hashtopolis.zip")
                         logging.info("Update received, restarting client...")
-                        if os.path.exists("lock.pid"):
-                            os.unlink("lock.pid")
+                        Path("lock.pid").unlink(missing_ok=True)
                         os.execl(sys.executable, sys.executable, "hashtopolis.zip")
                         exit(0)
 
@@ -133,7 +129,7 @@ class BinaryDownload:
             os.rmdir("temp")
             logging.debug("PRINCE downloaded and extracted")
         return True
-    
+
     def check_preprocessor(self, task):
         logging.debug("Checking if requested preprocessor is present...")
         path = Path(self.config.get_value('preprocessors-path'), str(task.get_task()['preprocessor']))
@@ -208,7 +204,7 @@ class BinaryDownload:
                     # Linux
                     cmd = f"./7zr{Initialize.get_os_extension()} x -o'{temp_folder}' '{zip_file}'"
                 os.system(cmd)
-                
+
                 # Clean up 7zip
                 os.unlink(zip_file)
 
