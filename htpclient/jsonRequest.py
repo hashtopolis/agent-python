@@ -10,10 +10,14 @@ class JsonRequest:
         self.config = Config()
         self.session = Session().s
 
-    def execute(self):
+    def execute(self, ignore_certificate: bool = True):
         try:
             logging.debug(self.data)
-            r = self.session.post(self.config.get_value('url'), json=self.data, timeout=30)
+            r = self.session.post(
+                self.config.get_value('url'),
+                json=self.data,
+                timeout=30,
+                verify=not ignore_certificate)
             if r.status_code != 200:
                 logging.error("Status code from server: " + str(r.status_code))
                 return None

@@ -161,7 +161,7 @@ class Initialize:
                 query['cpu-only'] = True
 
             req = JsonRequest(query)
-            ans = req.execute()
+            ans = req.execute(args.ignore_cert)
             if ans is None:
                 logging.error("Request failed!")
                 self.__check_token(args)
@@ -181,7 +181,7 @@ class Initialize:
                 cert = os.path.abspath(args.cert)
                 logging.debug("Setting cert to: " + cert)
                 self.config.set_value('cert', cert)
-                
+
         if cert is not None:
             Session().s.cert = cert
             logging.debug("Configuration session cert to: " + cert)
@@ -210,7 +210,7 @@ class Initialize:
             self.__check_url(args)
         else:
             logging.debug("Connection test successful!")
-            
+
         if args.cpu_only is not None and args.cpu_only:
             logging.debug("Setting agent to be CPU only..")
             self.config.set_value('cpu-only', True)
