@@ -1,18 +1,19 @@
-import string
 import logging
-import subprocess
-import psutil
+import os
 from pathlib import Path
-from time import sleep
+import psutil
 from queue import Queue, Empty
 import re
+import string
+import subprocess
 from threading import Thread, Lock
 import time
+
 
 from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
-from htpclient.jsonRequest import JsonRequest, os
+from htpclient.jsonRequest import JsonRequest
 from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi
 from htpclient.dicts import *
 
@@ -43,13 +44,13 @@ class HashcatCracker:
             self.callPath = f"'./{self.executable_name}'"
 
         cmd = [str(self.executable_path), "--version"]
-        
+
         try:
             logging.debug(f"CALL: {' '.join(cmd)}")
             output = subprocess.check_output(cmd, cwd=self.cracker_path)
         except subprocess.CalledProcessError as e:
             logging.error("Error during version detection: " + str(e))
-            sleep(5)
+            time.sleep(5)
         self.version_string = output.decode().replace('v', '')
 
         self.lock = Lock()
@@ -103,27 +104,27 @@ class HashcatCracker:
         args.append('-p "\t"')
         args.append(f"-s {chunk['skip']}")
         args.append(f"-l {chunk['length']}")
-        
+
         if 'useBrain' in task and task['useBrain']:  # when using brain we set the according parameters
             args.append('--brain-client')
             args.append(f"--brain-host {task['brainHost']}")
             args.append(f"--brain-port {task['brainPort']}")
             args.append(f"--brain-password {task['brainPass']}")
-            
+
             if 'brainFeatures' in task:
                 args.append(f"--brain-client-features {task['brainFeatures']}")
         else:  # remove should only be used if we run without brain
             args.append('--potfile-disable')
             args.append('--remove')
             args.append(f"--remove-timer={task['statustimer']}")
-        
+
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'], f'"{hashlist_file}"')
         args.append(files)
         args.append(task['cmdpars'])
 
-        
-        
+
+
         full_cmd = ' '.join(args)
         full_cmd = f'{self.callPath} {full_cmd}'
 
@@ -187,7 +188,7 @@ class HashcatCracker:
             skip_length = chunk['skip'] + chunk['length']
             pre_args.append(f"| head -n {skip_length}")
             pre_args.append(f"| tail -n {chunk['length']}")
-        
+
         zaps_file = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
         output_file = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}.out")
         hashlist_file = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
@@ -236,23 +237,23 @@ class HashcatCracker:
             full_cmd = self.build_command(task, chunk)
         self.statusCount = 0
         self.wasStopped = False
-        
+
         # Set paths
         outfile_path = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}.out")
         outfile_backup_path = Path(self.config.get_value('hashlists-path'), f"{task['hashlistId']}_{time.time()}.out")
         zapfile_path = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
-        
+
         # clear old found file - earlier we deleted them, but just in case, we just move it to a unique filename if configured so
         if os.path.exists(outfile_path):
             if self.config.get_value('outfile-history'):
                 os.rename(outfile_path, outfile_backup_path)
             else:
                 os.unlink(outfile_path)
-    
+
         # create zap folder
         if not os.path.exists(zapfile_path):
             os.mkdir(zapfile_path)
-        
+
         # Call command
         logging.debug("CALL: " + full_cmd)
         if Initialize.get_os() != 1:
@@ -393,7 +394,7 @@ class HashcatCracker:
                             ans = req.execute()
                             if ans is None:
                                 logging.error("Failed to send solve!")
-                                sleep(1)
+                                time.sleep(1)
                             elif ans['response'] != 'SUCCESS':
                                 self.wasStopped = True
                                 logging.error("Error from server on solve: " + str(ans))
@@ -401,7 +402,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
-                                sleep(5)
+                                time.sleep(5)
                                 return
                             elif 'agent' in ans.keys() and ans['agent'] == 'stop':
                                 # server set agent to stop
@@ -411,7 +412,7 @@ class HashcatCracker:
                                     kill_hashcat(proc.pid, Initialize.get_os())
                                 except ProcessLookupError:
                                     pass
-                                sleep(5)
+                                time.sleep(5)
                                 return
                             else:
                                 cracks_count = len(self.cracks)
@@ -436,7 +437,7 @@ class HashcatCracker:
                     if msg and str(msg) != '^C':  # this is maybe not the fanciest way, but as ctrl+c is sent to the underlying process it reports it to stderr
                         logging.error("HC error: " + msg)
                         send_error(msg, self.config.get_value('token'), task['taskId'], chunk['chunkId'])
-                        sleep(0.1)  # we set a minimal sleep to avoid overreaction of the client sending a huge number of errors, but it should not be slowed down too much, in case the errors are not critical and the agent can continue
+                        time.sleep(0.1)  # we set a minimal sleep to avoid overreaction of the client sending a huge number of errors, but it should not be slowed down too much, in case the errors are not critical and the agent can continue
 
     def measure_keyspace(self, task, chunk):
         if 'usePrince' in task.get_task() and task.get_task()['usePrince']:
@@ -446,9 +447,9 @@ class HashcatCracker:
         task = task.get_task()  # TODO: refactor this to be better code
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'] + " ", "")
-               
+
         full_cmd = f"{self.callPath} --keyspace --quiet {files} {task['cmdpars']}"
-        
+
         if 'useBrain' in task and task['useBrain']:
             full_cmd = f"{full_cmd} -S"
 
@@ -459,7 +460,7 @@ class HashcatCracker:
         except subprocess.CalledProcessError as e:
             logging.error("Error during keyspace measure: " + str(e) + " Output: " + output.decode(encoding='utf-8'))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
-            sleep(5)
+            time.sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         ks = 0
@@ -489,7 +490,7 @@ class HashcatCracker:
         except subprocess.CalledProcessError:
             logging.error("Error during PRINCE keyspace measure")
             send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
-            sleep(5)
+            time.sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
@@ -513,14 +514,14 @@ class HashcatCracker:
         if not os.path.isfile(binary):
             split = binary.split(".")
             binary = '.'.join(split[:-1]) + get_bit() + "." + split[-1]
-        
+
         if Initialize.get_os() == 1:
             # Windows
             binary = f'"{binary}"'
         else:
             # Mac / Linux
             binary = f'"./{binary}"'
-        
+
         args = []
         args.append(preprocessor['keyspaceCommand'])
         args.append(update_files(task.get_task()['preprocessorCommand']))
@@ -534,7 +535,7 @@ class HashcatCracker:
         except subprocess.CalledProcessError:
             logging.error("Error during preprocessor keyspace measure")
             send_error("Preprocessor keyspace measure failed!", self.config.get_value('token'), task.get_task()['taskId'], None)
-            sleep(5)
+            time.sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         keyspace = "0"
@@ -556,15 +557,15 @@ class HashcatCracker:
         args.append('--machine-readable')
         args.append('--quiet')
         args.append(f"--runtime={task['bench']}")
-        
+
         args.append('--restore-disable')
         args.append('--potfile-disable')
         args.append('--session=hashtopolis')
         args.append('-p')
         args.append('"\t"')
-        
-        
-      
+
+
+
         hashlist_path = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), f"{str(task['hashlistId'])}.out")
 
@@ -579,7 +580,7 @@ class HashcatCracker:
         full_cmd = ' '.join(args)
 
         full_cmd = f"{self.callPath} {full_cmd}"
-      
+
         logging.debug(f"CALL: {full_cmd}")
         proc = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
         output, error = proc.communicate()
@@ -626,13 +627,13 @@ class HashcatCracker:
         args.append('--machine-readable')
         args.append('--quiet')
         args.append('--progress-only')
-        
+
         args.append('--restore-disable')
         args.append('--potfile-disable')
         args.append('--session=hashtopolis')
         args.append('-p')
         args.append('"\t"')
-        
+
         hashlist_path = Path(self.config.get_value('hashlists-path'), str(task['hashlistId']))
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), f"{str(task['hashlistId'])}.out")
 
@@ -640,7 +641,7 @@ class HashcatCracker:
             attackcmd = get_rules_and_hl(update_files(task['attackcmd']))
             # Replace #HL# with the real hashlist
             attackcmd = attackcmd.replace(task['hashlistAlias'], f'"{hashlist_path}"')
-            
+
             args.append(attackcmd)
 
             # This dict is purely used for benchmarking with prince
@@ -664,7 +665,7 @@ class HashcatCracker:
 
         args.append('-o')
         args.append(f'"{hashlist_out_path}"')
-        
+
         full_cmd = ' '.join(args)
         full_cmd = f"{self.callPath} {full_cmd}"
 

@@ -300,7 +300,7 @@ def de_register():
     if ans is None:
         logging.error("De-registration failed!")
     elif ans['response'] != 'SUCCESS':
-        logging.error("Error on de-registration: " + str(ans))
+        logging.error("Error on de-registration: %s", str(ans))
     else:
         logging.info("Successfully de-registered!")
         # cleanup
@@ -334,6 +334,7 @@ if __name__ == "__main__":
     parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
     parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
     parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
+    parser.add_argument('--ignore-cert', action='store_true', help="Ignore the validity of the server's certificate.")
     args = parser.parse_args()
 
     if args.version:
@@ -370,7 +371,7 @@ if __name__ == "__main__":
             logging.info("Ignoring lock.pid file because PID is not existent anymore or not running python!")
 
         # create lock file
-        with open("lock.pid", 'w') as f:
+        with open("lock.pid", 'w', encoding=sys.getdefaultencoding()) as f:
             f.write(str(os.getpid()))
             f.close()
 
