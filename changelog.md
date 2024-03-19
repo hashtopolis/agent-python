@@ -1,3 +1,7 @@
+## v0.7.1 -> v0.7.2
+### Bugfixes
+* When using older hashcat version Hashtopolis doesn't detect the binary correctly (hashcat64.bin) #hashtopolis/server/1012 
+
 ## v0.7.0 -> v0.7.1
 
 ### Bugfixes
