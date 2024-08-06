@@ -42,13 +42,13 @@ class HashcatFiles7z(unittest.TestCase):
     def test_files_7z_linux(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         if sys.platform != 'linux':
             return
-        
+
         # Setup session object
         session = Session(requests.Session()).s
         session.headers.update({'User-Agent': Initialize.get_version()})
 
          # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Set config and variables
         cracker_id = 1
@@ -67,10 +67,10 @@ class HashcatFiles7z(unittest.TestCase):
         stamp = datetime.datetime.now().isoformat()
         wordlist = f'wordlist-{stamp}.txt'
         sevenzip = f'wordlist-{stamp}.7z'
-    
+
         with open(wordlist, 'w') as file_obj:
             file_obj.write('12345678\n123456\nprincess\n')
-        
+
         with py7zr.SevenZipFile(sevenzip, 'w') as z:
             z.writeall(f'./{wordlist}')
 
@@ -105,10 +105,10 @@ class HashcatFiles7z(unittest.TestCase):
         wordlist_path = Path(files_path, wordlist)
         if os.path.isfile(wordlist_path):
             os.remove(wordlist_path)
-        
-        # Try to download cracker 1        
+
+        # Try to download cracker 1
         executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
-        
+
         binaryDownload = BinaryDownload(test_args)
         binaryDownload.check_version(cracker_id)
 
@@ -192,7 +192,7 @@ class HashcatFiles7z(unittest.TestCase):
             f'-a0 "{wordlist_path}" ',
             ' --hash-type=0 ',
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_Popen.assert_called_with(
@@ -219,7 +219,7 @@ class HashcatFiles7z(unittest.TestCase):
     def test_files_7z_windows(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         if sys.platform != 'win32':
             return
-        
+
         # Setup session object
         session = Session(requests.Session()).s
         session.headers.update({'User-Agent': Initialize.get_version()})
@@ -244,10 +244,10 @@ class HashcatFiles7z(unittest.TestCase):
         stamp = int(time.time())
         wordlist = f'wordlist-{stamp}.txt'
         sevenzip = f'wordlist-{stamp}.7z'
-    
+
         with open(wordlist, 'w') as file_obj:
             file_obj.write('12345678\n123456\nprincess\n')
-        
+
         with py7zr.SevenZipFile(sevenzip, 'w') as z:
             z.writeall(f'./{wordlist}')
 
@@ -282,10 +282,10 @@ class HashcatFiles7z(unittest.TestCase):
         wordlist_path = Path(files_path, wordlist)
         if os.path.isfile(wordlist_path):
             os.remove(wordlist_path)
-        
-        # Try to download cracker 1        
+
+        # Try to download cracker 1
         executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.exe')
-        
+
         binaryDownload = BinaryDownload(test_args)
         binaryDownload.check_version(cracker_id)
 
@@ -369,7 +369,7 @@ class HashcatFiles7z(unittest.TestCase):
             f'-a0 "{wordlist_path}" ',
             ' --hash-type=0 ',
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_Popen.assert_called_with(

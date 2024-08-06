@@ -46,7 +46,7 @@ class HashcatFiles(unittest.TestCase):
         session.headers.update({'User-Agent': Initialize.get_version()})
 
          # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Set config and variables
         cracker_id = 1
@@ -54,7 +54,7 @@ class HashcatFiles(unittest.TestCase):
 
         crackers_path = config.get_value('crackers-path')
         files_path = config.get_value('files-path')
-        
+
 
         # Create hashlist
         p = Path(__file__).parent.joinpath('create_hashlist_001.json')
@@ -119,9 +119,9 @@ class HashcatFiles(unittest.TestCase):
         if os.path.isfile(rule_path):
             os.remove(rule_path)
 
-        # Try to download cracker 1        
+        # Try to download cracker 1
         executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
-        
+
         binaryDownload = BinaryDownload(test_args)
         binaryDownload.check_version(cracker_id)
 
@@ -202,7 +202,7 @@ class HashcatFiles(unittest.TestCase):
             f'-a0 "{wordlist_path}" -r "{rule_path}" ',
             ' --hash-type=0 ',
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_Popen.assert_called_with(

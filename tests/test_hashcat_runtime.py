@@ -58,7 +58,7 @@ class HashcatRuntime(unittest.TestCase):
             obj.save()
 
         # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Try to download cracker 1
         cracker_id = 1
@@ -96,7 +96,7 @@ class HashcatRuntime(unittest.TestCase):
         hashlist_out_path = Path(hashlists_path, f'{hashlist_id}.out')
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
-        
+
         full_cmd = [
             '"hashcat.exe"',
             '--machine-readable',
@@ -113,14 +113,14 @@ class HashcatRuntime(unittest.TestCase):
             '-o',
             f'"{hashlist_out_path}"'
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         moch_popen.assert_called_with(
             full_cmd,
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
-            stdout=-1, 
+            stdout=-1,
             stderr=-1
         )
 

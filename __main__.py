@@ -20,6 +20,7 @@ from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 from htpclient.dicts import *
 import logging
+from logging.handlers import RotatingFileHandler
 
 from htpclient.task import Task
 
@@ -100,8 +101,8 @@ def init_logging(args):
     print_format = '%(message)s'
     date_format = '%Y-%m-%d %H:%M:%S'
     log_level = logging.INFO
-    logfile = open('client.log', "a", encoding="utf-8")
-
+    file_handler = RotatingFileHandler('client.log', maxBytes=args.max_log_size, backupCount=args.max_log_backups)
+    file_handler.setFormatter(logging.Formatter(log_format))
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     CONFIG = Config()
@@ -111,8 +112,6 @@ def init_logging(args):
         log_level = logging.DEBUG
         logging.getLogger("requests").setLevel(logging.DEBUG)
     logging.basicConfig(level=log_level, format=print_format, datefmt=date_format)
-    file_handler = logging.StreamHandler(logfile)
-    file_handler.setFormatter(logging.Formatter(log_format))
     logging.getLogger().addHandler(file_handler)
 
 
@@ -334,6 +333,8 @@ if __name__ == "__main__":
     parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
     parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
     parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
+    parser.add_argument('--max-log-size', default=5_000_000, type=int, required=False, help='Max size in bytes of client.log before rotation trigger; default 5000000 (5MB)')
+    parser.add_argument('--max-log-backups', default=5, type=int, required=False, help='Number of rotated client.log copies to keep; default 5.')
     args = parser.parse_args()
 
     if args.version:
