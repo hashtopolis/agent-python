@@ -104,6 +104,10 @@ When you run the client for the first time it will ask automatically for all the
 | preprocessors-path    | string  |         | Use given folder path as preprocessors location                            |
 | zaps-path             | string  |         | Use given folder path as zaps location                                     |
 | cpu-only              | boolean | false   | Only send CPU information about agent (for CPU only agents)                |
+| use-mtls              | boolean | false   | Use mTLS for client API                                                    |
+| mtls-cert             | string  |         | Use given path as client cert location for mTLS                            |
+| mtls-key              | string  |         | Use given path as client key location for mTLS                             |
+| mtls-ca-cert          | string  |         | Use given path as CA cert location for mTLS verification                   |
 
 ### Debug example
 
