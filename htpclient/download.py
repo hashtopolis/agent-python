@@ -14,17 +14,28 @@ class Download:
     def download(url, output, no_header=False):
         try:
             session = Session().s
-
+            # If agent is using mtls, we need to set the session params to the default
+            # so that sites that are internet accesible can still be accessed for downloading
+            # even if mtls is not enabled, the session_params created is the default config
+            session_params = {}
+            if Session().using_mtls:
+                mtls_exempt_sites = ["hashcat.net"]
+                for site in mtls_exempt_sites:
+                    if site in url:
+                        session_params  = {
+                            "cert": None,
+                            "verify": True
+                        }
             # Check header
             if not no_header:
-                head = session.head(url)
+                head = session.head(url, **session_params)
                 # not sure if we only should allow 200/301/302, but then it's present for sure
                 if head.status_code not in [200, 301, 302]:
                     logging.error("File download header reported wrong status code: " + str(head.status_code))
                     return False
-
+           
             with open(output, "wb") as file:
-                response = session.get(url, stream=True)
+                response = session.get(url, stream=True, **session_params)
                 total_length = response.headers.get('Content-Length')
 
                 if total_length is None:  # no content length header
