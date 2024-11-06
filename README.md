@@ -31,13 +31,13 @@ Please note:
 ### Command Line Arguments
 
 ```
-usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT] [--files-path FILES_PATH]
-                               [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
-
+usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT]
+                               [--files-path FILES_PATH] [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH]
+                               [--zaps-path ZAPS_PATH] [--cpu-only] [--use-mtls USE_MTLS] [--mtls-cert MTLS_CERT] [--mtls-key MTLS_KEY] [--mtls-ca-cert MTLS_CA_CERT]
 
 Hashtopolis Client v0.7.2
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --de-register         client should automatically de-register from server now
   --version             show version information
@@ -58,6 +58,12 @@ optional arguments:
   --zaps-path ZAPS_PATH
                         Use given folder path as zaps location
   --cpu-only            Force client to register as CPU only and also only reading out CPU information
+  --use-mtls USE_MTLS   Use mTLS for client API
+  --mtls-cert MTLS_CERT
+                        Use given path as client cert location for mTLS
+  --mtls-key MTLS_KEY   Use given path as client key location for mTLS
+  --mtls-ca-cert MTLS_CA_CERT
+                        Use given path as CA cert location for mTLS verification
 ```
 
 ### Config
@@ -98,6 +104,10 @@ When you run the client for the first time it will ask automatically for all the
 | preprocessors-path    | string  |         | Use given folder path as preprocessors location                            |
 | zaps-path             | string  |         | Use given folder path as zaps location                                     |
 | cpu-only              | boolean | false   | Only send CPU information about agent (for CPU only agents)                |
+| use-mtls              | boolean | false   | Use mTLS for client API                                                    |
+| mtls-cert             | string  |         | Use given path as client cert location for mTLS                            |
+| mtls-key              | string  |         | Use given path as client key location for mTLS                             |
+| mtls-ca-cert          | string  |         | Use given path as CA cert location for mTLS verification                   |
 
 ### Debug example
 
