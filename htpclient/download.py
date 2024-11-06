@@ -24,7 +24,7 @@ class Download:
                     if site in url:
                         session_params  = {
                             "cert": None,
-                            "verify": True
+                            "verify": "/etc/ssl/certs/ca-certificates.crt"
                         }
             # Check header
             if not no_header:
