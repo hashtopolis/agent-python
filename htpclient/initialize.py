@@ -104,13 +104,27 @@ class Initialize:
                     devices.append(line[1].strip())
 
         elif Initialize.get_os() == 1:  # windows
-            output = subprocess.check_output("wmic cpu get name", shell=True)
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-            for line in output:
-                line = line.rstrip("\r\n ")
-                if line == "Name" or not line:
-                    continue
-                devices.append(line)
+            platform_release = platform.uname().release
+            if int(platform_release) >= 10:
+                processor_information = subprocess.check_output(
+                    'powershell -Command "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name"',
+                    shell=True)
+                processor_information = processor_information.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                for line in processor_information:
+                    line = line.rstrip("\r\n ")
+                    if line == "Name" or not line:
+                        continue
+                    devices.append(line)
+            else:
+                processor_information = subprocess.check_output(
+                    'powershell -Command "Get-WmiObject Win32_Processor | Select-Object -ExpandProperty Name"',
+                    shell=True)
+                processor_information = processor_information.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                for line in processor_information:
+                    line = line.rstrip("\r\n ")
+                    if line == "Name" or not line:
+                        continue
+                    devices.append(line)
             output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
             output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             for line in output:
