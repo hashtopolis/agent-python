@@ -105,33 +105,28 @@ class Initialize:
 
         elif Initialize.get_os() == 1:  # windows
             platform_release = platform.uname().release
-            if int(platform_release) >= 10:
+            if platform_release == "" or int(platform_release) >= 10:
                 processor_information = subprocess.check_output(
                     'powershell -Command "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name"',
                     shell=True)
                 processor_information = processor_information.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-                for line in processor_information:
-                    line = line.rstrip("\r\n ")
-                    if line == "Name" or not line:
-                        continue
-                    devices.append(line)
+                video_controller = subprocess.check_output(
+                    'powershell -Command "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"',
+                    shell=True)
+                video_controller = video_controller.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
             else:
                 processor_information = subprocess.check_output(
-                    'powershell -Command "Get-WmiObject Win32_Processor | Select-Object -ExpandProperty Name"',
+                    'wmic cpu get name',
                     shell=True)
                 processor_information = processor_information.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-                for line in processor_information:
+                video_controller = subprocess.check_output('wmic path win32_VideoController get name', shell=True)
+                video_controller = video_controller.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+
+            for source in (processor_information, video_controller):
+                for line in source:
                     line = line.rstrip("\r\n ")
-                    if line == "Name" or not line:
-                        continue
-                    devices.append(line)
-            output = subprocess.check_output("wmic path win32_VideoController get name", shell=True)
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
-            for line in output:
-                line = line.rstrip("\r\n ")
-                if line == "Name" or not line:
-                    continue
-                devices.append(line)
+                    if line and line != "Name":
+                        devices.append(line)
 
         else:  # OS X
             output = subprocess.check_output("system_profiler SPDisplaysDataType -detaillevel mini", shell=True)
