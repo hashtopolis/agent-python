@@ -40,7 +40,7 @@ class HashcatPreprocessor(unittest.TestCase):
     def test_preprocessor_linux(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         if sys.platform != 'linux':
             return
-    
+
         # Setup session object
         session = Session(requests.Session()).s
         session.headers.update({'User-Agent': Initialize.get_version()})
@@ -63,17 +63,17 @@ class HashcatPreprocessor(unittest.TestCase):
             shutil.rmtree(preprocessor_path)
 
         # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Try to download cracker 1
         cracker_id = 1
         config = Config()
         crackers_path = config.get_value('crackers-path')
-        
+
         # executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
-        
+
         binaryDownload = BinaryDownload(test_args)
-        
+
         task = Task()
         task.load_task()
 
@@ -173,7 +173,7 @@ class HashcatPreprocessor(unittest.TestCase):
     def test_preprocessor_windows(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         if sys.platform != 'win32':
             return
-    
+
         # Setup session object
         session = Session(requests.Session()).s
         session.headers.update({'User-Agent': Initialize.get_version()})
@@ -199,16 +199,16 @@ class HashcatPreprocessor(unittest.TestCase):
             shutil.rmtree(preprocessor_path)
 
         # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Try to download cracker 1
         cracker_id = 1
         crackers_path = config.get_value('crackers-path')
-        
+
         # executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
-        
+
         binaryDownload = BinaryDownload(test_args)
-        
+
         task = Task()
         task.load_task()
 
@@ -256,13 +256,13 @@ class HashcatPreprocessor(unittest.TestCase):
             '-o',
             f'"{hashlist_out_path}"'
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
         mock_Popen.assert_called_with(
             full_cmd,
             shell=True,
             cwd=Path(crackers_path, str(cracker_id)),
-            stdout=-1, 
+            stdout=-1,
             stderr=-2
         )
 

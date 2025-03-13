@@ -1,6 +1,12 @@
+## v0.7.2 -> v0.7.3
+
+### Enhancements
+
+* Introduced rotating logfile for `client.log` with two new CLI flags for behavior.
+
 ## v0.7.1 -> v0.7.2
 ### Bugfixes
-* When using older hashcat version Hashtopolis doesn't detect the binary correctly (hashcat64.bin) #hashtopolis/server/1012 
+* When using older hashcat version Hashtopolis doesn't detect the binary correctly (hashcat64.bin) #hashtopolis/server/1012
 
 ## v0.7.0 -> v0.7.1
 

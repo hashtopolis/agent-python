@@ -43,20 +43,20 @@ class HashcatBrain(unittest.TestCase):
     def test_brain_linux(self, mock_system, mock_unlink, mock_check_output, mock_Popen):
         if sys.platform != 'linux':
             return
-    
+
         # Setup session object
         session = Session(requests.Session()).s
         session.headers.update({'User-Agent': Initialize.get_version()})
 
         # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Set config and variables
         cracker_id = 1
         config = Config()
 
         crackers_path = config.get_value('crackers-path')
-        
+
         # Setting Brain configuration
         set_config = {
             'hashcatBrainEnable': '1',
@@ -83,7 +83,7 @@ class HashcatBrain(unittest.TestCase):
         task_obj = Task_v2(**payload)
         task_obj.save()
 
-        # Try to download cracker 1        
+        # Try to download cracker 1
         executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
 
         binaryDownload = BinaryDownload(test_args)
@@ -159,7 +159,7 @@ class HashcatBrain(unittest.TestCase):
             '-a3 ?l?l?l?l ',
             ' --hash-type=0 ',
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_Popen.assert_called_with(
@@ -187,7 +187,7 @@ class HashcatBrain(unittest.TestCase):
             config_item = Config_v2.objects.get(item=k)
             config_item.value = v
             config_item.save()
-        
+
         # Re-enable agents, because the the hashcat command will fail
         agent = Agent_v2.objects.get(token=config.get_value('token'))
         agent.isActive = True

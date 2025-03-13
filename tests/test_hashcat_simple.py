@@ -64,18 +64,18 @@ class HashcatSimple(unittest.TestCase):
             obj.save()
 
         # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Try to download cracker 1
         cracker_id = 1
         config = Config()
         crackers_path = config.get_value('crackers-path')
-        
+
         executeable_path = Path(crackers_path, str(cracker_id), 'hashcat.bin')
-        
+
         binaryDownload = BinaryDownload(test_args)
         binaryDownload.check_version(cracker_id)
-        
+
         cracker_zip = Path(crackers_path, f'{cracker_id}.7z')
         crackers_temp = Path(crackers_path, 'temp')
         zip_binary = './7zr'
@@ -152,7 +152,7 @@ class HashcatSimple(unittest.TestCase):
             '-a3 ?l?l?l?l ',
             ' --hash-type=0 ',
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_Popen.assert_called_with(
@@ -201,7 +201,7 @@ class HashcatSimple(unittest.TestCase):
             obj.save()
 
         # Cmd parameters setup
-        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None)
+        test_args = Namespace( cert=None,  cpu_only=False, crackers_path=None, de_register=False, debug=True, disable_update=False, files_path=None, hashlists_path=None, number_only=False, preprocessors_path=None, url='http://hashtopolis/api/server.php', version=False, voucher='devvoucher', zaps_path=None, max_log_size=5_000_000, max_log_backups=5)
 
         # Try to download cracker 1
         cracker_id = 1
@@ -249,7 +249,7 @@ class HashcatSimple(unittest.TestCase):
         hashlist_out_path = Path(hashlists_path, f'{hashlist_id}.out')
         result = cracker.run_benchmark(task.get_task())
         assert result != 0
-        
+
         full_cmd = [
             '"hashcat.exe"',
             '--machine-readable',
@@ -267,7 +267,7 @@ class HashcatSimple(unittest.TestCase):
             '-o',
             f'"{hashlist_out_path}"'
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_check_output.assert_called_with(
@@ -314,7 +314,7 @@ class HashcatSimple(unittest.TestCase):
             '-a3 ?l?l?l?l ',
             ' --hash-type=0 ',
         ]
-        
+
         full_cmd = ' '.join(full_cmd)
 
         mock_Popen.assert_called_with(
