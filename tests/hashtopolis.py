@@ -48,8 +48,6 @@ class HashtopolisConfig(object):
         self.username = self._cfg['username']
         self.password = self._cfg['password']
 
-    
-
 
 class HashtopolisConnector(object):
     # Cache authorisation token per endpoint
@@ -62,14 +60,14 @@ class HashtopolisConnector(object):
         self._hashtopolis_uri = config._hashtopolis_uri
         self.config = config
 
-    def authenticate(self):    
+    def authenticate(self):
         if not self._api_endpoint in HashtopolisConnector.token:
             # Request access TOKEN, used throughout the test
 
             logger.info("Start authentication")
             auth_uri = self._api_endpoint + '/auth/token'
             auth = (self.config.username, self.config.password)
-            r = requests.post(auth_uri, auth=auth)
+            r = requests.post(auth_uri, auth=auth, allow_redirects=True)
 
             HashtopolisConnector.token[self._api_endpoint] = r.json()['token']
             HashtopolisConnector.token_expires[self._api_endpoint] = r.json()['token']
@@ -93,7 +91,7 @@ class HashtopolisConnector(object):
             '__gt': '>',
             '__gte': '>=',
             '__lt': '<',
-            '__lte': '<=', 
+            '__lte': '<=',
         }
         for k,v in filter.items():
             l = None
@@ -104,7 +102,7 @@ class HashtopolisConnector(object):
             # Default to equal assignment
             if l == None:
                 l = f'{k}={v}'
-            filter_list.append(l)                  
+            filter_list.append(l)
 
         payload = {
             'filter': filter_list,
@@ -146,7 +144,7 @@ class HashtopolisConnector(object):
         headers = self._headers
         payload = dict([(k,v[1]) for (k,v) in obj.diff().items()])
 
-        r = requests.post(uri, headers=headers, data=json.dumps(payload))
+        r = requests.post(uri, headers=headers, data=json.dumps(payload), allow_redirects=True)
         if r.status_code != 201:
             logger.exception("Creation of object failed: %s", r.text)
 
@@ -222,7 +220,7 @@ class ManagerBase(type):
         return objs[0]
 
     @classmethod
-    def filter(cls, expand=None, **kwargs):              
+    def filter(cls, expand=None, **kwargs):
         # Get all objects
         api_objs = cls.get_conn().filter(expand, kwargs)
 
@@ -242,7 +240,7 @@ class ModelBase(type):
             return super().__new__(cls, clsname, bases, attrs)
 
         new_class = super().__new__(cls, clsname, bases, attrs)
-        
+
         setattr(new_class, 'objects', type('Manager', (ManagerBase,), {'_model_uri': uri}))
         setattr(new_class.objects, '_model', new_class)
         cls_registry[clsname] = new_class
@@ -251,10 +249,10 @@ class ModelBase(type):
 
 
 class Model(metaclass=ModelBase):
-    def __init__(self, *args, **kwargs):      
+    def __init__(self, *args, **kwargs):
         self.set_initial(kwargs)
         super().__init__()
-    
+
     def _dict2obj(self, dict):
         # Function to convert a dict to an object.
         uri = dict.get('_self')
@@ -264,7 +262,7 @@ class Model(metaclass=ModelBase):
             model_uri = model.objects._model_uri
             # Check if part of the uri is in the model uri
             if model_uri in uri:
-                
+
                 obj = model()
 
                 # Set all the attributes of the object.
@@ -287,12 +285,12 @@ class Model(metaclass=ModelBase):
 
         # Create attribute values
         for k,v in kv.items():
-            
+
             # In case expand is true, there can be a attribute which also is an object.
             # Example: Users in AccessGroups. This part will convert the returned data.
             # Into proper objects.
             if type(v) is list and len(v) > 0:
-                
+
                 # Many-to-Many relation
                 obj_list = []
                 # Loop through all the values in the list and convert them to objects.
@@ -373,7 +371,7 @@ class Cracker(Model, uri="/ui/crackers"):
 class CrackerType(Model, uri="/ui/crackertypes"):
     def __repr__(self):
         return self._self
-    
+
 class Config(Model, uri="/ui/configs"):
     def __repr__(self):
         return self._self
@@ -389,7 +387,7 @@ class FileImport(HashtopolisConnector):
 
     def __repr__(self):
         return self._self
-    
+
     def do_upload(self, filename, file_stream):
         self.authenticate()
 
