@@ -63,6 +63,9 @@ class Initialize:
                 if not os.path.isdir("multicast"):
                     os.mkdir("multicast")
 
+    def decode_output(self, output):
+        return output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+
     def __update_information(self):
         if not self.config.get_value('uuid'):
             self.config.set_value('uuid', str(uuid.uuid4()))
@@ -72,7 +75,7 @@ class Initialize:
         devices = []
         if Initialize.get_os() == 0:  # linux
             output = subprocess.check_output("cat /proc/cpuinfo", shell=True)
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            output = self.decode_output(output)
             tmp = []
             for line in output:
                 line = line.strip()
@@ -96,7 +99,7 @@ class Initialize:
                 except subprocess.CalledProcessError:
                     # we silently ignore this case on machines where lspci is not present or architecture has no pci bus
                     output = b""
-                output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                output = self.decode_output(output)
                 for line in output:
                     if not line:
                         continue
@@ -109,18 +112,18 @@ class Initialize:
                 processor_information = subprocess.check_output(
                     'powershell -Command "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name"',
                     shell=True)
-                processor_information = processor_information.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                processor_information = self.decode_output(processor_information)
                 video_controller = subprocess.check_output(
                     'powershell -Command "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"',
                     shell=True)
-                video_controller = video_controller.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                video_controller = self.decode_output(video_controller)
             else:
                 processor_information = subprocess.check_output(
                     'wmic cpu get name',
                     shell=True)
-                processor_information = processor_information.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                processor_information = self.decode_output(processor_information)
                 video_controller = subprocess.check_output('wmic path win32_VideoController get name', shell=True)
-                video_controller = video_controller.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+                video_controller = self.decode_output(video_controller)
 
             for source in (processor_information, video_controller):
                 for line in source:
@@ -130,7 +133,7 @@ class Initialize:
 
         else:  # OS X
             output = subprocess.check_output("system_profiler SPDisplaysDataType -detaillevel mini", shell=True)
-            output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+            output = self.decode_output(output)
             for line in output:
                 line = line.rstrip("\r\n ")
                 if "Chipset Model" not in line:
