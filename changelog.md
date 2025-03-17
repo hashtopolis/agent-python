@@ -1,3 +1,10 @@
+## v0.7.2 -> vx.x.x
+### Bugfixes
+* When there is an empty pid file, the agent crashes #hashtopolis/server/1028
+  
+### Enhancements
+* Added Windows 11 support. #hashtopolis/server/1159
+
 ## v0.7.1 -> v0.7.2
 ### Bugfixes
 * When using older hashcat version Hashtopolis doesn't detect the binary correctly (hashcat64.bin) #hashtopolis/server/1012 
