@@ -1,384 +1,238 @@
-import glob
-import shutil
-import signal
-import sys
-import os
-import time
-from time import sleep
-
-import psutil as psutil
 import argparse
+import datetime
+import logging
+import os
+import sys
+import time
+from dataclasses import dataclass
+from logging.handlers import TimedRotatingFileHandler
+from time import sleep
+from typing import Any
 
-from htpclient.binarydownload import BinaryDownload
-from htpclient.chunk import Chunk
+import psutil
+
+from htpclient import Agent
+from htpclient.chunk import ChunkStatus
 from htpclient.files import Files
 from htpclient.generic_cracker import GenericCracker
 from htpclient.hashcat_cracker import HashcatCracker
-from htpclient.hashlist import Hashlist
-from htpclient.helpers import start_uftpd, file_get_contents
-from htpclient.initialize import Initialize
-from htpclient.jsonRequest import *
-from htpclient.dicts import *
-import logging
-
 from htpclient.task import Task
 
-CONFIG = None
-binaryDownload = None
+cur_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
-def run_health_check():
-    global CONFIG, binaryDownload
+@dataclass
+class Arguments:
+    """Data class for arguments"""
 
-    logging.info("Health check requested by server!")
-    logging.info("Retrieving health check settings...")
-    query = copy_and_set_token(dict_getHealthCheck, CONFIG.get_value('token'))
-    req = JsonRequest(query)
-    ans = req.execute()
-    if ans is None:
-        logging.error("Failed to get health check!")
-        sleep(5)
-        return
-    elif ans['response'] != 'SUCCESS':
-        logging.error("Error on getting health check: " + str(ans))
-        sleep(5)
-        return
-    binaryDownload.check_version(ans['crackerBinaryId'])
-    check_id = ans['checkId']
-    logging.info("Starting check ID " + str(check_id))
-
-    # write hashes to file
-    hash_file = open(CONFIG.get_value('hashlists-path') + "/health_check.txt", "w")
-    hash_file.write("\n".join(ans['hashes']))
-    hash_file.close()
-
-    # delete old file if necessary
-    if os.path.exists(CONFIG.get_value('hashlists-path') + "/health_check.out"):
-        os.unlink(CONFIG.get_value('hashlists-path') + "/health_check.out")
-
-    # run task
-    cracker = HashcatCracker(ans['crackerBinaryId'], binaryDownload)
-    start = int(time.time())
-    [states, errors] = cracker.run_health_check(ans['attack'], ans['hashlistAlias'])
-    end = int(time.time())
-
-    # read results
-    if os.path.exists(CONFIG.get_value('hashlists-path') + "/health_check.out"):
-        founds = file_get_contents(CONFIG.get_value('hashlists-path') + "/health_check.out").replace("\r\n", "\n").split("\n")
-    else:
-        founds = []
-    if len(states) > 0:
-        num_gpus = len(states[0].get_temps())
-    else:
-        errors.append("Faild to retrieve one successful cracker state, most likely due to failing.")
-        num_gpus = 0
-    query = copy_and_set_token(dict_sendHealthCheck, CONFIG.get_value('token'))
-    query['checkId'] = check_id
-    query['start'] = start
-    query['end'] = end
-    query['numGpus'] = num_gpus
-    query['numCracked'] = len(founds) - 1
-    query['errors'] = errors
-    req = JsonRequest(query)
-    ans = req.execute()
-    if ans is None:
-        logging.error("Failed to send health check results!")
-        sleep(5)
-        return
-    elif ans['response'] != 'OK':
-        logging.error("Error on sending health check results: " + str(ans))
-        sleep(5)
-        return
-    logging.info("Health check completed successfully!")
+    de_register: bool
+    version: bool
+    number_only: bool
+    debug: bool
+    idle: bool
 
 
 # Sets up the logging to stdout and to file with different styles and with the level as set in the config if available
-def init_logging(args):
-    global CONFIG
+def init_logging(debug: bool, log_dir: str = "logs"):
+    """Initialize logging"""
+    # Log formats
+    file_log_format = "%(asctime)s - [%(levelname)-5s] - %(message)s"
+    console_log_format = "[%(levelname)-5s] %(message)s"  # Simpler format for console output
+    log_date_format = "%Y-%m-%d %H:%M:%S"
+    log_level = logging.DEBUG if debug else logging.INFO
 
-    log_format = '[%(asctime)s] [%(levelname)-5s] %(message)s'
-    print_format = '%(message)s'
-    date_format = '%Y-%m-%d %H:%M:%S'
-    log_level = logging.INFO
-    logfile = open('client.log', "a", encoding="utf-8")
+    # Ensure the logs directory exists
+    os.makedirs(log_dir, exist_ok=True)
 
-    logging.getLogger("requests").setLevel(logging.WARNING)
+    # Set up a TimedRotatingFileHandler to rotate logs every 5 days
+    log_path = os.path.join(log_dir, "client.log")
+    file_handler = TimedRotatingFileHandler(log_path, when="D", interval=5, backupCount=5, encoding="utf-8", utc=True)
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(logging.Formatter(file_log_format, datefmt=log_date_format))
 
-    CONFIG = Config()
-    if args.debug:
-        CONFIG.set_value('debug', True)
-    if CONFIG.get_value('debug'):
-        log_level = logging.DEBUG
-        logging.getLogger("requests").setLevel(logging.DEBUG)
-    logging.basicConfig(level=log_level, format=print_format, datefmt=date_format)
-    file_handler = logging.StreamHandler(logfile)
-    file_handler.setFormatter(logging.Formatter(log_format))
-    logging.getLogger().addHandler(file_handler)
+    # Get the root logger and configure it
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)  # Set log level for root logger
+    root_logger.addHandler(file_handler)  # Add the file handler to the root logger
 
+    # Console handler with a different format
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(logging.Formatter(console_log_format))  # Simpler format for console
+    root_logger.addHandler(console_handler)
 
-def init(args):
-    global CONFIG, binaryDownload
-
-    if len(CONFIG.get_value('files-path')) == 0:
-        CONFIG.set_value('files-path', os.path.abspath('files'))
-    if len(CONFIG.get_value('crackers-path')) == 0:
-        CONFIG.set_value('crackers-path', os.path.abspath('crackers'))
-    if len(CONFIG.get_value('hashlists-path')) == 0:
-        CONFIG.set_value('hashlists-path', os.path.abspath('hashlists'))
-    if len(CONFIG.get_value('zaps-path')) == 0:
-        CONFIG.set_value('zaps-path', os.path.abspath('.'))
-    if len(CONFIG.get_value('preprocessors-path')) == 0:
-        CONFIG.set_value('preprocessors-path', os.path.abspath('preprocessors'))
-
-    if args.files_path and len(args.files_path):
-        CONFIG.set_value('files-path', os.path.abspath(args.files_path))
-    if args.crackers_path and len(args.crackers_path):
-        CONFIG.set_value('crackers-path', os.path.abspath(args.crackers_path))
-    if args.hashlists_path and len(args.hashlists_path):
-        CONFIG.set_value('hashlists-path', os.path.abspath(args.hashlists_path))
-    if args.zaps_path and len(args.zaps_path):
-        CONFIG.set_value('zaps-path', os.path.abspath(args.zaps_path))
-    if args.preprocessors_path and len(args.preprocessors_path):
-        CONFIG.set_value('preprocessors-path', os.path.abspath(args.preprocessors_path))
-
-    logging.info("Starting client '" + Initialize.get_version() + "'...")
-
-    # check if there are running hashcat.pid files around (as we assume that nothing is running anymore if the client gets newly started)
-    if os.path.exists(CONFIG.get_value('crackers-path')):
-        for root, dirs, files in os.walk(CONFIG.get_value('crackers-path')):
-            for folder in dirs:
-                if folder.isdigit() and os.path.exists(CONFIG.get_value('crackers-path') + "/" + folder + "/hashtopolis.pid"):
-                    logging.info("Cleaning hashcat PID file from " + CONFIG.get_value('crackers-path') + "/" + folder)
-                    os.unlink(CONFIG.get_value('crackers-path') + "/" + folder + "/hashtopolis.pid")
-
-    session = Session(requests.Session()).s
-    session.headers.update({'User-Agent': Initialize.get_version()})
-
-    if CONFIG.get_value('proxies'):
-        session.proxies = CONFIG.get_value('proxies')
-
-    if CONFIG.get_value('auth-user') and CONFIG.get_value('auth-password'):
-        session.auth = (CONFIG.get_value('auth-user'), CONFIG.get_value('auth-password'))
-
-    # connection initialization
-    Initialize().run(args)
-    # download and updates
-    binaryDownload = BinaryDownload(args)
-    binaryDownload.run()
-
-    # if multicast is set to run, we need to start the daemon
-    if CONFIG.get_value('multicast') and Initialize().get_os() == 0:
-        start_uftpd(Initialize().get_os_extension(), CONFIG)
+    # Optionally, adjust the log level for specific libraries (e.g., 'requests')
+    logging.getLogger("requests").setLevel(logging.WARNING if not debug else logging.DEBUG)
 
 
-def loop():
-    global binaryDownload, CONFIG
-
+def loop(agent: Agent, idle: bool):
+    """Main loop"""
     logging.debug("Entering loop...")
-    task = Task()
-    chunk = Chunk()
-    files = Files()
-    hashlist = Hashlist()
-    task_change = True
-    last_task_id = 0
+    task = None
+    old_task = None
+    files = Files(agent)
     cracker = None
+    idle_check = 0
+    idle_state = not idle
+
     while True:
-        CONFIG.update()
-        files.deletion_check()  # check if there are deletion orders from the server
-        if task.get_task() is not None:
-            last_task_id = task.get_task()['taskId']
-        task.load_task()
-        if task.get_task_id() == -1:  # get task returned to run a health check
-            run_health_check()
-            task.reset_task()
-            continue
-        elif task.get_task() is None:
-            task_change = True
-            continue
-        else:
-            if task.get_task()['taskId'] is not last_task_id:
-                task_change = True
-        # try to download the needed cracker (if not already present)
-        if not binaryDownload.check_version(task.get_task()['crackerId']):
-            task_change = True
-            task.reset_task()
-            continue
-        # if prince is used, make sure it's downloaded (deprecated, as preprocessors are integrated generally now)
-        if 'usePrince' in task.get_task() and task.get_task()['usePrince']:
-            if not binaryDownload.check_prince():
-                continue
-        # if preprocessor is used, make sure it's downloaded
-        if 'usePreprocessor' in task.get_task() and task.get_task()['usePreprocessor']:
-            if not binaryDownload.check_preprocessor(task):
-                continue
-        # check if all required files are present
-        if not files.check_files(task.get_task()['files'], task.get_task()['taskId']):
-            task.reset_task()
-            continue
-        # download the hashlist for the task
-        if task_change and not hashlist.load_hashlist(task.get_task()['hashlistId']):
-            task.reset_task()
-            continue
-        if task_change:  # check if the client version is up-to-date and load the appropriate cracker
-            binaryDownload.check_client_version()
-            logging.info("Got cracker binary type " + binaryDownload.get_version()['name'])
-            if binaryDownload.get_version()['name'].lower() == 'hashcat':
-                cracker = HashcatCracker(task.get_task()['crackerId'], binaryDownload)
+        if idle and time.time() - idle_check >= 3600:
+            idle_check = time.time()
+            if psutil.cpu_percent() > 10:
+                idle_state = False
             else:
-                cracker = GenericCracker(task.get_task()['crackerId'], binaryDownload)
-        # if it's a task using hashcat brain, we need to load the found hashes
-        if task_change and 'useBrain' in task.get_task() and task.get_task()['useBrain'] and not hashlist.load_found(task.get_task()['hashlistId'], task.get_task()['crackerId']):
-            task.reset_task()
+                idle_state = True
+
+        if not idle_state:
+            logging.debug("System is not idle, waiting...")
+            sleep(60)
             continue
-        task_change = False
-        chunk_resp = chunk.get_chunk(task.get_task()['taskId'])
-        if chunk_resp == 0:
-            task.reset_task()
+
+        if task is not None:
+            old_task = task
+
+        sleep(5)  # wait for 5 seconds before trying again to get a task to avoid spamming the server
+        try:
+            task = Task.get_task(agent)
+        except Exception as e:
+            logging.error("Failed to get task: %s", e)
             continue
-        elif chunk_resp == -1:
-            # measure keyspace
-            if not cracker.measure_keyspace(task, chunk):  # failure case
-                task.reset_task()
+
+        if agent.last_update_check + datetime.timedelta(weeks=1) < datetime.datetime.now():
+            agent.last_update_check = datetime.datetime.now()
+            logging.info("Checking for updates...")
+            agent.update_client()
+
+        if agent.last_clean_up + datetime.timedelta(days=1) < datetime.datetime.now():
+            logging.info("Cleaning up...")
+            agent.clean_up()
+
+        if files.last_check + datetime.timedelta(minutes=5) < datetime.datetime.now():
+            logging.info("Checking for files to clean up...")
+            files.clean_up()
+
+        logging.info("Updating config...")
+        agent.update_config()
+
+        if not task:
+            logging.warning("No task available")
             continue
-        elif chunk_resp == -3:
-            run_health_check()
-            task.reset_task()
+
+        if task.downloaded_files:
+            logging.debug("Retrying to get task to check if still current task...")
             continue
-        elif chunk_resp == -2:
-            # measure benchmark
-            logging.info("Benchmark task...")
-            result = cracker.run_benchmark(task.get_task())
+
+        if task.task_id == -1:
+            logging.info("Running health check...")
+            agent.run_health_check(task)
+            continue
+
+        if (old_task and task.task_id != old_task.task_id) or cracker is None or cracker.task.task_id != task.task_id:
+            if task.cracker.name == "hashcat":
+                cracker = HashcatCracker(agent, task)
+            else:
+                cracker = GenericCracker(agent, task)
+
+        logging.info("Getting chunk...")
+        chunk = task.get_chunk()
+
+        if not chunk:
+            logging.warning("No chunk available")
+            continue
+
+        if chunk.status == ChunkStatus.KEYSPACE_REQUIRED:
+            logging.info("Measuring keyspace...")
+            cracker.measure_keyspace(chunk)
+            continue
+
+        if chunk.status == ChunkStatus.BENCHMARK:
+            logging.info("Running benchmark...")
+            result = cracker.run_benchmark(chunk)
+
             if result == 0:
                 sleep(10)
-                task.reset_task()
-                # some error must have occurred on benchmarking
                 continue
-            # send result of benchmark
-            query = copy_and_set_token(dict_sendBenchmark, CONFIG.get_value('token'))
-            query['taskId'] = task.get_task()['taskId']
-            query['result'] = result
-            query['type'] = task.get_task()['benchType']
-            req = JsonRequest(query)
-            ans = req.execute()
-            if ans is None:
+
+            query: dict[str, Any] = {
+                "action": "sendBenchmark",
+                "taskId": task.task_id,
+                "result": result,
+                "type": task.benchmark_type,
+            }
+
+            response = agent.post(query)
+
+            if response is None:
                 logging.error("Failed to send benchmark!")
                 sleep(5)
-                task.reset_task()
-                continue
-            elif ans['response'] != 'SUCCESS':
-                logging.error("Error on sending benchmark: " + str(ans))
-                sleep(5)
-                task.reset_task()
-                continue
-            else:
-                logging.info("Server accepted benchmark!")
                 continue
 
-        # check if we have an invalid chunk
-        if chunk.chunk_data() is not None and chunk.chunk_data()['length'] == 0:
-            logging.error("Invalid chunk size (0) retrieved! Retrying...")
-            task.reset_task()
-            continue
+        if chunk.status == ChunkStatus.NORMAL:
+            logging.info("Running chunk...")
+            if chunk.length == 0:
+                agent.send_warning("Invalid chunk size (0) retrieved! Retrying...", task.task_id)
+                continue
 
-        # run chunk
-        logging.info("Start chunk...")
-        cracker.run_chunk(task.get_task(), chunk.chunk_data(), task.get_preprocessor())
-        if cracker.agent_stopped():
-            # if the chunk was aborted by a stop from the server, we need to ask for a task again first
-            task.reset_task()
-            task_change = True
-        binaryDownload.check_client_version()
+            cracker.run_chunk(chunk)
+
+            if cracker.agent_stopped():
+                continue
 
 
-def de_register():
-    global CONFIG
+def argument_parser() -> Arguments:
+    """Parse arguments"""
+    parser = argparse.ArgumentParser(
+        description="Hashtopolis Client v" + Agent.get_version_number(), prog="python3 hashtopolis.zip"
+    )
+    parser.add_argument(
+        "--de-register", action="store_true", help="client should automatically de-register from server now"
+    )
+    parser.add_argument("--version", action="store_true", help="show version information")
+    parser.add_argument("--number-only", action="store_true", help="when using --version show only the number")
+    parser.add_argument("--debug", "-d", action="store_true", help="enforce debugging output")
+    parser.add_argument("--idle", action="store_true", help="run in idle mode (only when machine is idle)")
 
-    logging.info("De-registering client..")
-    query = copy_and_set_token(dict_deregister, CONFIG.get_value('token'))
-    req = JsonRequest(query)
-    ans = req.execute()
-    if ans is None:
-        logging.error("De-registration failed!")
-    elif ans['response'] != 'SUCCESS':
-        logging.error("Error on de-registration: " + str(ans))
-    else:
-        logging.info("Successfully de-registered!")
-        # cleanup
-        dirs = [CONFIG.get_value('crackers-path'), CONFIG.get_value('preprocessors-path'), CONFIG.get_value('hashlists-path'), CONFIG.get_value('files-path')]
-        files = ['config.json', '7zr.exe', '7zr']
-        for file in files:
-            if os.path.exists(file):
-                os.unlink(file)
-        for directory in dirs:
-            if os.path.exists(directory):
-                shutil.rmtree(directory)
-        r = glob.glob(CONFIG.get_value('zaps-path') + '/hashlist_*')
-        for i in r:
-            shutil.rmtree(i)
-        logging.info("Cleanup finished!")
+    args = parser.parse_args()
+    return Arguments(
+        de_register=args.de_register,
+        version=args.version,
+        number_only=args.number_only,
+        debug=args.debug,
+        idle=args.idle,
+    )
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Hashtopolis Client v' + Initialize.get_version_number(), prog='python3 hashtopolis.zip')
-    parser.add_argument('--de-register', action='store_true', help='client should automatically de-register from server now')
-    parser.add_argument('--version', action='store_true', help='show version information')
-    parser.add_argument('--number-only', action='store_true', help='when using --version show only the number')
-    parser.add_argument('--disable-update', action='store_true', help='disable retrieving auto-updates of the client from the server')
-    parser.add_argument('--debug', '-d', action='store_true', help='enforce debugging output')
-    parser.add_argument('--voucher', type=str, required=False, help='voucher to use to automatically register')
-    parser.add_argument('--url', type=str, required=False, help='URL to Hashtopolis client API')
-    parser.add_argument('--cert', type=str, required=False, help='Client TLS cert bundle for Hashtopolis client API')
-    parser.add_argument('--files-path', type=str, required=False, help='Use given folder path as files location')
-    parser.add_argument('--crackers-path', type=str, required=False, help='Use given folder path as crackers location')
-    parser.add_argument('--hashlists-path', type=str, required=False, help='Use given folder path as hashlists location')
-    parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
-    parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
-    parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
-    args = parser.parse_args()
+    args = argument_parser()
+    init_logging(args.debug)
+    logging.debug("Starting client with arguments: %s", args)
 
     if args.version:
         if args.number_only:
-            print(Initialize.get_version_number())
+            logging.info(Agent.get_version_number())
         else:
-            print(Initialize.get_version())
+            logging.info(Agent.get_version())
         sys.exit(0)
+
+    agent = Agent(cur_dir)
 
     if args.de_register:
-        init_logging(args)
-        session = Session(requests.Session()).s
-        session.headers.update({'User-Agent': Initialize.get_version()})
-        de_register()
+        agent.de_register()
         sys.exit(0)
 
+    if agent.is_running():
+        logging.error("There is already a hashtopolis agent running in this directory!")
+        sys.exit(-1)
+
     try:
-        init_logging(args)
-
-        # check if there is a lock file and check if this pid is still running hashtopolis
-        if os.path.exists("lock.pid") and os.path.isfile("lock.pid"):
-            pid = file_get_contents("lock.pid")
-            logging.info("Found existing lock.pid, checking if python process is running...")
-            if pid.isdigit() and psutil.pid_exists(int(pid)):
-                try:
-                    command = psutil.Process(int(pid)).cmdline()[0].replace('\\', '/').split('/')
-                    print(command)
-                    if str.startswith(command[-1], "python"):
-                        logging.fatal("There is already a hashtopolis agent running in this directory!")
-                        sys.exit(-1)
-                except Exception:
-                    # if we fail to determine the cmd line we assume that it's either not running anymore or another process (non-hashtopolis)
-                    pass
-            logging.info("Ignoring lock.pid file because PID is not existent anymore or not running python!")
-
-        # create lock file
-        with open("lock.pid", 'w') as f:
-            f.write(str(os.getpid()))
-            f.close()
-
-        init(args)
-        loop()
+        loop(agent, args.idle)
     except KeyboardInterrupt:
+        agent.send_warning("Client was stopped by user")
         logging.info("Exiting...")
         # if lock file exists, remove
         if os.path.exists("lock.pid"):
-            os.unlink("lock.pid")
+            os.remove("lock.pid")
         sys.exit()
+    except Exception as e:
+        print(f"Client crashed: {e}")
+        agent.send_error(f"Client crashed: {e}")
