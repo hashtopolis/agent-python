@@ -1,60 +1,77 @@
-import logging
-from time import sleep
+from enum import Enum
+from typing import TYPE_CHECKING, Any
 
-from htpclient.config import Config
-from htpclient.jsonRequest import JsonRequest
-from htpclient.dicts import *
+if TYPE_CHECKING:
+    from htpclient import Agent
+
+
+class ChunkStatus(Enum):
+    """Enum representing the status of a chunk"""
+
+    KEYSPACE_REQUIRED = -1
+    BENCHMARK = -2
+    FULLY_DISPATCHED = 0
+    HEALTH_CHECK = -3
+    NORMAL = 1
 
 
 class Chunk:
-    def __init__(self):
-        self.config = Config()
-        self.chunk = None
+    """Class representing a chunk of keyspace"""
 
-    def chunk_data(self):
-        return self.chunk
+    def __init__(self, agent: Agent, task_id: int):  # pylint: disable=E0601:used-before-assignment
+        self.agent = agent
+        self.task_id = task_id
 
-    def get_chunk(self, task_id):
-        query = copy_and_set_token(dict_getChunk, self.config.get_value('token'))
-        query['taskId'] = task_id
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Failed to get chunk!")
-            sleep(5)
-            return 0
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Getting of chunk failed: " + str(ans))
-            sleep(5)
-            return 0
-        else:
-            # test what kind the answer is
-            if ans['status'] == 'keyspace_required':
-                return -1
-            elif ans['status'] == 'benchmark':
-                return -2
-            elif ans['status'] == 'fully_dispatched':
-                return 0
-            elif ans['status'] == 'health_check':
-                return -3
-            else:
-                self.chunk = ans
-                return 1
+        if not self.__load():
+            self.agent.send_error("Loading chunk failed")
+            raise RuntimeError("Loading chunk failed")
 
-    def send_keyspace(self, keyspace, task_id):
-        query = copy_and_set_token(dict_sendKeyspace, self.config.get_value('token'))
-        query['taskId'] = task_id
-        query['keyspace'] = int(keyspace)
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Failed to send keyspace!")
-            sleep(5)
+    def __load(self):
+        query: dict[str, Any] = {
+            "action": "getChunk",
+            "taskId": self.task_id,
+        }
+
+        response = self.agent.post(query)
+
+        if response is None:
             return False
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Sending of keyspace failed: " + str(ans))
-            sleep(5)
-            return False
-        else:
-            logging.info("Keyspace got accepted!")
+
+        self.status = (
+            ChunkStatus[response["status"].upper()]
+            if response["status"].upper() in ChunkStatus.__members__
+            else ChunkStatus.NORMAL
+        )
+
+        if self.status == ChunkStatus.HEALTH_CHECK:
             return True
+
+        if self.status == ChunkStatus.KEYSPACE_REQUIRED:
+            return True
+
+        if self.status == ChunkStatus.BENCHMARK:
+            return True
+
+        if self.status == ChunkStatus.FULLY_DISPATCHED:
+            return True
+
+        self.length = int(response["length"])
+        self.chunk_id = int(response["chunkId"])
+        self.skip = int(response["skip"])
+
+        return True
+
+    def send_keyspace(self, keyspace: int):
+        """Send the keyspace to the server"""
+        query: dict[str, Any] = {
+            "action": "sendKeyspace",
+            "taskId": self.task_id,
+            "keyspace": keyspace,
+        }
+
+        response = self.agent.post(query)
+
+        if response is None:
+            return False
+
+        return True

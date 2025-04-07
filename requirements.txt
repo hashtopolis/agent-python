@@ -1,2 +1,4 @@
 requests
 psutil
+tqdm
+unidecode

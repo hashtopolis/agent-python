@@ -1,48 +1,69 @@
 import logging
-from time import sleep
+import os
+from typing import TYPE_CHECKING, Any
 
-from htpclient.config import Config
-from htpclient.download import Download
-from htpclient.jsonRequest import JsonRequest
-from htpclient.dicts import *
+if TYPE_CHECKING:
+    from htpclient import Agent
 
 
 class Hashlist:
-    def __init__(self):
-        self.config = Config()
-        self.chunk = None
+    """Class representing a hashlist"""
 
-    def load_hashlist(self, hashlist_id):
-        query = copy_and_set_token(dict_getHashlist, self.config.get_value('token'))
-        query['hashlistId'] = hashlist_id
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Failed to get hashlist!")
-            sleep(5)
+    def __init__(self, agent: Agent, hashlist_id: int):  # pylint: disable=E0601:used-before-assignment
+        self.hashlist_id = hashlist_id
+        self.agent = agent
+
+        if not self.__load():
+            self.agent.send_error("Loading hashlist failed")
+            raise RuntimeError("Loading hashlist failed")
+
+    def __load(self):
+        hashlists_dir = self.agent.config.get_value("hashlists-path")
+
+        if not isinstance(hashlists_dir, str):
             return False
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Getting of hashlist failed: " + str(ans))
-            sleep(5)
-            return False
-        else:
-            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], self.config.get_value('hashlists-path') + "/" + str(hashlist_id), True)
+
+        self.path = os.path.join(hashlists_dir, str(self.hashlist_id))
+
+        if os.path.isfile(self.path):
+            logging.info("Hashlist already loaded.")
             return True
 
-    def load_found(self, hashlist_id, cracker_id):
-        query = copy_and_set_token(dict_getFound, self.config.get_value('token'))
-        query['hashlistId'] = hashlist_id
-        req = JsonRequest(query)
-        ans = req.execute()
-        if ans is None:
-            logging.error("Failed to get found of hashlist!")
-            sleep(5)
+        query: dict[str, Any] = {
+            "action": "getHashlist",
+            "hashlistId": self.hashlist_id,
+        }
+
+        response = self.agent.post(query)
+
+        if response is None:
             return False
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Getting of hashlist founds failed: " + str(ans))
-            sleep(5)
+
+        if not response["url"]:
+            self.agent.send_error(f"Getting hashlist failed {response}")
             return False
-        else:
-            logging.info("Saving found hashes to hashcat potfile...")
-            Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], self.config.get_value('crackers-path') + "/" + str(cracker_id) + "/hashcat.potfile", True)
-            return True
+
+        if not self.agent.download(response["url"], self.path):
+            return False
+
+        return True
+
+    def load_found_hashes(self, hashlist_id: int, cracker_id: int):
+        """Load found hashes from the hashlist"""
+        query = {
+            "action": "getFound",
+            "hashlistId": hashlist_id,
+        }
+
+        response = self.agent.post(query)
+
+        if response is None:
+            return False
+
+        if not self.agent.download(
+            response["url"],
+            os.path.join(self.agent.config.get_value("crackers-path"), str(cracker_id), "hashcat.potfile"),  # type: ignore
+        ):
+            return False
+
+        return True

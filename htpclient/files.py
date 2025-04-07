@@ -1,116 +1,225 @@
-import logging
-import time
-from time import sleep
-from pathlib import Path
-
+import datetime
 import os
+import subprocess
+from time import sleep
+from typing import TYPE_CHECKING, Any
 
-from htpclient.config import Config
-from htpclient.download import Download
-from htpclient.initialize import Initialize
-from htpclient.jsonRequest import JsonRequest
-from htpclient.dicts import *
+from htpclient.operating_system import OperatingSystem
+from htpclient.utils import get_storage_remaining, get_storage_total
+
+if TYPE_CHECKING:
+    from htpclient import Agent
 
 
 class Files:
-    def __init__(self):
-        self.config = Config()
-        self.chunk = None
-        self.last_check = None
-        self.check_interval = 600
-        if self.config.get_value('file-deletion-interval'):
-            self.check_interval = int(self.config.get_value('file-deletion-interval'))
+    """Class representing files"""
 
-    def deletion_check(self):
-        if self.config.get_value('file-deletion-disable'):
-            return
-        elif self.last_check is not None and time.time() - self.last_check < self.check_interval:
-            return
-        query = copy_and_set_token(dict_getFileStatus, self.config.get_value('token'))
-        req = JsonRequest(query)
-        ans = req.execute()
-        self.last_check = time.time()
-        if ans is None:
-            logging.error("Failed to get file status!")
-        elif ans['response'] != 'SUCCESS':
-            logging.error("Getting of file status failed: " + str(ans))
+    COMPRESSION_FILE_EXTENSIONS = {".7z"}
+    POSSIBLE_TEXT_EXTENSIONS = {".txt", ".wordlist", ".wordlists", ".dict", ".dictionary", ".dic", ".gz"}
+
+    def __init__(self, agent: Agent):  # pylint: disable=E0601:used-before-assignment
+        self.agent = agent
+        self.last_check = datetime.datetime.now()
+        self.downloaded: dict[str, bool] = {}
+        self.deleted_old_files: list[str] = []
+
+    def check_file_exists(self, file_name: str, task_id: int):
+        """Check if a file exists and download it if not"""
+        file_path = os.path.join(self.agent.config.get_value("files-path"), file_name)  # type: ignore
+
+        query: dict[str, Any] = {
+            "action": "getFile",
+            "taskId": task_id,
+            "file": file_name,
+        }
+
+        response = self.agent.post(query)  # type: ignore
+
+        if response is None:
+            return None
+
+        if any(file_name.endswith(ext) for ext in self.COMPRESSION_FILE_EXTENSIONS):
+            self.downloaded[os.path.splitext(file_path)[0]] = False  # type: ignore
+            return self.check_compressed_file(file_path, response, task_id)  # type: ignore
+
+        self.downloaded[file_path] = False
+        return self.check_single_file(file_path, response, task_id)  # type: ignore
+
+    def check_single_file(self, file_path: str, response: dict[str, Any], task_id: int):
+        """Check a single file"""
+        if os.path.isfile(file_path) and os.stat(file_path).st_size == int(response["filesize"]):
+            return file_path
+
+        if os.path.isfile(file_path) and os.stat(file_path).st_size != int(response["filesize"]):
+            self.agent.send_warning(f"File size mismatch on file: {file_path} - removing file and retrying...", task_id)
+            os.remove(file_path)
+            sleep(5)
+            return None
+
+        if not os.path.isfile(file_path) and self.agent.config.get_value("multicast"):  # type: ignore
+            self.agent.send_warning("Multicast is enabled, need to wait until file was delivered!", task_id)
+            sleep(5)  # in case the file is not there yet (or not completely), we just wait some time and then try again
+            return None
+
+        if get_storage_total(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+            response["filesize"]
+        ):
+            self.agent.send_error("Not enough storage space available", task_id)
+            return None
+
+        if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+            response["filesize"]
+        ):
+            self.agent.send_warning("Not enough storage space available, cleaning up files...", task_id)
+            self.clean_up()
+            self.agent.clean_up()
+
+            if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+                response["filesize"]
+            ):
+                self.agent.send_warning(
+                    "Cleanup did not create enough space, deleting oldest file and then retrying...", task_id
+                )
+                self.remove_oldest_file()
+
+                if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+                    response["filesize"]
+                ):
+                    self.agent.send_error("Not enough storage space available, even after deleting some files", task_id)
+                    return None
+
+        if self.agent.config.get_value("rsync") and self.agent.operating_system != OperatingSystem.WINDOWS:
+            if not self.agent.rsync(file_path):
+                return None
         else:
-            files = ans['filenames']
-            for filename in files:
-                file_path = Path(self.config.get_value('files-path'), filename)
-                if filename.find("/") != -1 or filename.find("\\") != -1:
-                    continue  # ignore invalid file names
-                elif os.path.dirname(file_path) != "files":
-                    continue  # ignore any case in which we would leave the files folder
-                elif os.path.exists(file_path):
-                    logging.info("Delete file '" + filename + "' as requested by server...")
-                    # When we get the delete requests, this function will check if the <filename>.7z maybe as
-                    # an extracted text file. That file will also be deleted.
-                    if os.path.splitext(file_path)[1] == '.7z':
-                        txt_file = Path(f"{os.path.splitext(file_path)[0]}.txt")
-                        if os.path.exists(txt_file):
-                            logging.info("Also delete assumed wordlist from archive of same file...")
-                            os.unlink(txt_file)
-                    os.unlink(file_path)
+            if not self.agent.download(response["url"], file_path):  # type: ignore
+                return None
 
-    def check_files(self, files, task_id):
-        for file in files:
-            file_localpath = Path(self.config.get_value('files-path'), file)
-            txt_file = Path(f"{os.path.splitext(file_localpath)[0]}.txt")
-            query = copy_and_set_token(dict_getFile, self.config.get_value('token'))
-            query['taskId'] = task_id
-            query['file'] = file
-            req = JsonRequest(query)
-            ans = req.execute()
+        self.downloaded[file_path] = True
 
-            # Process request
-            if ans is None:
-                logging.error("Failed to get file!")
-                sleep(5)
-                return False
-            elif ans['response'] != 'SUCCESS':
-                logging.error("Getting of file failed: " + str(ans))
-                sleep(5)
-                return False
+        if os.path.isfile(file_path) and os.stat(file_path).st_size != int(response["filesize"]):
+            self.agent.send_warning(f"File size mismatch on file: {file_path} - removing file and retrying...", task_id)
+            os.remove(file_path)
+            sleep(5)
+            return None
+
+        return file_path
+
+    def check_compressed_file(self, file_path: str, response: dict[str, Any], task_id: int):
+        """Check a compressed file"""
+        new_file_path = os.path.splitext(file_path)[0]
+
+        if os.path.isfile(new_file_path):
+            return new_file_path
+
+        if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+            response["filesize"]
+        ):
+            self.agent.send_error("Not enough storage space available", task_id)
+            return None
+
+        if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+            response["filesize"]
+        ):
+            self.agent.send_warning("Not enough storage space available, cleaning up files...", task_id)
+            self.clean_up()
+            self.agent.clean_up()
+
+            if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+                response["filesize"]
+            ):
+                self.agent.send_warning(
+                    "Cleanup did not create enough space, deleting oldest file and then retrying...", task_id
+                )
+                self.remove_oldest_file()
+
+                if get_storage_remaining(self.agent.config.get_value("files-path"), self.agent.operating_system) < int(  # type: ignore
+                    response["filesize"]
+                ):
+                    self.agent.send_error("Not enough storage space available, even after deleting some files", task_id)
+                    return None
+
+        if not os.path.isfile(file_path):
+            if self.agent.config.get_value("rsync") and self.agent.operating_system != OperatingSystem.WINDOWS:
+                if not self.agent.rsync(file_path):
+                    return None
             else:
-                # Filesize is OK
-                file_size = int(ans['filesize'])
-                if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size == file_size:
-                    logging.debug("File is present on agent and has matching file size.")
-                    continue
-                
-                # Multicasting configured
-                elif self.config.get_value('multicast'):
-                    logging.debug("Multicast is enabled, need to wait until it was delivered!")
-                    sleep(5)  # in case the file is not there yet (or not completely), we just wait some time and then try again
-                    return False
-                
-                # TODO: we might need a better check for this
-                if os.path.isfile(txt_file):
-                    continue
-                
-                # Rsync
-                if self.config.get_value('rsync') and Initialize.get_os() != 1:
-                    Download.rsync(Path(self.config.get_value('rsync-path'), file), file_localpath) 
-                else:
-                    logging.debug("Starting download of file from server...")
-                    Download.download(self.config.get_value('url').replace("api/server.php", "") + ans['url'], file_localpath)
+                if not self.agent.download(response["url"], file_path):  # type: ignore
+                    return None
 
-                # Mismatch filesize
-                if os.path.isfile(file_localpath) and os.stat(file_localpath).st_size != file_size:
-                    logging.error("file size mismatch on file: %s" % file)
-                    sleep(5)
-                    return False
-                
-                # 7z extraction, check if the <filename>.txt does exist.
-                if os.path.splitext(file_localpath)[1] == '.7z' and not os.path.isfile(txt_file):
-                    # extract if needed
-                    files_path = Path(self.config.get_value('files-path'))
-                    if Initialize.get_os() == 1:
-                        # Windows
-                        cmd = f'7zr{Initialize.get_os_extension()} x -aoa -o"{files_path}" -y "{file_localpath}"'
-                    else:
-                        # Linux
-                        cmd = f"./7zr{Initialize.get_os_extension()} x -aoa -o'{files_path}' -y '{file_localpath}'"
-                    os.system(cmd)
-        return True
+            if os.path.isfile(file_path) and os.stat(file_path).st_size != int(response["filesize"]):
+                self.agent.send_warning(
+                    f"File size mismatch on file: {file_path} - removing file and retrying...", task_id
+                )
+                os.remove(file_path)
+                sleep(5)
+                return None
+
+        if os.path.isfile(file_path):
+            if self.agent.operating_system == OperatingSystem.WINDOWS:
+                subprocess.check_output(
+                    f"7zr{self.agent.operating_system.get_extension()} x -aoa"
+                    f" -o\"{self.agent.config.get_value('files-path')}\" -y \"{file_path}\"",
+                    shell=True,
+                )
+            else:
+                subprocess.check_output(
+                    f"./7zr{self.agent.operating_system.get_extension()} x -aoa"
+                    f" -o\"{self.agent.config.get_value('files-path')}\" -y \"{file_path}\"",
+                    shell=True,
+                )
+
+            os.remove(file_path)
+            new_file_path = os.path.splitext(file_path)[0]
+
+        return new_file_path
+
+    def clean_up(self):
+        """Clean up files"""
+        self.last_check = datetime.datetime.now()
+        if self.agent.config.get_value("file-deletion-disable"):
+            return
+
+        query = {"action": "getFileStatus"}
+        response = self.agent.post(query)
+
+        if response is None:
+            return
+
+        file_names = response["filenames"]
+
+        for file_name in file_names:
+            file_path = os.path.join(self.agent.config.get_value("files-path"), file_name)  # type: ignore
+
+            if file_name.find("/") != -1 or file_name.find("\\") != -1:
+                continue  # ignore invalid file names
+
+            if os.path.dirname(file_path) != os.path.dirname(self.agent.config.get_value("files-path")):  # type: ignore
+                continue  # ignore any case in which we would leave the files folder
+
+            if os.path.exists(file_path):  # type: ignore
+                if any(file_name.endswith(ext) for ext in self.COMPRESSION_FILE_EXTENSIONS):
+                    new_file_path = os.path.splitext(file_path)[0]  # type: ignore
+
+                    possible_text_files = [new_file_path] + [  # type: ignore
+                        f"{new_file_path}{ext}" for ext in self.POSSIBLE_TEXT_EXTENSIONS
+                    ]
+
+                    for text_file in possible_text_files:  # type: ignore
+                        if os.path.exists(text_file):  # type: ignore
+                            os.remove(text_file)  # type: ignore
+
+                os.remove(file_path)  # type: ignore
+
+    def remove_oldest_file(self):
+        """Remove the oldest file"""
+        files_dir = self.agent.config.get_value("files-path")  # type: ignore
+        files = os.listdir(files_dir)  # type: ignore
+
+        if not files:
+            return
+
+        oldest_file = min(files, key=lambda f: os.path.getatime(os.path.join(files_dir, f)))  # type: ignore
+        self.deleted_old_files.append(oldest_file)  # type: ignore
+        os.remove(os.path.join(files_dir, oldest_file))  # type: ignore
+        self.agent.send_warning(f"Removed oldest file: {oldest_file}")
