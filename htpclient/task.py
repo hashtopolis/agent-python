@@ -157,13 +157,17 @@ class Task:
             self.preprocessor_command = self.preprocessor_command.replace(f"{base_name}.???", file_name)
 
             if not file_name in self.attack_command:
-                self.agent.send_error(f"File {file_name} not found in attack command", self.task_id)
-
                 if os.path.splitext(file_name)[0] in self.attack_command:
+                    self.agent.send_warning(
+                        f"File {file_name} not found in attack command, but base name"
+                        f" {os.path.splitext(file_name)[0]} found"
+                    )
                     self.attack_command = self.attack_command.replace(os.path.splitext(file_name)[0], f'"{file_path}"')
                     self.preprocessor_command = self.preprocessor_command.replace(
                         os.path.splitext(file_name)[0], f'"{file_path}"'
                     )
+                else:
+                    self.agent.send_error(f"File {file_name} not found in attack command", self.task_id)
             else:
                 self.attack_command = self.attack_command.replace(file_name, f'"{file_path}"')  # type: ignore
                 self.preprocessor_command = self.preprocessor_command.replace(file_name, f'"{file_path}"')  # type: ignore
