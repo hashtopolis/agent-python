@@ -160,7 +160,8 @@ class Task:
                 if os.path.splitext(file_name)[0] in self.attack_command:
                     self.agent.send_warning(
                         f"File {file_name} not found in attack command, but base name"
-                        f" {os.path.splitext(file_name)[0]} found"
+                        f" {os.path.splitext(file_name)[0]} found",
+                        self.task_id,
                     )
                     self.attack_command = self.attack_command.replace(os.path.splitext(file_name)[0], f'"{file_path}"')
                     self.preprocessor_command = self.preprocessor_command.replace(
