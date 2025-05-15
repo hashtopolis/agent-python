@@ -1,3 +1,9 @@
+## v0.7.3-> v0.7.x
+
+### bugfixes
+
+* Fixed bug in healthcheck on windows #hashtopolis/server/1019 
+
 ## v0.7.2 -> v0.7.3
 
 ### Bugfixes
