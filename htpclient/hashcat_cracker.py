@@ -724,7 +724,7 @@ class HashcatCracker:
         args += " --restore-disable --potfile-disable --session=health "
         args += update_files(attack).replace(hashlist_alias, "'" + self.config.get_value('hashlists-path') + "/health_check.txt'")
         args += " -o '" + self.config.get_value('hashlists-path') + "/health_check.out'"
-        full_cmd = f"'{self.callPath}'" + args
+        full_cmd = f"{self.callPath}" + args
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug(f"CALL: {''.join(full_cmd)}")
