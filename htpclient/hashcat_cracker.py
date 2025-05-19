@@ -720,11 +720,26 @@ class HashcatCracker:
         return self.wasStopped
 
     def run_health_check(self, attack, hashlist_alias):
-        args = " --machine-readable --quiet"
-        args += " --restore-disable --potfile-disable --session=health "
-        args += update_files(attack).replace(hashlist_alias, "'" + self.config.get_value('hashlists-path') + "/health_check.txt'")
-        args += " -o '" + self.config.get_value('hashlists-path') + "/health_check.out'"
-        full_cmd = f"{self.callPath}" + args
+        args = []
+        args.append('--machine-readable')
+        args.append('--quiet')
+        args.append('--restore-disable')
+        args.append('--potfile-disable')
+        args.append('--session=health')
+        attackcmd = update_files(attack)
+        hashlist_path = Path(self.config.get_value('hashlists-path'), "health_check.txt")
+        hashlist_out_path = Path(self.config.get_value('hashlists-path'), "health_check.out")
+
+        # Replace #HL# with the real hashlist
+        attackcmd = attackcmd.replace(hashlist_alias, f'"{hashlist_path}"')
+
+        args.append(attackcmd)
+        args.append('-o')
+        args.append(f'"{hashlist_out_path}"')
+        
+        full_cmd = ' '.join(args)
+        full_cmd = f"{self.callPath} {full_cmd}"
+
         if Initialize.get_os() == 1:
             full_cmd = full_cmd.replace("/", '\\')
         logging.debug(f"CALL: {''.join(full_cmd)}")
