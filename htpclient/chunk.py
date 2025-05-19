@@ -1,8 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from htpclient import Agent
+from typing import Any
 
 
 class ChunkStatus(Enum):
@@ -18,7 +15,7 @@ class ChunkStatus(Enum):
 class Chunk:
     """Class representing a chunk of keyspace"""
 
-    def __init__(self, agent: Agent, task_id: int):  # pylint: disable=E0601:used-before-assignment
+    def __init__(self, agent: Any, task_id: int):  # pylint: disable=E0601:used-before-assignment
         self.agent = agent
         self.task_id = task_id
 

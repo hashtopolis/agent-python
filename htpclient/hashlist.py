@@ -1,15 +1,12 @@
 import logging
 import os
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from htpclient import Agent
+from typing import Any
 
 
 class Hashlist:
     """Class representing a hashlist"""
 
-    def __init__(self, agent: Agent, hashlist_id: int):  # pylint: disable=E0601:used-before-assignment
+    def __init__(self, agent: Any, hashlist_id: int):  # pylint: disable=E0601:used-before-assignment
         self.hashlist_id = hashlist_id
         self.agent = agent
 

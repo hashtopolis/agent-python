@@ -2,13 +2,10 @@ import datetime
 import os
 import subprocess
 from time import sleep
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from htpclient.operating_system import OperatingSystem
 from htpclient.utils import get_storage_remaining, get_storage_total
-
-if TYPE_CHECKING:
-    from htpclient import Agent
 
 
 class Files:
@@ -17,7 +14,7 @@ class Files:
     COMPRESSION_FILE_EXTENSIONS = {".7z"}
     POSSIBLE_TEXT_EXTENSIONS = {".txt", ".wordlist", ".wordlists", ".dict", ".dictionary", ".dic", ".gz"}
 
-    def __init__(self, agent: Agent):  # pylint: disable=E0601:used-before-assignment
+    def __init__(self, agent: Any):  # pylint: disable=E0601:used-before-assignment
         self.agent = agent
         self.last_check = datetime.datetime.now()
         self.downloaded: dict[str, bool] = {}

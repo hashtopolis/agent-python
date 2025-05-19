@@ -4,7 +4,7 @@ import subprocess
 import time
 from queue import Empty, Queue
 from threading import Lock, Thread
-from typing import IO, TYPE_CHECKING, Any
+from typing import IO, Any
 
 import unidecode
 
@@ -19,16 +19,13 @@ from htpclient.utils import (
     run_command_and_get_output_and_errors,
 )
 
-if TYPE_CHECKING:
-    from htpclient import Agent
-
 
 class GenericCracker:
     """Class representing a Hashcat cracker"""
 
     crack_split_length = 1000
 
-    def __init__(self, agent: Agent, task: Task):  # pylint: disable=E0601:used-before-assignment
+    def __init__(self, agent: Any, task: Task):  # pylint: disable=E0601:used-before-assignment
         self.agent = agent
         self.task = task
         self.queue: Queue[tuple[str, bytes]] = Queue()

@@ -2,16 +2,13 @@ import logging
 import os
 from enum import Enum
 from time import sleep
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from htpclient.chunk import Chunk, ChunkStatus
 from htpclient.cracker import Cracker
 from htpclient.files import Files
 from htpclient.hashlist import Hashlist
 from htpclient.preprocessor import Preprocessor
-
-if TYPE_CHECKING:
-    from htpclient import Agent
 
 
 class TaskSpecialID(Enum):
@@ -27,7 +24,7 @@ class Task:
 
     def __init__(
         self,
-        agent: Agent,  # pylint: disable=E0601:used-before-assignment
+        agent: Any,  # pylint: disable=E0601:used-before-assignment
         task_id: int,
         data: dict[str, Any] | None = None,
     ):
@@ -51,7 +48,7 @@ class Task:
             raise RuntimeError("Loading task failed")
 
     @staticmethod
-    def get_task(agent: Agent):  # pylint: disable=E0601:used-before-assignment
+    def get_task(agent: Any):  # pylint: disable=E0601:used-before-assignment
         """Get a task from the server"""
         query = {"action": "getTask"}
         response = agent.post(query)

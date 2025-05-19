@@ -1,16 +1,13 @@
 import os
 import subprocess
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from htpclient.operating_system import OperatingSystem
 from htpclient.utils import get_system_bit
 
-if TYPE_CHECKING:
-    from htpclient import Agent
-
 
 class Preprocessor:
-    def __init__(self, agent: Agent, preprocessor_id: int):  # pylint: disable=E0601:used-before-assignment
+    def __init__(self, agent: Any, preprocessor_id: int):  # pylint: disable=E0601:used-before-assignment
         self.agent = agent
         self.preprocessor_id = preprocessor_id
 
