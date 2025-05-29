@@ -155,6 +155,7 @@ def init(args):
 
     session = Session(requests.Session()).s
     session.headers.update({'User-Agent': Initialize.get_version()})
+    session.headers.update(CONFIG.get_value('http-headers'))
 
     if CONFIG.get_value('proxies'):
         session.proxies = CONFIG.get_value('proxies')
