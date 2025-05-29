@@ -16,7 +16,7 @@ class JsonRequest:
             headers = self.config.get_value('http-headers') or {}
             r = self.session.post(self.config.get_value('url'), json=self.data, timeout=30, headers=headers)
             if r.status_code != 200:
-                logging.error("Status code from server aaaaaaaaaaaaaaa: " + str(r.status_code))
+                logging.error("Status code from server: " + str(r.status_code))
                 return None
             logging.debug(r.content)
             return r.json()
