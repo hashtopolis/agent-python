@@ -15,7 +15,7 @@ from htpclient.files import Files
 from htpclient.generic_cracker import GenericCracker
 from htpclient.hashcat_cracker import HashcatCracker
 from htpclient.hashlist import Hashlist
-from htpclient.helpers import start_uftpd, file_get_contents
+from htpclient.helpers import start_uftpd, file_get_contents, parse_http_headers
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import *
 from htpclient.dicts import *
@@ -140,6 +140,8 @@ def init(args):
         CONFIG.set_value('zaps-path', os.path.abspath(args.zaps_path))
     if args.preprocessors_path and len(args.preprocessors_path):
         CONFIG.set_value('preprocessors-path', os.path.abspath(args.preprocessors_path))
+    if args.http_headers and len(args.http_headers):
+        CONFIG.set_value('http-headers', parse_http_headers(args.http_headers))
 
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
@@ -334,6 +336,7 @@ if __name__ == "__main__":
     parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
     parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
     parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
+    parser.add_argument('--http-headers', type=str, required=False, help='Use given http headers in all HTTP requests')
     args = parser.parse_args()
 
     if args.version:
