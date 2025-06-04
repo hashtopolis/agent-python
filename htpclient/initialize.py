@@ -9,6 +9,8 @@ from htpclient.jsonRequest import *
 class Initialize:
     def __init__(self):
         self.config = Config()
+        # In windows server and windows server R2 uses cp1251 encoding
+        self.encoding = "utf-8"
 
     @staticmethod
     def get_version():
@@ -64,7 +66,8 @@ class Initialize:
                     os.mkdir("multicast")
 
     def decode_output(self, output):
-        return output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
+        # Replace on dynamic variables for supporting windows cp1251 encoding
+        return output.decode(encoding=self.encoding).replace("\r\n", "\n").split("\n")
 
     def __update_information(self):
         if not self.config.get_value('uuid'):
@@ -108,21 +111,35 @@ class Initialize:
 
         elif Initialize.get_os() == 1:  # windows
             platform_release = platform.uname().release
-            if platform_release == "" or int(platform_release) >= 10:
+            # This code for using on windows server 2012 and windows server 2012 R2
+            try:
+                if platform_release == "" or int(platform_release) >= 10:
+                    processor_information = subprocess.check_output(
+                        'powershell -Command "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name"',
+                        shell=True)
+                    processor_information = self.decode_output(processor_information)
+                    video_controller = subprocess.check_output(
+                        'powershell -Command "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"',
+                        shell=True)
+                    video_controller = self.decode_output(video_controller)
+                else:
+                    processor_information = subprocess.check_output(
+                        'wmic cpu get name',
+                        shell=True)
+                    processor_information = self.decode_output(processor_information)
+                    video_controller = subprocess.check_output('wmic path win32_VideoController get name', shell=True)
+                    video_controller = self.decode_output(video_controller)
+            except ValueError as ver:
+                pass
+            
+            if platform_release == "2012ServerR2" or platform_release == "2012Server":
                 processor_information = subprocess.check_output(
-                    'powershell -Command "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name"',
-                    shell=True)
+                        'powershell -Command "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name"',
+                        shell=True)
                 processor_information = self.decode_output(processor_information)
                 video_controller = subprocess.check_output(
-                    'powershell -Command "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"',
-                    shell=True)
-                video_controller = self.decode_output(video_controller)
-            else:
-                processor_information = subprocess.check_output(
-                    'wmic cpu get name',
-                    shell=True)
-                processor_information = self.decode_output(processor_information)
-                video_controller = subprocess.check_output('wmic path win32_VideoController get name', shell=True)
+                        'powershell -Command "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name"',
+                        shell=True)
                 video_controller = self.decode_output(video_controller)
 
             for source in (processor_information, video_controller):
@@ -130,7 +147,6 @@ class Initialize:
                     line = line.rstrip("\r\n ")
                     if line and line != "Name":
                         devices.append(line)
-
         else:  # OS X
             output = subprocess.check_output("system_profiler SPDisplaysDataType -detaillevel mini", shell=True)
             output = self.decode_output(output)
