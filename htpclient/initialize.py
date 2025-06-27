@@ -188,13 +188,13 @@ class Initialize:
 
     def __check_cert(self, args):
         cert = self.config.get_value('cert')
-        if cert is None:
+        if not cert:
             if args.cert is not None:
                 cert = os.path.abspath(args.cert)
                 logging.debug("Setting cert to: " + cert)
                 self.config.set_value('cert', cert)
                 
-        if cert is not None:
+        if cert:
             Session().s.cert = cert
             logging.debug("Configuration session cert to: " + cert)
 
