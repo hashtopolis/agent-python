@@ -1,6 +1,13 @@
 class HashcatStatus:
     def __init__(self, line):
-        # parse
+        """
+        Initializes the HashcatStatus object by parsing a machine-readable
+        status line from Hashcat.
+
+        Args:
+            line (str): A single line of Hashcat machine-readable status
+                        output.
+        """
         self.status = -1
         self.speed = []
         self.exec_runtime = []
@@ -11,44 +18,72 @@ class HashcatStatus:
         self.rejected = 0
         self.util = []
         self.temp = []
+        self.power = []
+        self.unknown_fields = False
 
-        line = line.split("\t")
-        if line[0] != "STATUS":
-            # invalid line
-            return
-        elif len(line) < 19:
-            # invalid line
-            return
-        self.status = int(line[1])
-        index = 3
-        while line[index] != "EXEC_RUNTIME":
-            self.speed.append([int(line[index]), int(line[index + 1])])
-            index += 2
-        while line[index] != "CURKU":
-            index += 1
-        self.curku = int(line[index + 1])
-        self.progress[0] = int(line[index + 3])
-        self.progress[1] = int(line[index + 4])
-        self.rec_hash[0] = int(line[index + 6])
-        self.rec_hash[1] = int(line[index + 7])
-        self.rec_salt[0] = int(line[index + 9])
-        self.rec_salt[1] = int(line[index + 10])
-        if line[index + 11] == "TEMP":
-            # we have temp values
-            index += 12
-            while line[index] != "REJECTED":
-                self.temp.append(int(line[index]))
-                index += 1
-        else:
-            index += 11
-        self.rejected = int(line[index + 1])
-        if len(line) > index + 2:
-            index += 2
-            if line[index] == "UTIL":
-                index += 1
-                while len(line) - 1 > index:  # -1 because the \r\n is also included in the split
-                    self.util.append(int(line[index]))
-                    index += 1
+        try:
+            fields = line.strip().split('\t')
+            if not fields or fields[0] != 'STATUS':
+                # Not a valid status line
+                return
+
+            self.status = int(fields[1])
+
+            i = 2
+            while i < len(fields):
+                key = fields[i]
+                i += 1
+
+                if key == 'SPEED':
+                    # Speed has two values per device: hashes over period and period in ms
+                    while i + 1 < len(fields) and fields[i].isdigit() and fields[i+1].isdigit():
+                        self.speed.append([int(fields[i]), int(fields[i+1])])
+                        i += 2
+                elif key == 'EXEC_RUNTIME':
+                    # Execution runtime per device
+                    while i < len(fields) and fields[i].replace('.', '', 1).isdigit():
+                        self.exec_runtime.append(float(fields[i]))
+                        i += 1
+                elif key == 'CURKU':
+                    self.curku = int(fields[i])
+                    i += 1
+                elif key == 'PROGRESS':
+                    # Progress has two values: current and total
+                    self.progress = [int(fields[i]), int(fields[i+1])]
+                    i += 2
+                elif key == 'RECHASH':
+                    # Recovered hashes has two values: done and total
+                    self.rec_hash = [int(fields[i]), int(fields[i+1])]
+                    i += 2
+                elif key == 'RECSALT':
+                     # Recovered salts has two values: done and total
+                    self.rec_salt = [int(fields[i]), int(fields[i+1])]
+                    i += 2
+                elif key == 'TEMP':
+                    # Temperature per device
+                    while i < len(fields) and fields[i].lstrip('-').isdigit():
+                        self.temp.append(int(fields[i]))
+                        i += 1
+                elif key == 'REJECTED':
+                    self.rejected = int(fields[i])
+                    i += 1
+                elif key == 'UTIL':
+                    # Utilization per device
+                    while i < len(fields) and fields[i].lstrip('-').isdigit():
+                        self.util.append(int(fields[i]))
+                        i += 1
+                elif key == 'POWER':
+                    # Power usage per device (newer versions)
+                    while i < len(fields) and fields[i].lstrip('-').isdigit():
+                        self.power.append(int(fields[i]))
+                        i += 1
+                else:
+                    print(f"Unknown field in Hashcat status line: {key}")
+                    self.unknown_fields = True
+                    pass
+        except (ValueError, IndexError) as e:
+            print(f"Error parsing Hashcat status line: {e}")
+            self.__init__("") # Fallback to default initialization
 
     def is_valid(self):
         return self.status >= 0
@@ -87,3 +122,14 @@ class HashcatStatus:
 
     def get_rejected(self):
         return self.rejected
+
+    def get_all_power(self):
+        return self.power
+
+    def get_power(self):
+        if not self.power:
+            return -1
+        power_sum = 0
+        for p in self.power:
+            power_sum += p
+        return int(power_sum / len(self.power))
