@@ -47,6 +47,9 @@ class HashcatStatus:
             if line[index] == "UTIL":
                 index += 1
                 while len(line) - 1 > index:  # -1 because the \r\n is also included in the split
+                    # Hashcat 7 has extra parameter where we expect utils of cards
+                    if line[index] == "POWER": 
+                        break
                     self.util.append(int(line[index]))
                     index += 1
 
