@@ -19,16 +19,10 @@ RUN apt-get update \
 # Install Intel OpenCL Runtime
 RUN cd /tmp \
     && apt install wget lsb-core libnuma-dev pciutils clinfo -y \
-    && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/vcp/15532/l_opencl_p_18.1.0.015.tgz \
-    && tar xzvf l_opencl_p_18.1.0.015.tgz \
-    && cd l_opencl_p_18.1.0.015 \
-    && echo "ACCEPT_EULA=accept" > silent.cfg \
-    && echo "PSET_INSTALL_DIR=/opt/intel" >> silent.cfg \
-    && echo "CONTINUE_WITH_OPTIONAL_ERROR=yes" >> silent.cfg \
-    && echo "CONTINUE_WITH_INSTALLDIR_OVERWRITE=yes" >> silent.cfg \
-    && echo "COMPONENTS=DEFAULTS" >> silent.cfg \
-    && echo "PSET_MODE=install" >> silent.cfg \
-    && ./install.sh -s silent.cfg
+    && wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg >/dev/null \
+    && echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main"  | tee /etc/apt/sources.list.d/oneAPI.list \
+    && apt update \
+    && apt install intel-oneapi-runtime-libs opencl-headers -y
 
 # Clean
 RUN apt-get autoremove -y \
