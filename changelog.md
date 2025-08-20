@@ -1,8 +1,9 @@
-## v0.7.3-> v0.7.x
+## v0.7.3-> v0.7.4
 
-### bugfixes
+### Bugfixes
 
 * Fixed bug in healthcheck on windows #hashtopolis/server/1019 
+* Compatibility for new machine-readable output format of hashcat 7 added
 
 ## v0.7.2 -> v0.7.3
 

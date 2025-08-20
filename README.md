@@ -31,11 +31,11 @@ Please note:
 ### Command Line Arguments
 
 ```
-usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL] [--cert CERT] [--files-path FILES_PATH]
-                               [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH] [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
+usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL]
+                               [--cert CERT] [--files-path FILES_PATH] [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH]
+                               [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
 
-
-Hashtopolis Client v0.7.3
+Hashtopolis Client v0.7.4
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -58,6 +58,7 @@ optional arguments:
   --zaps-path ZAPS_PATH
                         Use given folder path as zaps location
   --cpu-only            Force client to register as CPU only and also only reading out CPU information
+
 ```
 
 ### Config
@@ -127,6 +128,9 @@ In order to use the multicast distribution for files, please make sure that the 
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 7.1.1
+* 7.1.0
+* 7.0.0
 * 6.2.6
 * 6.2.5
 * 6.2.4
