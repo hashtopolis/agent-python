@@ -8,7 +8,7 @@ RUN cd /htp && bash build.sh && ls /htp
 
 FROM nvidia/cuda:12.3.2-devel-ubuntu22.04 AS agent-cuda
 
-ENV APPDIR=/htp-agent
+ENV APPDIR=/htp
 
 WORKDIR ${APPDIR}
 
@@ -40,6 +40,7 @@ ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_P
 
 COPY --from=preprocess /htp/hashtopolis.zip ${APPDIR}/
 
+COPY requirements.txt ${APPDIR}
 
 RUN pip3 install -r requirements.txt
 
