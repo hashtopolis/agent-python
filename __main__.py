@@ -8,6 +8,7 @@ from time import sleep
 
 import psutil as psutil
 import argparse
+import requests
 
 from htpclient.binarydownload import BinaryDownload
 from htpclient.chunk import Chunk
