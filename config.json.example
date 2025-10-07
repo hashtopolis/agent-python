@@ -1,0 +1,5 @@
+{
+  "debug": true,
+  "voucher": "<voucher>",
+  "url": "http://<server-ip>:<server-port>/api/server.php"
+}

@@ -1,0 +1,13 @@
+services:
+  hashtopolis-agent:
+    container_name: hashtopolis-agent
+    image: hashtopolis/agent:latest
+    volumes:
+      - ./config.json:/htp/config.json
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
