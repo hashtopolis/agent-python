@@ -108,6 +108,9 @@ class Files:
                     # extract if needed
                     files_path = Path(self.config.get_value('files-path'))
                     zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+                    if not zr_bin:
+                        logging.error("7zr not found, cannot extract archive")
+                        return False
                     cmd = f'{zr_bin} x -aoa -o"{files_path}" -y "{file_localpath}"'
                     os.system(cmd)
         return True

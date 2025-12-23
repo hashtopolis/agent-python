@@ -68,6 +68,9 @@ def start_uftpd(os_extension, config):
     except subprocess.CalledProcessError:
         pass  # ignore in case uftpd was not running
     path = retrieveBinary('uftpd' + os_extension)
+    if not path:
+        logging.error("uftpd binary not found, cant do multicast")
+        return
     cmd = path + ' '
     if config.get_value('multicast-device'):
         cmd += "-I " + config.get_value('multicast-device') + ' '
@@ -141,12 +144,12 @@ def retrieveBinary(binary):
     local_binary = cwd / binary
 
     # First check if there is a local binary and use that if it is there
-    if local_binary.exists() and local_binary.is_file() and os.access(local_binary, os.X_OK):
+    if local_binary.exists() and local_binary.is_file():
         return str(local_binary)
 
-    # Fall back on sytem binary
-    systemBinary = shutil.which(binary)
+    # Fall back on system binary
+    system_binary = shutil.which(binary)
 
-    if systemBinary:
-        return systemBinary
+    if system_binary
+        return system_binary
     return None

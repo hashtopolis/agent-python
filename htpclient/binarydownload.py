@@ -123,6 +123,9 @@ class BinaryDownload:
                 sleep(5)
                 return False
             zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+            if not zr_bin:
+                logging.error("7zr not found, cannot extract archive")
+                return False
             os.system(zr_bin + " x -otemp prince.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
                 if os.path.isdir("temp/" + name):
@@ -160,6 +163,9 @@ class BinaryDownload:
                 sleep(5)
                 return False
             zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+            if not zr_bin:
+                logging.error("7zr not found, cannot extract archive")
+                return False
             os.system(f"{zr_bin} x -otemp temp.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
                 if os.path.isdir(Path('temp', name)):
@@ -198,6 +204,10 @@ class BinaryDownload:
                 temp_folder = Path(self.config.get_value('crackers-path'), 'temp')
                 zip_file = Path(self.config.get_value('crackers-path'), f'{cracker_id}.7z')
                 zrbinary = retrieveBinary("7zr" + Initialize.get_os_extension())
+                if not zrbinary:
+                    logging.error("7zr not found, cannot extract archive")
+                    sleep(5)
+                    return False
                 cmd = f'{zrbinary} x -o"{temp_folder}" "{zip_file}"'
                 os.system(cmd)
                 
