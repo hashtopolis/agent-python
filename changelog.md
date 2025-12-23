@@ -1,3 +1,26 @@
+## v0.7.3-> v0.7.4
+
+### Bugfixes
+
+* Fixed bug in healthcheck on windows #hashtopolis/server/1019 
+* Compatibility for new machine-readable output format of hashcat 7 added
+
+## v0.7.2 -> v0.7.3
+
+### Bugfixes
+
+* When there is an empty pid file, the agent crashes #hashtopolis/server/1028
+
+### Enhancements
+
+* Added Windows 11 support. #hashtopolis/server/1159
+
+## v0.7.1 -> v0.7.2
+
+### Bugfixes
+
+* When using older hashcat version Hashtopolis doesn't detect the binary correctly (hashcat64.bin) #hashtopolis/server/1012 
+
 ## v0.7.0 -> v0.7.1
 
 ### Bugfixes
