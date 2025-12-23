@@ -7,6 +7,7 @@ from time import sleep
 
 from htpclient.config import Config
 from htpclient.download import Download
+from htpclient.helpers import retrieveBinary
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 from htpclient.dicts import *
@@ -63,7 +64,7 @@ class BinaryDownload:
 
     def __check_utils(self):
         path = '7zr' + Initialize.get_os_extension()
-        if not os.path.isfile(path):
+        if not retrieveBinary(path):
             query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
             query['type'] = '7zr'
             req = JsonRequest(query)
@@ -80,7 +81,7 @@ class BinaryDownload:
                 Download.download(ans['executable'], path)
                 os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
         path = 'uftpd' + Initialize.get_os_extension()
-        if not os.path.isfile(path) and self.config.get_value('multicast'):
+        if not retrieveBinary(path) and self.config.get_value('multicast'):
             query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
             query['type'] = 'uftpd'
             req = JsonRequest(query)
@@ -121,10 +122,8 @@ class BinaryDownload:
                 logging.error("Download of prince failed!")
                 sleep(5)
                 return False
-            if Initialize.get_os() == 1:
-                os.system("7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
-            else:
-                os.system("./7zr" + Initialize.get_os_extension() + " x -otemp prince.7z")
+            zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+            os.system(zr_bin + " x -otemp prince.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
                 if os.path.isdir("temp/" + name):
                     os.rename("temp/" + name, "prince")
@@ -160,10 +159,8 @@ class BinaryDownload:
                 logging.error("Download of preprocessor failed!")
                 sleep(5)
                 return False
-            if Initialize.get_os() == 1:
-                os.system(f"7zr{Initialize.get_os_extension()} x -otemp temp.7z")
-            else:
-                os.system(f"./7zr{Initialize.get_os_extension()} x -otemp temp.7z")
+            zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+            os.system(f"{zr_bin} x -otemp temp.7z")
             for name in os.listdir("temp"):  # this part needs to be done because it is compressed with the main subfolder of prince
                 if os.path.isdir(Path('temp', name)):
                     os.rename(Path('temp', name), path)
@@ -200,13 +197,8 @@ class BinaryDownload:
                 # we need to extract the 7zip
                 temp_folder = Path(self.config.get_value('crackers-path'), 'temp')
                 zip_file = Path(self.config.get_value('crackers-path'), f'{cracker_id}.7z')
-
-                if Initialize.get_os() == 1:
-                    # Windows
-                    cmd = f'7zr{Initialize.get_os_extension()} x -o"{temp_folder}" "{zip_file}"'
-                else:
-                    # Linux
-                    cmd = f"./7zr{Initialize.get_os_extension()} x -o'{temp_folder}' '{zip_file}'"
+                zrbinary = retrieveBinary("7zr" + Initialize.get_os_extension())
+                cmd = f'{zrbinary} x -o"{temp_folder}" "{zip_file}"'
                 os.system(cmd)
                 
                 # Clean up 7zip

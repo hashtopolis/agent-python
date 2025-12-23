@@ -7,6 +7,7 @@ import os
 
 from htpclient.config import Config
 from htpclient.download import Download
+from htpclient.helpers import retrieveBinary
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 from htpclient.dicts import *
@@ -106,11 +107,7 @@ class Files:
                 if os.path.splitext(file_localpath)[1] == '.7z' and not os.path.isfile(txt_file):
                     # extract if needed
                     files_path = Path(self.config.get_value('files-path'))
-                    if Initialize.get_os() == 1:
-                        # Windows
-                        cmd = f'7zr{Initialize.get_os_extension()} x -aoa -o"{files_path}" -y "{file_localpath}"'
-                    else:
-                        # Linux
-                        cmd = f"./7zr{Initialize.get_os_extension()} x -aoa -o'{files_path}' -y '{file_localpath}'"
+                    zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+                    cmd = f'{zr_bin} x -aoa -o"{files_path}" -y "{file_localpath}"'
                     os.system(cmd)
         return True
