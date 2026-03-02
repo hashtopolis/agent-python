@@ -103,7 +103,7 @@ class Initialize:
                 for line in output:
                     if not line:
                         continue
-                    line = ' '.join(line.split(' ')[1:]).split(':')
+                    line = line.partition(' ')[2].split(':')
                     devices.append(line[1].strip())
 
         elif Initialize.get_os() == 1:  # windows
