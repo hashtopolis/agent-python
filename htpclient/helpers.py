@@ -67,7 +67,7 @@ def start_uftpd(os_extension, config):
         subprocess.check_output("killall -s 9 uftpd", shell=True)  # stop running service to make sure we can start it again
     except subprocess.CalledProcessError:
         pass  # ignore in case uftpd was not running
-    path = retrieveBinary('uftpd' + os_extension)
+    path = retrieve_binary('uftpd' + os_extension)
     if not path:
         logging.error("uftpd binary not found, cant do multicast")
         return
@@ -138,7 +138,7 @@ def escape_ansi(line):
     return ansi_escape.sub('', line)
 
 # function to retrieve a system or local binary.
-def retrieveBinary(binary):
+def retrieve_binary(binary):
     cwd = Path.cwd()
     # use full path so that it works on Windows and Linux
     local_binary = cwd / binary

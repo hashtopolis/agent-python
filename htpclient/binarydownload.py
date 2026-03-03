@@ -7,7 +7,7 @@ from time import sleep
 
 from htpclient.config import Config
 from htpclient.download import Download
-from htpclient.helpers import retrieveBinary
+from htpclient.helpers import retrieve_binary
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest
 from htpclient.dicts import *
@@ -64,7 +64,7 @@ class BinaryDownload:
 
     def __check_utils(self):
         path = '7zr' + Initialize.get_os_extension()
-        if not retrieveBinary(path):
+        if not retrieve_binary(path):
             query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
             query['type'] = '7zr'
             req = JsonRequest(query)
@@ -81,7 +81,7 @@ class BinaryDownload:
                 Download.download(ans['executable'], path)
                 os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
         path = 'uftpd' + Initialize.get_os_extension()
-        if not retrieveBinary(path) and self.config.get_value('multicast'):
+        if not retrieve_binary(path) and self.config.get_value('multicast'):
             query = copy_and_set_token(dict_downloadBinary, self.config.get_value('token'))
             query['type'] = 'uftpd'
             req = JsonRequest(query)
@@ -122,7 +122,7 @@ class BinaryDownload:
                 logging.error("Download of prince failed!")
                 sleep(5)
                 return False
-            zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+            zr_bin = retrieve_binary("7zr" + Initialize.get_os_extension())
             if not zr_bin:
                 logging.error("7zr not found, cannot extract archive")
                 return False
@@ -162,7 +162,7 @@ class BinaryDownload:
                 logging.error("Download of preprocessor failed!")
                 sleep(5)
                 return False
-            zr_bin = retrieveBinary("7zr" + Initialize.get_os_extension())
+            zr_bin = retrieve_binary("7zr" + Initialize.get_os_extension())
             if not zr_bin:
                 logging.error("7zr not found, cannot extract archive")
                 return False
@@ -203,12 +203,12 @@ class BinaryDownload:
                 # we need to extract the 7zip
                 temp_folder = Path(self.config.get_value('crackers-path'), 'temp')
                 zip_file = Path(self.config.get_value('crackers-path'), f'{cracker_id}.7z')
-                zrbinary = retrieveBinary("7zr" + Initialize.get_os_extension())
-                if not zrbinary:
+                zr_bin = retrieve_binary("7zr" + Initialize.get_os_extension())
+                if not zr_bin:
                     logging.error("7zr not found, cannot extract archive")
                     sleep(5)
                     return False
-                cmd = f'{zrbinary} x -o"{temp_folder}" "{zip_file}"'
+                cmd = f'{zr_bin} x -o"{temp_folder}" "{zip_file}"'
                 os.system(cmd)
                 
                 # Clean up 7zip
