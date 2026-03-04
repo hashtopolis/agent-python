@@ -150,6 +150,6 @@ def retrieve_binary(binary):
     # Fall back on system binary
     system_binary = shutil.which(binary)
 
-    if system_binary
+    if system_binary:
         return system_binary
     return None
