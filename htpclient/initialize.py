@@ -153,6 +153,12 @@ class Initialize:
             self.__update_information()
         elif ans['response'] != 'SUCCESS':
             logging.error("Error from server: " + str(ans))
+            if ans['message'] == 'Invalid token!':
+                logging.fatal("Token is invalid, either place the correct token in the config or re-register the agent")
+                if os.path.exists("lock.pid"):
+                    os.unlink("lock.pid")
+                sys.exit(-1)
+                pass
             sleep(5)
             self.__update_information()
 
