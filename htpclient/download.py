@@ -17,9 +17,8 @@ class Download:
 
             # Check header
             if not no_header:
-                head = session.head(url)
-                # not sure if we only should allow 200/301/302, but then it's present for sure
-                if head.status_code not in [200, 301, 302]:
+                head = session.head(url, allow_redirects=True)
+                if not head.ok:
                     logging.error("File download header reported wrong status code: " + str(head.status_code))
                     return False
 
