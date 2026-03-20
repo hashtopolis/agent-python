@@ -158,7 +158,6 @@ class Initialize:
                 if os.path.exists("lock.pid"):
                     os.unlink("lock.pid")
                 sys.exit(-1)
-                pass
             sleep(5)
             self.__update_information()
 
