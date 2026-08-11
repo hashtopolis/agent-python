@@ -13,7 +13,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi
+from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi, strip_increment
 from htpclient.dicts import *
 
 
@@ -663,13 +663,17 @@ class HashcatCracker:
         args.append(f'"{hashlist_out_path}"')
         
         full_cmd = ' '.join(args)
+        # hashcat rejects --progress-only combined with --increment, which would
+        # make the speed benchmark fail for every increment task. Drop the
+        # increment flags: the measured speed is independent of the mask length.
+        full_cmd = strip_increment(full_cmd)
         full_cmd = f"{self.callPath} {full_cmd}"
 
-        output = b''
         try:
             logging.debug(f"CALL: {''.join(full_cmd)}")
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
+            output = e.output if e.output else b''
             logging.error("Error during speed benchmark, return code: " + str(e.returncode) + " Output: " + output.decode(encoding='utf-8'))
             send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)
             return 0

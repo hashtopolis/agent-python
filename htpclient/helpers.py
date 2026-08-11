@@ -105,6 +105,30 @@ def get_rules_and_hl(command, alias):
     return " ".join(rules)
 
 
+# hashcat rejects --increment together with --progress-only, so the speed
+# benchmark can't run it. Remove the increment flags; cracking speed does not
+# depend on the increment range. Note: do not run the tokens through clean_list
+# here - the assembled command contains runs of spaces, and clean_list drops
+# real tokens when it hits consecutive empty entries. Empty tokens are harmless
+# (they rejoin as spaces), so just iterate as-is.
+def strip_increment(command):
+    ret = []
+    skip_next = False
+    for part in command.split(" "):
+        if skip_next:
+            skip_next = False
+            continue
+        if part == '--increment' or part == '-i':
+            continue
+        if part == '--increment-min' or part == '--increment-max':
+            skip_next = True
+            continue
+        if part.startswith('--increment-min=') or part.startswith('--increment-max='):
+            continue
+        ret.append(part)
+    return " ".join(ret)
+
+
 def clean_list(element_list):
     index = 0
     for part in element_list:
