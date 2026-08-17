@@ -106,11 +106,10 @@ def get_rules_and_hl(command, alias):
 
 
 # hashcat rejects --increment together with --progress-only, so the speed
-# benchmark can't run it. Remove the increment flags; cracking speed does not
-# depend on the increment range. Note: do not run the tokens through clean_list
-# here - the assembled command contains runs of spaces, and clean_list drops
-# real tokens when it hits consecutive empty entries. Empty tokens are harmless
-# (they rejoin as spaces), so just iterate as-is.
+# benchmark can't run it. Drop the increment flags; the measured cracking speed
+# is independent of the mask length / increment range. Iterate the tokens
+# directly and keep any empty ones - they rejoin as harmless spaces, so there is
+# nothing to filter out.
 def strip_increment(command):
     ret = []
     skip_next = False
@@ -130,13 +129,9 @@ def strip_increment(command):
 
 
 def clean_list(element_list):
-    index = 0
-    for part in element_list:
-        if not part:
-            del element_list[index]
-            index -= 1
-        index += 1
-    return element_list
+    # Drop empty entries. Must not delete while iterating the same list -
+    # that skips elements and leaves real tokens behind.
+    return [part for part in element_list if part]
 
 
 # the prince flag is deprecated

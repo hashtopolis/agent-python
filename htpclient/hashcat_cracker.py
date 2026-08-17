@@ -452,11 +452,11 @@ class HashcatCracker:
         if 'useBrain' in task and task['useBrain']:
             full_cmd = f"{full_cmd} -S"
 
-        output = b''
         try:
             logging.debug(f"CALL: {full_cmd}")
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
+            output = e.output if e.output else b''
             logging.error("Error during keyspace measure: " + str(e) + " Output: " + output.decode(encoding='utf-8'))
             send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
             sleep(5)
@@ -637,7 +637,7 @@ class HashcatCracker:
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), f"{str(task['hashlistId'])}.out")
 
         if 'usePrince' in task and task['usePrince']:
-            attackcmd = get_rules_and_hl(update_files(task['attackcmd']))
+            attackcmd = get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias'])
             # Replace #HL# with the real hashlist
             attackcmd = attackcmd.replace(task['hashlistAlias'], f'"{hashlist_path}"')
             

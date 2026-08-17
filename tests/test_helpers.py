@@ -1,6 +1,14 @@
 import unittest
 
-from htpclient.helpers import strip_increment
+from htpclient.helpers import strip_increment, clean_list
+
+
+class CleanList(unittest.TestCase):
+    def test_removes_all_empty_entries_including_consecutive_ones(self):
+        self.assertEqual(clean_list(['a', '', '', 'b', '', 'c']), ['a', 'b', 'c'])
+
+    def test_leaves_full_list_untouched(self):
+        self.assertEqual(clean_list(['-a', '3', '?d?d']), ['-a', '3', '?d?d'])
 
 
 class StripIncrement(unittest.TestCase):
