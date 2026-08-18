@@ -253,33 +253,69 @@ class HashcatCracker:
         if not os.path.exists(zapfile_path):
             os.mkdir(zapfile_path)
         
-        # Call command
-        logging.debug("CALL: " + full_cmd)
-        if Initialize.get_os() != 1:
-            process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
-        else:
-            process = subprocess.Popen(full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
+        use_optimized = '-O' in task.get('cmdpars', '')
 
-        logging.debug("started cracking")
-        out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
-        err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', process.stderr))
-        crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=(outfile_path, process))
-        out_thread.start()
-        err_thread.start()
-        crk_thread.start()
-        self.first_status = False
-        self.last_update = time.time()
+        for attempt in range(2):
+            suffix = " -O " if use_optimized else ""
+            cmd = full_cmd + suffix
 
-        main_thread = Thread(target=self.run_loop, name='run_loop', args=(process, chunk, task))
-        main_thread.start()
+            # Call command
+            logging.debug(f"CALL (attempt {attempt + 1}): {cmd}")
+            if Initialize.get_os() != 1:
+                process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path, preexec_fn=os.setsid)
+            else:
+                process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cracker_path)
 
-        # wait for all threads to finish
-        process.wait()
-        crk_thread.join()
-        out_thread.join()
-        err_thread.join()
-        main_thread.join()
-        logging.info("finished chunk")
+            logging.debug("started cracking")
+            out_thread = Thread(target=self.stream_watcher, name='stdout-watcher', args=('OUT', process.stdout))
+            err_thread = Thread(target=self.stream_watcher, name='stderr-watcher', args=('ERR', process.stderr))
+            crk_thread = Thread(target=self.output_watcher, name='crack-watcher', args=(outfile_path, process))
+            out_thread.start()
+            err_thread.start()
+            crk_thread.start()
+            self.first_status = False
+            self.last_update = time.time()
+
+            main_thread = Thread(target=self.run_loop, name='run_loop', args=(process, chunk, task))
+            main_thread.start()
+
+            # wait for all threads to finish
+            process.wait()
+            crk_thread.join()
+            out_thread.join()
+            err_thread.join()
+            main_thread.join()
+
+            # Check if hashcat crashed immediately with an optimized kernel error
+            if use_optimized and process.returncode != 0 and not self.wasStopped:
+                crash_patterns = ['OpenCL', 'CUDA', 'kernel', 'Optimized', 'Device', 'clBuildProgram', 'out of memory', 'out-of-memory']
+                should_retry = False
+                while not self.io_q.empty():
+                    try:
+                        identifier, line = self.io_q.get_nowait()
+                        if identifier == 'ERR':
+                            decoded = line.decode('utf-8', errors='replace') if isinstance(line, bytes) else str(line)
+                            for pattern in crash_patterns:
+                                if pattern.lower() in decoded.lower():
+                                    should_retry = True
+                                    break
+                    except Empty:
+                        break
+
+                if should_retry:
+                    logging.warning("Hashcat crashed with optimized kernel error, retrying without -O...")
+                    use_optimized = False
+                    if os.path.exists(outfile_path):
+                        if self.config.get_value('outfile-history'):
+                            os.rename(outfile_path, outfile_backup_path)
+                        else:
+                            os.unlink(outfile_path)
+                    self.statusCount = 0
+                    self.wasStopped = False
+                    continue
+
+            logging.info("finished chunk")
+            break
 
     def run_loop(self, proc, chunk, task):
         zap_path = Path(self.config.get_value('zaps-path'), f"hashlist_{task['hashlistId']}")
@@ -670,9 +706,27 @@ class HashcatCracker:
             logging.debug(f"CALL: {''.join(full_cmd)}")
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            logging.error("Error during speed benchmark, return code: " + str(e.returncode) + " Output: " + output.decode(encoding='utf-8'))
-            send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)
-            return 0
+            error_output = e.output.decode(encoding='utf-8', errors='replace') if e.output else ''
+            logging.error("Error during speed benchmark, return code: " + str(e.returncode) + " Output: " + error_output)
+            # Retry without -O if optimized kernels caused the crash
+            if '-O' in task.get('cmdpars', ''):
+                crash_patterns = ['OpenCL', 'CUDA', 'kernel', 'Optimized', 'clBuildProgram', 'out of memory', 'out-of-memory']
+                should_retry = any(p.lower() in error_output.lower() for p in crash_patterns)
+                if should_retry:
+                    logging.warning("Speed benchmark crashed with optimized kernel error, retrying without -O...")
+                    retry_cmd = full_cmd.replace(' -O ', ' ')
+                    try:
+                        output = subprocess.check_output(retry_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
+                    except subprocess.CalledProcessError as e2:
+                        logging.error("Retry without -O also failed: " + str(e2.returncode))
+                        send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)
+                        return 0
+                else:
+                    send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)
+                    return 0
+            else:
+                send_error("Speed benchmark failed!", self.config.get_value('token'), task['taskId'], None)
+                return 0
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
         benchmark_sum = [0, 0]
         for line in output:
