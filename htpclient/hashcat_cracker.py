@@ -100,7 +100,7 @@ class HashcatCracker:
         args.append(f'--outfile-check-dir="{zaps_file}"')
         args.append(f'-o "{output_file}"')
         args.append(f'--outfile-format={self.get_outfile_format()}')
-        args.append('-p "\t"')
+        args.append('-p :')
         args.append(f"-s {chunk['skip']}")
         args.append(f"-l {chunk['length']}")
         
@@ -112,10 +112,8 @@ class HashcatCracker:
             
             if 'brainFeatures' in task:
                 args.append(f"--brain-client-features {task['brainFeatures']}")
-        else:  # remove should only be used if we run without brain
+        else:  # no --remove with hashcat 7.x native format
             args.append('--potfile-disable')
-            args.append('--remove')
-            args.append(f"--remove-timer={task['statustimer']}")
         
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'], f'"{hashlist_file}"')
@@ -136,12 +134,12 @@ class HashcatCracker:
         # call the command with piping
         pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
         pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
-        post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        post_args = " --machine-readable --quiet --status --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir='" + self.config.get_value('zaps-path') + "/hashlist_" + str(task['hashlistId']) + "'"
         post_args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out' --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
-        post_args += " --remove-timer=" + str(task['statustimer'])
+        
         post_args += " '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "'"
         return f"'{self.callPath}'" + pre_args + " | " + f"'{self.callPath}'" + post_args + task['cmdpars']
 
@@ -154,12 +152,12 @@ class HashcatCracker:
             binary += "exe"
         pre_args = " -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
         pre_args += get_wordlist(update_files(task['attackcmd']).replace(task['hashlistAlias'], ''))
-        post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
+        post_args = " --machine-readable --quiet --status --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
         post_args += " --outfile-check-dir=../../hashlist_" + str(task['hashlistId'])
         post_args += " -o ../../hashlists/" + str(task['hashlistId']) + ".out --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
-        post_args += " --remove-timer=" + str(task['statustimer'])
+        
         post_args += " ../../hashlists/" + str(task['hashlistId'])
         post_args += get_rules_and_hl(update_files(task['attackcmd']), task['hashlistAlias']).replace(task['hashlistAlias'], '')
         return binary + pre_args + " | " + self.callPath + post_args + task['cmdpars']
@@ -206,7 +204,7 @@ class HashcatCracker:
         post_args.append(f'--outfile-check-dir="{zaps_file}"')
         post_args.append(f'-o "{output_file}"')
         post_args.append(f'--outfile-format={self.get_outfile_format()}')
-        post_args.append('-p "\t"')
+        post_args.append('-p :')
         post_args.append(f"--remove-timer={task['statustimer']}")
         post_args.append(f'"{hashlist_file}"')
 
@@ -377,10 +375,16 @@ class HashcatCracker:
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
                             query['state'] = status.get_state()
-                            # crack format: hash[:salt]:plain:hex_plain:crack_pos (separator will be tab instead of :)
+                            # crack format: hash[:salt]:plain:hex_plain:crack_pos
+                            # Use rsplit to handle hashes containing ':' (e.g. NetNTLM, Kerberos)
+                            # rsplit(":", 3) always gives [hash, plain, hex_plain, crack_pos]
                             prepared = []
                             for crack in self.cracks:
-                                prepared.append(crack.split("\t"))
+                                parts = crack.rsplit(":", 3)
+                                if len(parts) == 4:
+                                    prepared.append([parts[0], parts[1], parts[2], parts[3]])
+                                else:
+                                    prepared.append(parts)
                             query['cracks'] = prepared
                             if status.get_temps():
                                 query['gpuTemp'] = status.get_temps()
@@ -678,13 +682,13 @@ class HashcatCracker:
         for line in output:
             if not line:
                 continue
-            line = line.split(":")
-            if len(line) != 3:
+            parts = line.rsplit(":", 2)
+            if len(parts) != 3:
                 continue
             # we need to do a weighted sum of all the time outputs of the GPUs
             try:
-                benchmark_sum[0] += int(line[1])
-                benchmark_sum[1] += float(line[2])*int(line[1])
+                benchmark_sum[0] += int(parts[1])
+                benchmark_sum[1] += float(parts[2])*int(parts[1])
             except ValueError:
                 continue
         if benchmark_sum[0] == 0:
