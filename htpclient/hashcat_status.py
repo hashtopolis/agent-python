@@ -89,11 +89,8 @@ class HashcatStatus:
     def is_valid(self):
         return self.status >= 0
 
-    def get_progress(self, absolute=False):
-        if absolute:
-            return self.progress[0] + self.skip
-        else:
-            return self.progress[0]
+    def get_progress(self):
+        return self.progress[0] + self.skip
 
     def get_state(self):
         return self.status - 1
@@ -104,11 +101,8 @@ class HashcatStatus:
     def get_temps(self):
         return self.temp
 
-    def get_progress_total(self, absolute=False):
-        if absolute:
-            return self.progress[1] + self.skip
-        else:
-            return self.progress[1]
+    def get_progress_total(self):
+        return self.progress[1] + self.skip
 
     def get_all_util(self):
         return self.util
