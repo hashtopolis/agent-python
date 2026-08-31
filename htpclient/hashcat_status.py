@@ -20,7 +20,7 @@ class HashcatStatus:
         self.temp = []
         self.power = []
         self.unknown_fields = False
-        self.skip = skip  # https://github.com/hashcat/hashcat/issues/4805
+        self.skip = skip
 
         try:
             fields = line.strip().split('\t')
