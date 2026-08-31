@@ -316,7 +316,10 @@ class HashcatCracker:
             else:
                 identifier, line = item
                 if identifier == 'OUT':
-                    status = HashcatStatus(line.decode())
+                    if chunk['skip']:  # is not None and is nonzero
+                        status = HashcatStatus(line.decode(), chunk['skip'])
+                    else:
+                        status = HashcatStatus(line.decode())
                     if status.is_valid():
                         self.statusCount += 1
 
