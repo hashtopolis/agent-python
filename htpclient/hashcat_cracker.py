@@ -318,7 +318,8 @@ class HashcatCracker:
                 if identifier == 'OUT':
                     # sometime after the release of hashcat 7.1.2 the PROGRESS values both got decreased by the --skip amount
                     # This keeps track of this offset and adds it back, to preserve the old bevahiour
-                    if chunk['skip'] and tuple(self.version_string.split('.')) > (7,1,2):
+                    version_tuple = tuple(int(s) for s in self.version_string.split('.'))
+                    if chunk['skip'] and version_tuple >= (7,2):
                         status = HashcatStatus(line.decode(), skip=chunk['skip'])
                     else:
                         status = HashcatStatus(line.decode())
