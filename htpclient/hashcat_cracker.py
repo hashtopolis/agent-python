@@ -316,7 +316,10 @@ class HashcatCracker:
             else:
                 identifier, line = item
                 if identifier == 'OUT':
-                    version_tuple = tuple(int(s) for s in self.version_string.split('.'))
+                    # "7.1.2" -> (7,1,2)
+                    # "7.1.2-546-gc885beef" -> (7,1,2,546)
+                    version_list = self.version_string.replace('-', '.').split('.')[:4]  # Chop off anything past the fourth field (for example commit hash)
+                    version_tuple = tuple(int(s) for s in version_list)
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
                         self.statusCount += 1
@@ -345,10 +348,10 @@ class HashcatCracker:
                         # we need to calculate the chunk start, because progress does not start at 0 for a chunk
                         chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         if total > 0:
-                            if version_tuple >= (7,2):
+                            if version_tuple >= (7, 1, 2, 546):
                                 relative_progress = int(status.get_progress() / total * 10000)
                             else:
-                                # Before hashcat 7.2, the PROGRESS fields included the skip value.
+                                # before hashcat 7.1.2-546, the PROGRESS fields included the skip value.
                                 # Adjust for this offset
                                 relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
                         else:  # this is the case when we cannot say anything about the progress
