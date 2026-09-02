@@ -316,13 +316,8 @@ class HashcatCracker:
             else:
                 identifier, line = item
                 if identifier == 'OUT':
-                    # sometime after the release of hashcat 7.1.2 the PROGRESS values both got decreased by the --skip amount
-                    # This keeps track of this offset and adds it back, to preserve the old bevahiour
                     version_tuple = tuple(int(s) for s in self.version_string.split('.'))
-                    if chunk['skip'] and version_tuple >= (7,2):
-                        status = HashcatStatus(line.decode(), skip=chunk['skip'])
-                    else:
-                        status = HashcatStatus(line.decode())
+                    status = HashcatStatus(line.decode())
                     if status.is_valid():
                         self.statusCount += 1
 
@@ -350,7 +345,12 @@ class HashcatCracker:
                         # we need to calculate the chunk start, because progress does not start at 0 for a chunk
                         chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         if total > 0:
-                            relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
+                            if version_tuple >= (7,2):
+                                relative_progress = int(status.get_progress() / total * 10000)
+                            else:
+                                # Before hashcat 7.2, the PROGRESS fields included the skip value.
+                                # Adjust for this offset
+                                relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
                         else:  # this is the case when we cannot say anything about the progress
                             relative_progress = 0
                         speed = status.get_speed()

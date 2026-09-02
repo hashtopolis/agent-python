@@ -1,5 +1,5 @@
 class HashcatStatus:
-    def __init__(self, line, skip=0):
+    def __init__(self, line):
         """
         Initializes the HashcatStatus object by parsing a machine-readable
         status line from Hashcat.
@@ -20,7 +20,6 @@ class HashcatStatus:
         self.temp = []
         self.power = []
         self.unknown_fields = False
-        self.skip = skip
 
         try:
             fields = line.strip().split('\t')
@@ -90,7 +89,7 @@ class HashcatStatus:
         return self.status >= 0
 
     def get_progress(self):
-        return self.progress[0] + self.skip
+        return self.progress[0]
 
     def get_state(self):
         return self.status - 1
@@ -102,7 +101,7 @@ class HashcatStatus:
         return self.temp
 
     def get_progress_total(self):
-        return self.progress[1] + self.skip
+        return self.progress[1]
 
     def get_all_util(self):
         return self.util
