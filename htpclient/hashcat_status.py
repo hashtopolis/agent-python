@@ -16,6 +16,7 @@ class HashcatStatus:
         self.rec_hash = [0, 0]
         self.rec_salt = [0, 0]
         self.rejected = 0
+        self.brain_rejected = [0, 0]
         self.util = []
         self.temp = []
         self.power = []
@@ -67,6 +68,10 @@ class HashcatStatus:
                 elif key == 'REJECTED':
                     self.rejected = int(fields[i])
                     i += 1
+                elif key == 'BRAIN_REJECTED':
+                    # Brain rejected candidates has two values: done and total
+                    self.brain_rejected = [int(fields[i]), int(fields[i+1])]
+                    i += 2
                 elif key == 'UTIL':
                     # Utilization per device
                     while i < len(fields) and fields[i].lstrip('-').isdigit():
