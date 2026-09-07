@@ -53,6 +53,24 @@ class TestHashcatStatus(unittest.TestCase):
         self.assertEqual(status.power, [-1, -1])
         self.assertEqual(status.unknown_fields, False)
 
+    def test_hashcat_7_brain_rejected(self):
+        line = "STATUS\t3\tSPEED\t65627678\t1000\tEXEC_RUNTIME\t14.163552\tCURKU\t8236224\tPROGRESS\t9242125312\t16094406702\tRECHASH\t26\t3478\tRECSALT\t0\t1\tTEMP\t76\tREJECTED\t0\tBRAIN_REJECTED\t0\t0\tUTIL\t8\tPOWER\t-1\t"
+        status = HashcatStatus(line)
+        self.assertTrue(status.is_valid())
+        self.assertEqual(status.status, 3)
+        self.assertEqual(status.speed, [[65627678, 1000]])
+        self.assertEqual(status.exec_runtime, [14.163552])
+        self.assertEqual(status.curku, 8236224)
+        self.assertEqual(status.progress, [9242125312, 16094406702])
+        self.assertEqual(status.rec_hash, [26, 3478])
+        self.assertEqual(status.rec_salt, [0, 1])
+        self.assertEqual(status.temp, [76])
+        self.assertEqual(status.rejected, 0)
+        self.assertEqual(status.brain_rejected, [0, 0])
+        self.assertEqual(status.util, [8])
+        self.assertEqual(status.power, [-1])
+        self.assertEqual(status.unknown_fields, False)
+
     def test_valid_status_line(self):
         line = "STATUS\t1\tSPEED\t2534\t1000\tEXEC_RUNTIME\t123\tCURKU\t45\tPROGRESS\t67\t100\tRECHASH\t89\t120\tRECSALT\t56\t110\tTEMP\t25\tREJECTED\t7\tUTIL\t85\t90\tPOWER\t100\t150"
         status = HashcatStatus(line)
