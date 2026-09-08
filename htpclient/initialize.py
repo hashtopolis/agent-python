@@ -16,7 +16,7 @@ class Initialize:
 
     @staticmethod
     def get_version_number():
-        return "0.7.5"
+        return "0.7.6"
 
     def run(self, args):
         self.__check_cert(args)
