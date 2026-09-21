@@ -64,7 +64,8 @@ def file_get_contents(filename):
 
 def start_uftpd(os_extension, config):
     try:
-        subprocess.check_output("killall -s 9 uftpd", shell=True)  # stop running service to make sure we can start it again
+        # stop running service to make sure we can start it again
+        subprocess.check_output("killall -s 9 uftpd", shell=True)
     except subprocess.CalledProcessError:
         pass  # ignore in case uftpd was not running
     path = retrieve_binary('uftpd' + os_extension)
@@ -136,6 +137,18 @@ def update_files(command, prince=False):
 def escape_ansi(line):
     ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', line)
+
+
+def parse_http_headers(header_str):
+    headers = {}
+    if header_str:
+        pairs = header_str.split(',')
+        for pair in pairs:
+            if ':' in pair:
+                key, value = pair.split(':', 1)
+                headers[key.strip()] = value.strip()
+    return headers
+
 
 # function to retrieve a system or local binary.
 def retrieve_binary(binary):

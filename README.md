@@ -33,7 +33,7 @@ Please note:
 ```
 usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL]
                                [--cert CERT] [--files-path FILES_PATH] [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH]
-                               [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
+                               [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only] [--http-headers HTTP_HEADERS]
 
 Hashtopolis Client v0.7.5
 
@@ -58,6 +58,8 @@ options:
   --zaps-path ZAPS_PATH
                         Use given folder path as zaps location
   --cpu-only            Force client to register as CPU only and also only reading out CPU information
+  --http-headers HTTP_HEADERS
+                        Use given http headers in all HTTP requests, format: "Header1: Value1, Header2: Value2"
 
 ```
 
