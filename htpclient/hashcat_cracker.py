@@ -13,7 +13,7 @@ from htpclient.config import Config
 from htpclient.hashcat_status import HashcatStatus
 from htpclient.initialize import Initialize
 from htpclient.jsonRequest import JsonRequest, os
-from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi
+from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, print_speed, get_rules_and_hl, get_wordlist, escape_ansi, format_error_detail
 from htpclient.dicts import *
 
 
@@ -466,8 +466,14 @@ class HashcatCracker:
             logging.debug(f"CALL: {full_cmd}")
             output = subprocess.check_output(full_cmd, shell=True, cwd=self.cracker_path, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            logging.error("Error during keyspace measure: " + str(e) + " Output: " + output.decode(encoding='utf-8'))
-            send_error("Keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
+            # e.output carries hashcat's own stdout/stderr, the plain output variable is
+            # still empty here because the assignment above never completed.
+            detail = format_error_detail(e.output)
+            logging.error("Error during keyspace measure: " + str(e) + " Output: " + detail)
+            message = "Keyspace measure failed!"
+            if detail:
+                message += " " + detail
+            send_error(message, self.config.get_value('token'), task['taskId'], None)
             sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
@@ -494,10 +500,14 @@ class HashcatCracker:
             full_cmd = full_cmd.replace("/", '\\')
         try:
             logging.debug("CALL: " + full_cmd)
-            output = subprocess.check_output(full_cmd, shell=True, cwd="prince")
-        except subprocess.CalledProcessError:
-            logging.error("Error during PRINCE keyspace measure")
-            send_error("PRINCE keyspace measure failed!", self.config.get_value('token'), task['taskId'], None)
+            output = subprocess.check_output(full_cmd, shell=True, cwd="prince", stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            detail = format_error_detail(e.stderr or e.output)
+            logging.error("Error during PRINCE keyspace measure" + (" Output: " + detail if detail else ""))
+            message = "PRINCE keyspace measure failed!"
+            if detail:
+                message += " " + detail
+            send_error(message, self.config.get_value('token'), task['taskId'], None)
             sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
@@ -539,10 +549,14 @@ class HashcatCracker:
 
         try:
             logging.debug("CALL: " + full_cmd)
-            output = subprocess.check_output(full_cmd, shell=True, cwd=Path(preprocessors_path, str(task.get_task()['preprocessor'])))
-        except subprocess.CalledProcessError:
-            logging.error("Error during preprocessor keyspace measure")
-            send_error("Preprocessor keyspace measure failed!", self.config.get_value('token'), task.get_task()['taskId'], None)
+            output = subprocess.check_output(full_cmd, shell=True, cwd=Path(preprocessors_path, str(task.get_task()['preprocessor'])), stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            detail = format_error_detail(e.stderr or e.output)
+            logging.error("Error during preprocessor keyspace measure" + (" Output: " + detail if detail else ""))
+            message = "Preprocessor keyspace measure failed!"
+            if detail:
+                message += " " + detail
+            send_error(message, self.config.get_value('token'), task.get_task()['taskId'], None)
             sleep(5)
             return False
         output = output.decode(encoding='utf-8').replace("\r\n", "\n").split("\n")
