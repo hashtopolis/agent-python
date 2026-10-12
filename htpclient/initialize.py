@@ -204,6 +204,10 @@ class Initialize:
             logging.debug("Configuration session cert to: " + cert)
 
     def __check_url(self, args):
+        if args.cpu_only is not None and args.cpu_only:
+            logging.debug("Setting agent to be CPU only..")
+            self.config.set_value('cpu-only', True)
+        
         if not self.config.get_value('url'):
             # ask for url
             if args.url is None:
@@ -227,10 +231,6 @@ class Initialize:
             self.__check_url(args)
         else:
             logging.debug("Connection test successful!")
-            
-        if args.cpu_only is not None and args.cpu_only:
-            logging.debug("Setting agent to be CPU only..")
-            self.config.set_value('cpu-only', True)
 
     def __build_directories(self):
         if not os.path.isdir(self.config.get_value('crackers-path')):
