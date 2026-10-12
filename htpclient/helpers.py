@@ -118,6 +118,7 @@ def clean_list(element_list):
 # the prince flag is deprecated
 def update_files(command, prince=False):
     config = Config()
+    files_path = config.get_value('files-path')
 
     split = command.split(" ")
     ret = []
@@ -125,11 +126,24 @@ def update_files(command, prince=False):
         # test if file exists
         if not part:
             continue
-        path = Path(config.get_value('files-path'), part)
+
+        path = Path(files_path, part)
         if os.path.exists(path):
             ret.append(f'"{path}"')
-        else:
-            ret.append(str(part))
+            continue
+
+        if '=' in part:
+            key, value = part.split('=', 1)
+            if value:
+                # Accept both hintfile=file and hintfile="file" style arguments.
+                if len(value) > 1 and value[0] == value[-1] and value[0] in ("'", '"'):
+                    value = value[1:-1]
+                value_path = Path(files_path, value)
+                if os.path.exists(value_path):
+                    ret.append(f'{key}="{value_path}"')
+                    continue
+
+        ret.append(str(part))
     return " %s " % " ".join(ret)
 
 
