@@ -1,3 +1,11 @@
+## v0.7.4 -> v0.7.5
+
+### Enhancements
+
+* New `cache-path` config option and `--cache-path` command line argument to set the folder hashcat
+  caches wordlist seek databases and kernels in. Several agents can share one location. Only sent to
+  crackers which support `--cache-path`.
+
 ## v0.7.3-> v0.7.4
 
 ### Bugfixes
