@@ -57,6 +57,23 @@ def send_error(error, token, task_id, chunk_id):
     req.execute()
 
 
+def format_error_detail(output, limit=2000):
+    # Turn the raw output of a failed cracker run into a short printable detail
+    # string that can be appended to a generic error message, so the server and
+    # the web UI show the real reason a run failed instead of only the generic
+    # text. See hashtopolis issue 746. The tail is kept because the actual error
+    # is usually the last thing the cracker prints, and it is capped so a runaway
+    # output cannot blow past the server's error column.
+    if output is None:
+        return ''
+    if isinstance(output, bytes):
+        output = output.decode('utf-8', errors='replace')
+    output = escape_ansi(output.replace("\r\n", "\n")).strip()
+    if len(output) > limit:
+        output = output[-limit:]
+    return output
+
+
 def file_get_contents(filename):
     with open(filename) as f:
         return f.read()
