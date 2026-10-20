@@ -241,3 +241,14 @@ class Initialize:
             os.makedirs(self.config.get_value('hashlists-path'))
         if not os.path.isdir(self.config.get_value('preprocessors-path')):
             os.makedirs(self.config.get_value('preprocessors-path'))
+        # hashcat does not create the cache directory it is handed and aborts when it is missing, so we
+        # create it here. It may be a read-only or currently unavailable mount, which must not stop the
+        # agent from starting - the cracker checks again per chunk and drops the option if it is gone.
+        # exist_ok, because this is the one directory here that several agents may be sharing: two of
+        # them starting together both find it missing and both go on to create it.
+        cache_path = self.config.get_value('cache-path')
+        if cache_path and not os.path.isdir(cache_path):
+            try:
+                os.makedirs(cache_path, exist_ok=True)
+            except OSError as e:
+                logging.warning("Could not create cache directory '" + cache_path + "': " + str(e))

@@ -33,7 +33,8 @@ Please note:
 ```
 usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] [--disable-update] [--debug] [--voucher VOUCHER] [--url URL]
                                [--cert CERT] [--files-path FILES_PATH] [--crackers-path CRACKERS_PATH] [--hashlists-path HASHLISTS_PATH]
-                               [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cpu-only]
+                               [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cache-path CACHE_PATH]
+                               [--cpu-only]
 
 Hashtopolis Client v0.7.5
 
@@ -57,6 +58,8 @@ options:
                         Use given folder path as preprocessors location
   --zaps-path ZAPS_PATH
                         Use given folder path as zaps location
+  --cache-path CACHE_PATH
+                        Use given folder path as hashcat cache location (needs hashcat support for --cache-path)
   --cpu-only            Force client to register as CPU only and also only reading out CPU information
 
 ```
@@ -98,7 +101,29 @@ When you run the client for the first time it will ask automatically for all the
 | hashlists-path        | string  |         | Use given folder path as hashlists location                                |
 | preprocessors-path    | string  |         | Use given folder path as preprocessors location                            |
 | zaps-path             | string  |         | Use given folder path as zaps location                                     |
+| cache-path            | string  |         | Folder hashcat caches everything in (`--cache-path`, see note below)       |
 | cpu-only              | boolean | false   | Only send CPU information about agent (for CPU only agents)                |
+
+#### cache-path
+
+hashcat keeps a seek database per wordlist, which is what makes the `--skip` of every Hashtopolis
+chunk cheap, plus its compiled kernels. By default those live inside the cracker folder, so they are
+cold again after every cracker binary update. `cache-path` moves them to a directory of your choice.
+
+Seek databases are named after a hash of the wordlist they describe, so several agents pointed at
+one shared mount build each database only once for the whole cluster.
+
+Notes:
+
+* Use a **local, writable** directory. hashcat tolerates a read-only location for the wordlist
+  caches, but a failed kernel cache write aborts the session. To share across agents, point
+  `cache-path` at a local directory and mount or symlink only `cache/feeds/wordlist` to the share.
+* The option is only passed to crackers new enough for it. It appears in hashcat at build
+  `7.1.2-627-g6570a49f2`, so the agent passes it to that build and later, and to any release after
+  7.1.2. Anything older, including the 7.1.2 release itself, stays silent and is unaffected.
+* The agent creates the directory at startup if it is missing. If it points at a mount that is
+  down, that creates an empty local directory shadowing the mountpoint - check the log.
+* It is not removed when the agent de-registers, since it may be shared with other agents.
 
 ### Debug example
 
@@ -128,6 +153,7 @@ In order to use the multicast distribution for files, please make sure that the 
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 7.1.2
 * 7.1.1
 * 7.1.0
 * 7.0.0

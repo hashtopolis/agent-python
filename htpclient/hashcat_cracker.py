@@ -17,6 +17,73 @@ from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, p
 from htpclient.dicts import *
 
 
+# Where hashcat keeps the per-wordlist seek databases that make --skip cheap, and the compiled
+# kernels.
+CACHE_PATH_FLAG = '--cache-path'
+
+# The release the option landed after, and the build on that release which first carried it. It
+# appears in src/usage.c at v7.1.2-627-g6570a49f2; the build before it has no such option. Once a
+# release ships with it, this becomes that release and the build number stops mattering.
+CACHE_PATH_RELEASE = (7, 1, 2, 627)
+
+def parse_version(version_string):
+    """Turn the version a cracker reports into a tuple that compares the way the versions do.
+
+    "7.1.2" becomes (7, 1, 2) and a build made after a release, "7.1.2-627-g6570a49f2", becomes
+    (7, 1, 2, 627); the commit hash after the build number is dropped. A release sorts before every
+    build made on it, so plain tuple comparison against a minimum like (5, 1, 0, 1618) works.
+
+    Returns None when the string cannot be read as a version, so each caller decides what an
+    unknown version means for it.
+    """
+    if not version_string:
+        return None
+    parts = version_string.strip().split('-')
+    try:
+        version = tuple(int(s) for s in parts[0].split('.'))
+        if len(parts) > 1:
+            version += (int(parts[1]),)
+    except ValueError:
+        return None
+    return version
+
+def version_supports_cache_path(version_string):
+    """Whether the version a cracker reports is one that knows --cache-path.
+
+    The version arrives as either "7.1.2" or "7.1.2-627-g6570a49f2", which is how hashcat spells a
+    build made after a release, as read by parse_version(). The option landed
+    part way through the builds that followed 7.1.2, so on that release it is the build number that
+    decides, and any later release has it outright.
+
+    Anything that cannot be read as a version is treated as too old. hashcat does not ignore an
+    option it does not know, it stops, so the safe answer when in doubt is to say nothing.
+    """
+    version = parse_version(version_string)
+    return version is not None and version > CACHE_PATH_RELEASE
+
+def select_cache_arg(cache_path, version_string, isdir=os.path.isdir):
+    """Build the hashcat arguments for the configured cache directory.
+
+    Returns an empty list when nothing is configured, when the cracker is too old for the option, or
+    when the directory is not there right now. Both an unknown option and a missing cache directory
+    make hashcat abort immediately, and a cache is a speed-up, never worth failing a chunk over - so
+    we drop the option and let hashcat fall back to its own cache location.
+    """
+    if not cache_path:
+        return []
+    if '"' in cache_path:
+        # the value is quoted, not escaped, when it goes into the shell command line
+        logging.debug(f"Ignoring cache-path '{cache_path}': the path must not contain a double quote")
+        return []
+    if version_supports_cache_path(version_string) is False:
+        logging.debug(f"Ignoring cache-path '{cache_path}': cracker version {version_string.strip() if version_string else '<unknown>'} does not support {CACHE_PATH_FLAG}")
+        return []
+    if not isdir(cache_path):
+        logging.debug(f"Ignoring cache-path '{cache_path}': not a directory, hashcat will use its own cache location")
+        return []
+    return [f'{CACHE_PATH_FLAG}="{cache_path}"']
+
+
 class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
@@ -63,26 +130,23 @@ class HashcatCracker:
         self.wasStopped = False
 
     def get_outfile_format(self):
-        if self.version_string.find('-') == -1:
-            release = self.version_string.split('.')
-            try:
-                if int(str(release[0])) >= 6:
-                    return "1,2,3,4"
-            except ValueError:
-                return "1,2,3,4"  # if there is a custom version, we assume it's using the new format
-            return "15" # if we cannot determine the version or if the release is older than 6.0.0, we will use the old format
-        split = self.version_string.split('-')
-        if len(split) < 2:
-            return "15" # something is wrong with the version string, go for old format
-        release = str(split[0]).split('.')
-        commit = str(split[1])
-        if int(str(release[0])) < 5:
-            return "15"
-        elif int(str(release[0])) == 5 and int(str(release[1])) < 1:
-            return "15"
-        elif int(str(release[0])) == 5 and int(str(release[1])) == 1 and int(str(release[2])) == 0 and int(commit) < 1618:
-            return "15"
-        return "1,2,3,4" # new outfile format
+        version = parse_version(self.version_string)
+        if version is None:
+            return "1,2,3,4"  # if there is a custom version, we assume it's using the new format
+        if version >= (5, 1, 0, 1618):
+            return "1,2,3,4"  # new outfile format
+        return "15"
+
+    def get_cache_args(self):
+        """Arguments pointing hashcat at the configured cache directory, empty list if unavailable."""
+        cache_path = self.config.get_value('cache-path')
+        if not cache_path:
+            return []
+        return select_cache_arg(cache_path, self.version_string)
+
+    def get_cache_args_str(self):
+        """get_cache_args() for the builders that concatenate strings: leading space, or empty."""
+        return ''.join(f' {arg}' for arg in self.get_cache_args())
 
     def build_command(self, task, chunk):
         args = []
@@ -120,6 +184,7 @@ class HashcatCracker:
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'], f'"{hashlist_file}"')
         args.append(files)
+        args.extend(self.get_cache_args())
         args.append(task['cmdpars'])
 
         
@@ -136,6 +201,7 @@ class HashcatCracker:
         # call the command with piping
         pre_args = " --stdout -s " + str(chunk['skip']) + " -l " + str(chunk['length']) + ' '
         pre_args += update_files(task['attackcmd']).replace(task['hashlistAlias'], '')
+        pre_args += self.get_cache_args_str()
         post_args = " --machine-readable --quiet --status --remove --restore-disable --potfile-disable --session=hashtopolis"
         post_args += " --status-timer " + str(task['statustimer'])
         post_args += " --outfile-check-timer=" + str(task['statustimer'])
@@ -143,6 +209,7 @@ class HashcatCracker:
         post_args += " -o '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + ".out' --outfile-format=" + self.get_outfile_format() + " -p \"" + str(chr(9)) + "\""
         post_args += " --remove-timer=" + str(task['statustimer'])
         post_args += " '" + self.config.get_value('hashlists-path') + "/" + str(task['hashlistId']) + "'"
+        post_args += self.get_cache_args_str()
         return f"'{self.callPath}'" + pre_args + " | " + f"'{self.callPath}'" + post_args + task['cmdpars']
 
     # DEPRECATED
@@ -213,6 +280,7 @@ class HashcatCracker:
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'] + " ", "")
         post_args.append(files)
+        post_args.extend(self.get_cache_args())
         post_args.append(task['cmdpars'])
 
         pre_args = ' '.join(pre_args)
@@ -291,6 +359,10 @@ class HashcatCracker:
             piping_threshold = self.config.get_value('piping-threshold')
         if self.config.get_value('allow-piping') != '':
             enable_piping = self.config.get_value('allow-piping')
+        # before hashcat 7.1.2-546, the PROGRESS fields included the skip value. A version we cannot
+        # read is assumed to be a recent custom build, as get_outfile_format() does.
+        version = parse_version(self.version_string)
+        progress_includes_skip = version is not None and version < (7, 1, 2, 546)
         while True:
             try:
                 # Block for 1 second.
@@ -316,10 +388,6 @@ class HashcatCracker:
             else:
                 identifier, line = item
                 if identifier == 'OUT':
-                    # "7.1.2" -> (7,1,2)
-                    # "7.1.2-546-gc885beef" -> (7,1,2,546)
-                    version_list = self.version_string.replace('-', '.').split('.')[:4]  # Chop off anything past the fourth field (for example commit hash)
-                    version_tuple = tuple(int(s) for s in version_list)
                     status = HashcatStatus(line.decode())
                     if status.is_valid():
                         self.statusCount += 1
@@ -348,12 +416,11 @@ class HashcatCracker:
                         # we need to calculate the chunk start, because progress does not start at 0 for a chunk
                         chunk_start = int(status.get_progress_total() / (chunk['skip'] + chunk['length']) * chunk['skip'])
                         if total > 0:
-                            if version_tuple >= (7, 1, 2, 546):
-                                relative_progress = int(status.get_progress() / total * 10000)
-                            else:
-                                # before hashcat 7.1.2-546, the PROGRESS fields included the skip value.
-                                # Adjust for this offset
+                            if progress_includes_skip:
+                                # Adjust for the skip offset in the PROGRESS fields
                                 relative_progress = int((status.get_progress() - chunk_start) / float(total - chunk_start) * 10000)
+                            else:
+                                relative_progress = int(status.get_progress() / total * 10000)
                         else:  # this is the case when we cannot say anything about the progress
                             relative_progress = 0
                         speed = status.get_speed()
@@ -456,7 +523,7 @@ class HashcatCracker:
         files = update_files(task['attackcmd'])
         files = files.replace(task['hashlistAlias'] + " ", "")
                
-        full_cmd = f"{self.callPath} --keyspace --quiet {files} {task['cmdpars']}"
+        full_cmd = f"{self.callPath} --keyspace --quiet {files}{self.get_cache_args_str()} {task['cmdpars']}"
         
         if 'useBrain' in task and task['useBrain']:
             full_cmd = f"{full_cmd} -S"
@@ -581,6 +648,7 @@ class HashcatCracker:
         files = files.replace(task['hashlistAlias'], f'"{hashlist_path}"')
 
         args.append(files)
+        args.extend(self.get_cache_args())
         args.append(task['cmdpars'])
         args.append('-o')
         args.append(f'"{hashlist_out_path}"')
@@ -662,6 +730,7 @@ class HashcatCracker:
             attackcmd = attackcmd.replace(task['hashlistAlias'], f'"{hashlist_path}"')
 
             args.append(attackcmd)
+            args.extend(self.get_cache_args())
             args.append(task['cmdpars'])
         if 'usePreprocessor' in task and task['usePreprocessor']:
             args.append('example.dict')
@@ -735,6 +804,9 @@ class HashcatCracker:
         args.append('--restore-disable')
         args.append('--potfile-disable')
         args.append('--session=health')
+        # this ends up in the Windows slash rewrite of full_cmd below, which is harmless: on Windows
+        # os.path.abspath already hands us a backslash path
+        args.extend(self.get_cache_args())
         attackcmd = update_files(attack)
         hashlist_path = Path(self.config.get_value('hashlists-path'), "health_check.txt")
         hashlist_out_path = Path(self.config.get_value('hashlists-path'), "health_check.out")
