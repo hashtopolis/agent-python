@@ -86,7 +86,7 @@ def run_health_check():
         logging.error("Failed to send health check results!")
         sleep(5)
         return
-    elif ans['response'] != 'OK':
+    elif ans['response'] != 'OK' and ans['response'] != 'SUCCESS':  # the response 'OK' is legacy and should be removed after some time
         logging.error("Error on sending health check results: " + str(ans))
         sleep(5)
         return

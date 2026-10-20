@@ -36,9 +36,9 @@ usage: python3 hashtopolis.zip [-h] [--de-register] [--version] [--number-only] 
                                [--preprocessors-path PREPROCESSORS_PATH] [--zaps-path ZAPS_PATH] [--cache-path CACHE_PATH]
                                [--cpu-only]
 
-Hashtopolis Client v0.7.4
+Hashtopolis Client v0.7.5
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --de-register         client should automatically de-register from server now
   --version             show version information
