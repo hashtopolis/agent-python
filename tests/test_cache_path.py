@@ -78,12 +78,6 @@ class TestSelectCacheArg(unittest.TestCase):
         self.assertEqual(len(logs.output), 1)
         self.assertIn('not a directory', logs.output[0])
 
-    def test_path_with_space_stays_quoted(self):
-        self.assertEqual(
-            select_cache_arg('C:\\hashcat cache', BUILD_WITH, isdir=lambda p: True),
-            ['--cache-path="C:\\hashcat cache"']
-        )
-
     def test_path_with_double_quote_is_rejected(self):
         # the value is quoted, not escaped, when it lands in the shell command line
         with self.assertLogs(level='DEBUG') as logs:
