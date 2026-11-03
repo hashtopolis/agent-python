@@ -153,6 +153,7 @@ In order to use the multicast distribution for files, please make sure that the 
 
 The list contains all Hashcat versions with which the client was tested and is able to work with (other versions might work):
 
+* 8.0.0
 * 7.1.2
 * 7.1.1
 * 7.1.0

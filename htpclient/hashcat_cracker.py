@@ -17,14 +17,7 @@ from htpclient.helpers import send_error, update_files, kill_hashcat, get_bit, p
 from htpclient.dicts import *
 
 
-# Where hashcat keeps the per-wordlist seek databases that make --skip cheap, and the compiled
-# kernels.
-CACHE_PATH_FLAG = '--cache-path'
 
-# The release the option landed after, and the build on that release which first carried it. It
-# appears in src/usage.c at v7.1.2-627-g6570a49f2; the build before it has no such option. Once a
-# release ships with it, this becomes that release and the build number stops mattering.
-CACHE_PATH_RELEASE = (7, 1, 2, 627)
 
 def parse_version(version_string):
     """Turn the version a cracker reports into a tuple that compares the way the versions do.
@@ -58,8 +51,10 @@ def version_supports_cache_path(version_string):
     Anything that cannot be read as a version is treated as too old. hashcat does not ignore an
     option it does not know, it stops, so the safe answer when in doubt is to say nothing.
     """
+
+    CACHE_PATH_RELEASE = (7, 1, 2, 627)
     version = parse_version(version_string)
-    return version is not None and version > CACHE_PATH_RELEASE
+    return version is not None and version >= CACHE_PATH_RELEASE
 
 def select_cache_arg(cache_path, version_string, isdir=os.path.isdir):
     """Build the hashcat arguments for the configured cache directory.
@@ -69,6 +64,10 @@ def select_cache_arg(cache_path, version_string, isdir=os.path.isdir):
     make hashcat abort immediately, and a cache is a speed-up, never worth failing a chunk over - so
     we drop the option and let hashcat fall back to its own cache location.
     """
+    # Where hashcat keeps the per-wordlist seek databases that make --skip cheap, and the compiled
+    # kernels.
+    CACHE_PATH_FLAG = '--cache-path'
+
     if not cache_path:
         return []
     if '"' in cache_path:
