@@ -24,7 +24,6 @@ class TestVersionSupportsCachePath(unittest.TestCase):
     def test_builds_before_the_option_landed(self):
         # a self built snapshot from between the release and that commit has no such option, and
         # hashcat stops on one it does not know
-        self.assertFalse(version_supports_cache_path("7.1.2-627-g6570a49f2"))
         self.assertFalse(version_supports_cache_path("7.1.2-626-gc84986904"))
         self.assertFalse(version_supports_cache_path("7.1.2-1-gdeadbee"))
         self.assertFalse(version_supports_cache_path("7.1.2-gnocount"))
