@@ -80,6 +80,8 @@ def select_cache_arg(cache_path, version_string, isdir=os.path.isdir):
     if not isdir(cache_path):
         logging.debug(f"Ignoring cache-path '{cache_path}': not a directory, hashcat will use its own cache location")
         return []
+    if os.name == 'posix':
+         cache_path = cache_path.replace('\\', '\\\\').replace('$', '\\$').replace('`', '\\`')
     return [f'{CACHE_PATH_FLAG}="{cache_path}"']
 
 
