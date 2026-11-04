@@ -142,6 +142,13 @@ def init(args):
     if args.preprocessors_path and len(args.preprocessors_path):
         CONFIG.set_value('preprocessors-path', os.path.abspath(args.preprocessors_path))
 
+    # cache-path has no default on purpose: when it is unset hashcat keeps using its own cache location
+    if args.cache_path and len(args.cache_path):
+        CONFIG.set_value('cache-path', args.cache_path)
+    if len(CONFIG.get_value('cache-path')) > 0:
+        # hashcat is started with cwd=crackers/<id>, so a relative path would end up inside the cracker folder
+        CONFIG.set_value('cache-path', os.path.abspath(CONFIG.get_value('cache-path')))
+
     logging.info("Starting client '" + Initialize.get_version() + "'...")
 
     # check if there are running hashcat.pid files around (as we assume that nothing is running anymore if the client gets newly started)
@@ -305,6 +312,7 @@ def de_register():
     else:
         logging.info("Successfully de-registered!")
         # cleanup
+        # cache-path is left alone on purpose: it is meant to be shared between agents and is rebuildable
         dirs = [CONFIG.get_value('crackers-path'), CONFIG.get_value('preprocessors-path'), CONFIG.get_value('hashlists-path'), CONFIG.get_value('files-path')]
         files = ['config.json', '7zr.exe', '7zr']
         for file in files:
@@ -334,6 +342,7 @@ if __name__ == "__main__":
     parser.add_argument('--hashlists-path', type=str, required=False, help='Use given folder path as hashlists location')
     parser.add_argument('--preprocessors-path', type=str, required=False, help='Use given folder path as preprocessors location')
     parser.add_argument('--zaps-path', type=str, required=False, help='Use given folder path as zaps location')
+    parser.add_argument('--cache-path', type=str, required=False, help='Use given folder path as hashcat cache location (needs hashcat support for --cache-path)')
     parser.add_argument('--cpu-only', action='store_true', help='Force client to register as CPU only and also only reading out CPU information')
     args = parser.parse_args()
 
