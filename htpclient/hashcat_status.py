@@ -97,7 +97,8 @@ class HashcatStatus:
         return self.progress[0]
 
     def get_state(self):
-        return self.status - 1
+        """Hashcat's raw status code, kept in sync with the server's DHashcatStatus enum."""
+        return self.status
 
     def get_curku(self):
         return self.curku

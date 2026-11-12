@@ -374,7 +374,7 @@ class HashcatCracker:
                     query['keyspaceProgress'] = chunk['skip']
                     query['relativeProgress'] = 0
                     query['speed'] = 0
-                    query['state'] = 2
+                    query['state'] = 3
                     query['cracks'] = []
                     req = JsonRequest(query)
                     logging.info("Sending keepalive progress to avoid timeout...")
@@ -426,7 +426,7 @@ class HashcatCracker:
                             relative_progress = 0
                         speed = status.get_speed()
                         initial = True
-                        if status.get_state() == 4 or status.get_state() == 5:
+                        if status.get_state() == 5 or status.get_state() == 6:
                             time.sleep(5)  # we wait five seconds so all output is loaded from file
                             # reset piping stuff when a chunk is successfully finished
                             self.progressVal = 0

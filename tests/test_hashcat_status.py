@@ -115,5 +115,11 @@ class TestHashcatStatus(unittest.TestCase):
         status = HashcatStatus(line)
         self.assertEqual(status.get_util(), (85 + 90) // 2)
 
+    def test_get_state_returns_raw_hashcat_status(self):
+        """get_state() returns hashcat's raw status code, matching the server's DHashcatStatus enum."""
+        for state in (0, 1, 2, 3, 5, 6, 7, 11, 13, 14, 16):
+            status = HashcatStatus(f"STATUS\t{state}\tSPEED\t1000\t1000")
+            self.assertEqual(status.get_state(), state)
+
 if __name__ == '__main__':
     unittest.main()

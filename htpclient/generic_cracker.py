@@ -86,7 +86,7 @@ class GenericCracker:
                             query['keyspaceProgress'] = chunk['skip']
                             query['relativeProgress'] = progress
                             query['speed'] = speed
-                            query['state'] = (4 if progress == 10000 else 2)
+                            query['state'] = (5 if progress == 10000 else 3)
                             query['cracks'] = cracks
                             req = JsonRequest(query)
 
