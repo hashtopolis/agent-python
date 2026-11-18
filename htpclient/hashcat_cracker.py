@@ -85,6 +85,23 @@ def select_cache_arg(cache_path, version_string, isdir=os.path.isdir):
     return [f'{CACHE_PATH_FLAG}="{cache_path}"']
 
 
+def keyspace_progress(curku, skip, length, piped):
+    """The chunk checkpoint to report to the server, in task keyspace units.
+
+    hashcat's CURKU is its restore point. A direct run was given the chunk's --skip, so that point
+    is already a position in the task's keyspace. A piped run was not: the producer was given the
+    window instead, so hashcat counts the stream it is fed from zero and the chunk's own offset has
+    to be added back. hashcat before 8.0 had no restore point for a pipe at all and reported 0,
+    which leaves the chunk start, as it did before.
+
+    The clamp covers a CURKU that outruns the chunk, which --slow-candidates does because it counts
+    candidates where the chunk counts base words.
+    """
+    if not piped:
+        return curku
+    return min(skip + curku, skip + length)
+
+
 class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
@@ -364,6 +381,7 @@ class HashcatCracker:
         # read is assumed to be a recent custom build, as get_outfile_format() does.
         version = parse_version(self.version_string)
         progress_includes_skip = version is not None and version < (7, 1, 2, 546)
+        piped = self.usePipe or ('usePrince' in task and task['usePrince']) or ('usePreprocessor' in task and task['usePreprocessor'])
         while True:
             try:
                 # Block for 1 second.
@@ -448,9 +466,7 @@ class HashcatCracker:
                                 self.cracks = new_cracks
                             query = copy_and_set_token(dict_sendProgress, self.config.get_value('token'))
                             query['chunkId'] = chunk['chunkId']
-                            query['keyspaceProgress'] = status.get_curku()
-                            if (self.usePipe or 'usePrince' in task and task['usePrince'] or 'usePreprocessor' in task and task['usePreprocessor']) and status.get_curku() == 0:
-                                query['keyspaceProgress'] = chunk['skip']
+                            query['keyspaceProgress'] = keyspace_progress(status.get_curku(), chunk['skip'], chunk['length'], piped)
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
                             query['state'] = status.get_state()
