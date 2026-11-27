@@ -85,6 +85,48 @@ def select_cache_arg(cache_path, version_string, isdir=os.path.isdir):
     return [f'{CACHE_PATH_FLAG}="{cache_path}"']
 
 
+# What one line from a producer is worth in the chunk's keyspace.
+STREAM_DIRECT = 'direct'        # no producer, hashcat reads the attack itself
+STREAM_KEYSPACE = 'keyspace'    # one keyspace unit per line
+STREAM_CANDIDATE = 'candidate'  # a finished candidate, rules already expanded
+
+
+def stream_unit(task, use_pipe):
+    """Which producer feeds the hashcat that reports progress, in run_chunk's order of preference.
+
+    A preprocessor is given the chunk's window and emits one line per keyspace unit, so hashcat's
+    restore point is an offset into the chunk. A self pipe is "hashcat --stdout" instead, which
+    expands rules and mask positions, so one line is a finished candidate and says nothing about
+    how far into the chunk the run has got.
+    """
+    if ('usePrince' in task and task['usePrince']) or ('usePreprocessor' in task and task['usePreprocessor']):
+        return STREAM_KEYSPACE
+    if use_pipe:
+        return STREAM_CANDIDATE
+    return STREAM_DIRECT
+
+
+def keyspace_progress(curku, skip, length, stream):
+    """The chunk checkpoint to report to the server, in task keyspace units.
+
+    hashcat's CURKU is its restore point. A direct run was given the chunk's --skip, so that point
+    is already a position in the task's keyspace. A run behind a producer was not: the producer was
+    given the window instead, so hashcat counts the stream it is fed from zero and the chunk's own
+    offset has to be added back. hashcat before 8.0 had no restore point for a pipe at all and
+    reported 0, which leaves the chunk start, as it did before.
+
+    A stream of candidates passes the chunk's length long before the chunk is done, so its restore
+    point cannot be placed in the chunk at all. Staying at the chunk start makes the server redo an
+    interrupted chunk rather than skip the part hashcat never reached.
+    """
+    if stream == STREAM_DIRECT:
+        return curku
+    if stream == STREAM_CANDIDATE:
+        return skip
+    # The clamp guards against a producer that emits more than its window.
+    return skip + min(curku, length)
+
+
 class HashcatCracker:
     def __init__(self, cracker_id, binary_download):
         self.config = Config()
@@ -364,6 +406,7 @@ class HashcatCracker:
         # read is assumed to be a recent custom build, as get_outfile_format() does.
         version = parse_version(self.version_string)
         progress_includes_skip = version is not None and version < (7, 1, 2, 546)
+        stream = stream_unit(task, self.usePipe)
         while True:
             try:
                 # Block for 1 second.
@@ -448,9 +491,7 @@ class HashcatCracker:
                                 self.cracks = new_cracks
                             query = copy_and_set_token(dict_sendProgress, self.config.get_value('token'))
                             query['chunkId'] = chunk['chunkId']
-                            query['keyspaceProgress'] = status.get_curku()
-                            if (self.usePipe or 'usePrince' in task and task['usePrince'] or 'usePreprocessor' in task and task['usePreprocessor']) and status.get_curku() == 0:
-                                query['keyspaceProgress'] = chunk['skip']
+                            query['keyspaceProgress'] = keyspace_progress(status.get_curku(), chunk['skip'], chunk['length'], stream)
                             query['relativeProgress'] = relative_progress
                             query['speed'] = speed
                             query['state'] = status.get_state()
